@@ -1,250 +1,361 @@
 @extends('layouts.admin')
-@section('title', 'Laporan Favorit')
-@section('page-title', 'Laporan Menu Favorit')
-@section('page-subtitle', 'Analisis menu terlaris untuk perencanaan stok')
+
+@section('title', 'Laporan Keuangan — SmartCanteen Admin')
+@section('page-title', 'Laporan Keuangan')
+@section('page-subtitle', 'Ringkasan & analisis keuangan kantin sekolah')
 
 @section('content')
 
-{{-- Period Selector --}}
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <div class="flex gap-2 flex-wrap">
-        @foreach(['Hari Ini', 'Minggu Ini', 'Bulan Ini'] as $i => $p)
-        <button class="px-4 py-2 rounded-xl text-sm font-semibold transition-all {{ $i===2 ? 'bg-sidebar-bg text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300' }}">
+{{-- ===== PERIOD SELECTOR ===== --}}
+<div class="glass-card rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+    <div class="flex items-center gap-2">
+        <i class="fa-solid fa-calendar-range text-primary-400 text-sm"></i>
+        <span class="text-slate-300 text-sm font-medium">Periode:</span>
+    </div>
+    <div class="flex flex-wrap gap-2">
+        @foreach(['Hari Ini', 'Minggu Ini', 'Bulan Ini', 'Tahun Ini'] as $p)
+        <button class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
+            {{ $p === 'Bulan Ini' ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300' : 'bg-slate-800 border border-border text-slate-400 hover:text-white hover:border-slate-600' }}">
             {{ $p }}
         </button>
         @endforeach
+        <div class="flex items-center gap-2 bg-slate-800 border border-border rounded-lg px-3 py-1.5">
+            <input type="date" value="{{ date('Y-m-01') }}" class="bg-transparent text-slate-300 text-xs outline-none">
+            <span class="text-slate-600">—</span>
+            <input type="date" value="{{ date('Y-m-d') }}" class="bg-transparent text-slate-300 text-xs outline-none">
+        </div>
+    </div>
+    <div class="sm:ml-auto flex gap-2">
+        <button class="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary-500/10 border border-primary-500/20 text-primary-400 hover:bg-primary-500/20 transition-all text-xs font-semibold">
+            <i class="fa-solid fa-file-pdf"></i> Export PDF
+        </button>
+        <button class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 hover:border-primary-500 hover:text-primary-400 transition-all text-xs font-semibold">
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+        </button>
+    </div>
+</div>
+
+{{-- ===== HERO INCOME CARDS ===== --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+
+    {{-- Total Income --}}
+    <div class="relative glass-card rounded-2xl p-6 overflow-hidden col-span-1 sm:col-span-1">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-900/40 to-violet-900/20"></div>
+        <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary-500/10 -translate-y-10 translate-x-10 blur-2xl"></div>
         <div class="relative">
-            <input type="month" class="bg-white border border-gray-200 text-gray-600 text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-brand-400 transition-all">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-primary-500/20 border border-primary-500/30 flex items-center justify-center">
+                    <i class="fa-solid fa-chart-line text-primary-400 text-sm"></i>
+                </div>
+                <span class="text-slate-400 text-xs font-medium">Total Pemasukan</span>
+            </div>
+            <p class="text-white font-bold text-3xl leading-none">Rp 48,3<span class="text-xl text-slate-300">jt</span></p>
+            <p class="text-slate-500 text-xs mt-2">Bulan April 2025</p>
+            <div class="mt-4 flex items-center gap-2">
+                <div class="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-primary-500 to-violet-500 rounded-full" style="width: 78%"></div>
+                </div>
+                <span class="text-primary-400 text-xs font-semibold font-mono">78%</span>
+            </div>
+            <p class="text-slate-600 text-xs mt-1">dari target Rp 62jt</p>
         </div>
     </div>
-    <button class="btn-brand text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow">
-        <i class="fa-solid fa-download"></i>Export PDF
-    </button>
-</div>
 
-{{-- Summary Cards --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-    @php
-    $summaryStats = [
-        ['label'=>'Total Transaksi', 'value'=>'847', 'sub'=>'Bulan ini', 'icon'=>'fa-receipt', 'color'=>'from-slate-500 to-slate-700'],
-        ['label'=>'Total Pendapatan', 'value'=>'Rp 9,8jt', 'sub'=>'+12% vs bulan lalu', 'icon'=>'fa-coins', 'color'=>'from-brand-400 to-brand-600'],
-        ['label'=>'Menu Aktif', 'value'=>'10', 'sub'=>'dari 12 total', 'icon'=>'fa-utensils', 'color'=>'from-violet-500 to-violet-600'],
-        ['label'=>'Menu Terpopuler', 'value'=>'Nasi Gudeg', 'sub'=>'203 porsi terjual', 'icon'=>'fa-fire', 'color'=>'from-red-500 to-orange-500'],
-    ];
-    @endphp
-    @foreach($summaryStats as $s)
-    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-        <div class="w-9 h-9 bg-gradient-to-br {{ $s['color'] }} rounded-xl flex items-center justify-center shadow mb-3">
-            <i class="fa-solid {{ $s['icon'] }} text-white text-sm"></i>
+    {{-- Total Transaksi --}}
+    <div class="relative glass-card rounded-2xl p-6 overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-emerald-500/10 -translate-y-6 translate-x-6 blur-xl"></div>
+        <div class="relative">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-receipt text-emerald-400 text-sm"></i>
+                </div>
+                <span class="text-slate-400 text-xs font-medium">Total Transaksi</span>
+            </div>
+            <p class="text-white font-bold text-3xl leading-none">248</p>
+            <p class="text-slate-500 text-xs mt-2">Transaksi berhasil</p>
+            <p class="text-emerald-400 text-xs font-semibold mt-4 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-trend-up"></i> +18% dari bulan lalu
+            </p>
         </div>
-        <p class="font-heading font-bold text-base sm:text-xl text-gray-800 truncate">{{ $s['value'] }}</p>
-        <p class="text-xs text-gray-500">{{ $s['label'] }}</p>
-        <p class="text-[10px] text-gray-400 mt-0.5">{{ $s['sub'] }}</p>
     </div>
-    @endforeach
+
+    {{-- Rata-rata --}}
+    <div class="relative glass-card rounded-2xl p-6 overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-violet-500/10 -translate-y-6 translate-x-6 blur-xl"></div>
+        <div class="relative">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                    <i class="fa-solid fa-calculator text-violet-400 text-sm"></i>
+                </div>
+                <span class="text-slate-400 text-xs font-medium">Rata-rata / Transaksi</span>
+            </div>
+            <p class="text-white font-bold text-3xl leading-none">Rp 38,5<span class="text-xl text-slate-300">rb</span></p>
+            <p class="text-slate-500 text-xs mt-2">Per transaksi bulan ini</p>
+            <p class="text-violet-400 text-xs font-semibold mt-4 flex items-center gap-1">
+                <i class="fa-solid fa-arrow-trend-up"></i> +Rp 3.200 dari April
+            </p>
+        </div>
+    </div>
 </div>
 
-{{-- Main Report Grid --}}
-<div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+{{-- ===== CHART + BREAKDOWN ===== --}}
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
 
-    {{-- Top 5 Chart --}}
-    <div class="xl:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    {{-- Monthly Trend Chart --}}
+    <div class="xl:col-span-2 glass-card rounded-2xl p-5">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h2 class="font-heading font-bold text-gray-800 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-chart-column text-brand-500"></i>Top 5 Menu Favorit
-                </h2>
-                <p class="text-gray-400 text-xs mt-0.5">Berdasarkan jumlah porsi terjual — April 2025</p>
+                <h2 class="text-white font-bold text-base">Tren Pemasukan</h2>
+                <p class="text-slate-500 text-xs mt-0.5">Januari – April 2025 (dalam jutaan Rp)</p>
+            </div>
+            <div class="flex gap-3">
+                <div class="flex items-center gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                    <span class="text-slate-500 text-xs">Pemasukan</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-slate-600"></div>
+                    <span class="text-slate-500 text-xs">Target</span>
+                </div>
             </div>
         </div>
 
         @php
-        $topMenus = [
-            ['rank'=>1,'emoji'=>'🍛','name'=>'Nasi Gudeg Komplit','cat'=>'Makanan','sold'=>203,'revenue'=>2436000,'pct'=>100,'color'=>'from-brand-400 to-brand-500'],
-            ['rank'=>2,'emoji'=>'🧋','name'=>'Es Teh Manis','cat'=>'Minuman','sold'=>187,'revenue'=>748000,'pct'=>92,'color'=>'from-blue-400 to-blue-500'],
-            ['rank'=>3,'emoji'=>'🍜','name'=>'Mie Goreng Spesial','cat'=>'Makanan','sold'=>164,'revenue'=>1640000,'pct'=>81,'color'=>'from-violet-400 to-violet-500'],
-            ['rank'=>4,'emoji'=>'🍗','name'=>'Nasi Ayam Geprek','cat'=>'Makanan','sold'=>142,'revenue'=>1846000,'pct'=>70,'color'=>'from-emerald-400 to-emerald-500'],
-            ['rank'=>5,'emoji'=>'🍲','name'=>'Bakso Urat Jumbo','cat'=>'Makanan','sold'=>118,'revenue'=>1298000,'pct'=>58,'color'=>'from-rose-400 to-rose-500'],
-        ];
+            $months = ['Jan', 'Feb', 'Mar', 'Apr'];
+            $income  = [38500000, 42300000, 51200000, 48300000];
+            $target  = [45000000, 48000000, 55000000, 62000000];
+            $maxVal  = max(array_merge($income, $target));
         @endphp
 
-        <div class="space-y-5">
-            @foreach($topMenus as $m)
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <div class="w-7 h-7 bg-gradient-to-br {{ $m['color'] }} rounded-lg flex items-center justify-center text-white font-heading font-bold text-xs flex-shrink-0 shadow">{{ $m['rank'] }}</div>
-                    <span class="text-xl">{{ $m['emoji'] }}</span>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm text-gray-800 truncate">{{ $m['name'] }}</p>
-                        <p class="text-[10px] text-gray-400">{{ $m['cat'] }}</p>
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                        <p class="font-heading font-bold text-sm text-gray-800">{{ $m['sold'] }}</p>
-                        <p class="text-[10px] text-gray-400">porsi</p>
-                    </div>
-                    <div class="text-right flex-shrink-0 w-20 hidden sm:block">
-                        <p class="font-heading font-bold text-sm text-emerald-600">Rp {{ number_format($m['revenue'], 0, ',', '.') }}</p>
-                        <p class="text-[10px] text-gray-400">pendapatan</p>
+        <div class="flex items-end gap-4 h-40 mb-4">
+            @foreach($months as $i => $month)
+            <div class="flex-1 flex flex-col items-center gap-1">
+                <div class="w-full relative flex gap-1 items-end" style="height: 128px;">
+                    {{-- Target bar (faded) --}}
+                    <div class="flex-1 rounded-t-md bg-slate-700/40"
+                         style="height: {{ round(($target[$i] / $maxVal) * 128) }}px"></div>
+                    {{-- Income bar --}}
+                    <div class="flex-1 rounded-t-md bg-gradient-to-t from-primary-700 to-primary-400 relative group"
+                         style="height: {{ round(($income[$i] / $maxVal) * 128) }}px">
+                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-border text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                            Rp {{ number_format($income[$i] / 1000000, 1, ',', '.') }}jt
+                        </div>
                     </div>
                 </div>
-                <div class="ml-10 flex items-center gap-2">
-                    <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                        <div class="bg-gradient-to-r {{ $m['color'] }} h-full rounded-full transition-all duration-1000" style="width: {{ $m['pct'] }}%"></div>
-                    </div>
-                    <span class="text-[10px] font-semibold text-gray-500 w-8 text-right">{{ $m['pct'] }}%</span>
-                </div>
+                <span class="text-slate-500 text-xs font-medium">{{ $month }}</span>
+            </div>
+            @endforeach
+        </div>
+
+        <div class="border-t border-border/50 pt-3 grid grid-cols-4 gap-2">
+            @foreach($months as $i => $month)
+            <div class="text-center">
+                <p class="text-white font-bold text-sm font-mono">{{ number_format($income[$i] / 1000000, 1, ',', '.') }}jt</p>
+                <p class="text-slate-600 text-xs">{{ $month }}</p>
             </div>
             @endforeach
         </div>
     </div>
 
-    {{-- Right Panel --}}
-    <div class="xl:col-span-2 space-y-5">
+    {{-- Breakdown by Category --}}
+    <div class="glass-card rounded-2xl p-5">
+        <h2 class="text-white font-bold text-base mb-1">Breakdown Metode</h2>
+        <p class="text-slate-500 text-xs mb-5">Distribusi metode pembayaran</p>
 
-        {{-- Tren Penjualan --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h3 class="font-heading font-bold text-sm text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-brand-500"></i>Tren Harian (Apr)
-            </h3>
-            @php
-            $trendData = [22,28,31,25,29,35,38,30,27,33,40,38,35,42,44,38,41,47,39,36];
-            $maxTrend = max($trendData);
-            @endphp
-            <div class="flex items-end gap-1 h-20">
-                @foreach($trendData as $ti => $tv)
-                <div class="flex-1 relative group">
-                    <div class="bg-gradient-to-t {{ $tv === $maxTrend ? 'from-brand-500 to-brand-400' : 'from-gray-200 to-gray-150' }} rounded-sm transition-all hover:from-brand-400 hover:to-brand-300 cursor-pointer" style="height: {{ round(($tv / $maxTrend) * 100) }}%"></div>
-                    <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded hidden group-hover:block whitespace-nowrap z-10">{{ $tv }}</div>
-                </div>
-                @endforeach
-            </div>
-            <div class="flex items-center justify-between mt-2">
-                <span class="text-[9px] text-gray-400">1 Apr</span>
-                <span class="text-[9px] text-gray-400">20 Apr</span>
-            </div>
-        </div>
-
-        {{-- Distribusi Kategori --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h3 class="font-heading font-bold text-sm text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-brand-500"></i>Distribusi Kategori
-            </h3>
-            @php
-            $categories = [
-                ['name'=>'Makanan', 'pct'=>62, 'color'=>'bg-brand-500'],
-                ['name'=>'Minuman', 'pct'=>28, 'color'=>'bg-blue-500'],
-                ['name'=>'Snack',   'pct'=>10, 'color'=>'bg-violet-500'],
+        @php
+            $methods = [
+                ['label' => 'Transfer Bank', 'pct' => 65, 'amount' => 'Rp 31,4jt', 'color' => 'primary'],
+                ['label' => 'E-Wallet',      'pct' => 28, 'amount' => 'Rp 13,5jt', 'color' => 'violet'],
+                ['label' => 'Lainnya',       'pct' => 7,  'amount' => 'Rp 3,4jt',  'color' => 'slate'],
             ];
-            @endphp
-            {{-- Stacked Bar --}}
-            <div class="flex h-4 rounded-full overflow-hidden mb-3 gap-0.5">
-                @foreach($categories as $c)
-                <div class="{{ $c['color'] }} rounded-full transition-all" style="width:{{ $c['pct'] }}%"></div>
-                @endforeach
-            </div>
-            <div class="space-y-2">
-                @foreach($categories as $c)
-                <div class="flex items-center justify-between">
+        @endphp
+
+        <div class="space-y-4 mb-6">
+            @foreach($methods as $m)
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-2">
-                        <div class="w-2.5 h-2.5 rounded-full {{ $c['color'] }}"></div>
-                        <span class="text-xs text-gray-600 font-medium">{{ $c['name'] }}</span>
+                        <div class="w-2 h-2 rounded-full bg-{{ $m['color'] }}-500"></div>
+                        <span class="text-slate-300 text-sm font-medium">{{ $m['label'] }}</span>
                     </div>
-                    <span class="font-heading font-bold text-sm text-gray-700">{{ $c['pct'] }}%</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-400 text-xs">{{ $m['amount'] }}</span>
+                        <span class="text-{{ $m['color'] }}-400 font-mono font-semibold text-xs">{{ $m['pct'] }}%</span>
+                    </div>
                 </div>
-                @endforeach
+                <div class="h-2.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div class="h-full bg-{{ $m['color'] }}-500 rounded-full transition-all" style="width: {{ $m['pct'] }}%"></div>
+                </div>
             </div>
+            @endforeach
         </div>
 
-        {{-- Stok Alert --}}
-        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-            <h3 class="font-heading font-bold text-sm text-amber-800 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>Rekomendasi Stok
-            </h3>
-            <div class="space-y-2.5">
-                @php
-                $stockRec = [
-                    ['name'=>'Nasi Gudeg Komplit','action'=>'Tambah stok +15%','level'=>'high'],
-                    ['name'=>'Es Teh Manis','action'=>'Pertahankan stok','level'=>'ok'],
-                    ['name'=>'Jus Alpukat','action'=>'Stok habis — restok!','level'=>'low'],
-                ];
-                @endphp
-                @foreach($stockRec as $r)
-                <div class="flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-amber-100">
-                    <div class="w-2 h-2 rounded-full flex-shrink-0 {{ $r['level']==='high'?'bg-brand-500':($r['level']==='low'?'bg-red-500':'bg-emerald-500') }}"></div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-gray-800 truncate">{{ $r['name'] }}</p>
-                        <p class="text-[10px] {{ $r['level']==='low'?'text-red-500':'text-gray-400' }}">{{ $r['action'] }}</p>
-                    </div>
-                    <i class="fa-solid {{ $r['level']==='high'?'fa-arrow-trend-up text-brand-400':($r['level']==='low'?'fa-exclamation text-red-400':'fa-check text-emerald-400') }} text-xs flex-shrink-0"></i>
+        {{-- Donut Chart (CSS) --}}
+        <div class="flex items-center justify-center py-2">
+            <div class="relative w-28 h-28">
+                <svg viewBox="0 0 36 36" class="w-28 h-28 -rotate-90">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1e293b" stroke-width="3"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#4f46e5" stroke-width="3"
+                        stroke-dasharray="65 35" stroke-linecap="round"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#7c3aed" stroke-width="3"
+                        stroke-dasharray="28 72" stroke-dashoffset="-65" stroke-linecap="round"/>
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#475569" stroke-width="3"
+                        stroke-dasharray="7 93" stroke-dashoffset="-93" stroke-linecap="round"/>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <p class="text-white font-bold text-base leading-none">248</p>
+                    <p class="text-slate-500 text-xs">trx</p>
                 </div>
-                @endforeach
             </div>
         </div>
     </div>
 </div>
 
-{{-- Detail Table --}}
-<div class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="font-heading font-bold text-gray-800 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-table-list text-brand-500"></i>Detail Semua Menu
-        </h3>
-        <span class="text-xs text-gray-400">April 2025</span>
+{{-- ===== MONTHLY COMPARISON TABLE ===== --}}
+<div class="glass-card rounded-2xl overflow-hidden mb-6">
+    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h2 class="text-white font-bold text-base">Ringkasan Bulanan</h2>
+        <span class="text-slate-500 text-xs">Tahun 2025</span>
     </div>
-    {{-- Desktop --}}
+
+    {{-- Desktop table --}}
     <div class="hidden sm:block overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="text-left px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Menu</th>
-                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Terjual</th>
-                    <th class="text-right px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Pendapatan</th>
-                    <th class="text-center px-4 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Trend</th>
-                    <th class="text-center px-6 py-3 text-xs font-bold text-gray-500 uppercase tracking-wider">Rekomendasi Stok</th>
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-border">
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bulan</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Transaksi</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Pemasukan</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Target</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Capaian</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Growth</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
-                @foreach($topMenus as $m)
-                <tr class="hover:bg-gray-50/60 transition-colors">
-                    <td class="px-6 py-3.5 flex items-center gap-2">
-                        <span class="text-lg">{{ $m['emoji'] }}</span>
-                        <div>
-                            <p class="font-semibold text-sm text-gray-800">{{ $m['name'] }}</p>
-                            <p class="text-[10px] text-gray-400">{{ $m['cat'] }}</p>
+            <tbody class="divide-y divide-border/40">
+                @php
+                    $monthlyData = [
+                        ['month'=>'Januari',  'trx'=>195, 'income'=>38500000, 'target'=>45000000, 'pct'=>86, 'growth'=>null,  'gdir'=>'up'],
+                        ['month'=>'Februari', 'trx'=>212, 'income'=>42300000, 'target'=>48000000, 'pct'=>88, 'growth'=>'+9.9%','gdir'=>'up'],
+                        ['month'=>'Maret',    'trx'=>241, 'income'=>51200000, 'target'=>55000000, 'pct'=>93, 'growth'=>'+21.0%','gdir'=>'up'],
+                        ['month'=>'April',    'trx'=>248, 'income'=>48300000, 'target'=>62000000, 'pct'=>78, 'growth'=>'-5.7%','gdir'=>'down'],
+                    ];
+                @endphp
+                @foreach($monthlyData as $row)
+                <tr class="table-row {{ $loop->last ? 'bg-primary-500/5' : '' }}">
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center">
+                                <i class="fa-solid fa-calendar text-slate-400 text-xs"></i>
+                            </div>
+                            <span class="text-white font-semibold text-sm">{{ $row['month'] }}</span>
+                            @if($loop->last)
+                            <span class="text-xs font-semibold text-primary-400 bg-primary-500/10 border border-primary-500/20 px-1.5 py-0.5 rounded">Aktif</span>
+                            @endif
                         </div>
                     </td>
-                    <td class="px-4 py-3.5 text-center font-heading font-bold text-gray-800">{{ $m['sold'] }}</td>
-                    <td class="px-4 py-3.5 text-right font-heading font-bold text-emerald-600">Rp {{ number_format($m['revenue'], 0, ',', '.') }}</td>
-                    <td class="px-4 py-3.5 text-center">
-                        <span class="text-xs text-emerald-600 bg-emerald-50 font-semibold px-2 py-1 rounded-lg flex items-center gap-1 justify-center">
-                            <i class="fa-solid fa-arrow-trend-up text-[10px]"></i>+12%
-                        </span>
+                    <td class="px-5 py-4 text-slate-300 text-sm">{{ $row['trx'] }}</td>
+                    <td class="px-5 py-4">
+                        <span class="text-white font-bold font-mono text-sm">Rp {{ number_format($row['income'], 0, ',', '.') }}</span>
                     </td>
-                    <td class="px-6 py-3.5 text-center">
-                        @if($m['rank']===1)
-                        <span class="text-xs text-brand-600 bg-brand-50 font-semibold px-2.5 py-1 rounded-lg">Tambah +15%</span>
-                        @elseif($m['rank']===2)
-                        <span class="text-xs text-emerald-600 bg-emerald-50 font-semibold px-2.5 py-1 rounded-lg">Pertahankan</span>
+                    <td class="px-5 py-4 text-slate-400 text-sm font-mono">Rp {{ number_format($row['target'], 0, ',', '.') }}</td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-{{ $row['pct'] >= 90 ? 'emerald' : ($row['pct'] >= 75 ? 'amber' : 'red') }}-500 rounded-full" style="width: {{ $row['pct'] }}%"></div>
+                            </div>
+                            <span class="text-{{ $row['pct'] >= 90 ? 'emerald' : ($row['pct'] >= 75 ? 'amber' : 'red') }}-400 text-xs font-semibold font-mono">{{ $row['pct'] }}%</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4">
+                        @if($row['growth'])
+                        <span class="text-xs font-semibold font-mono flex items-center gap-1 {{ $row['gdir'] === 'up' ? 'text-emerald-400' : 'text-red-400' }}">
+                            <i class="fa-solid fa-arrow-trend-{{ $row['gdir'] }} text-xs"></i>
+                            {{ $row['growth'] }}
+                        </span>
                         @else
-                        <span class="text-xs text-blue-600 bg-blue-50 font-semibold px-2.5 py-1 rounded-lg">Normal</span>
+                        <span class="text-slate-600 text-xs">—</span>
                         @endif
                     </td>
                 </tr>
                 @endforeach
             </tbody>
+            <tfoot>
+                <tr class="border-t-2 border-border bg-slate-800/30">
+                    <td class="px-5 py-4 text-white font-bold text-sm">TOTAL YTD</td>
+                    <td class="px-5 py-4 text-white font-bold">896</td>
+                    <td class="px-5 py-4 text-emerald-400 font-bold font-mono text-sm">Rp 180.300.000</td>
+                    <td class="px-5 py-4 text-slate-400 font-mono text-sm">Rp 210.000.000</td>
+                    <td class="px-5 py-4">
+                        <span class="text-amber-400 font-bold font-mono text-sm">86%</span>
+                    </td>
+                    <td class="px-5 py-4 text-emerald-400 text-xs font-semibold font-mono">+8.3% rata²</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
-    {{-- Mobile --}}
-    <div class="sm:hidden divide-y divide-gray-50">
-        @foreach($topMenus as $m)
-        <div class="px-4 py-3.5 flex items-center gap-3">
-            <div class="w-8 h-8 bg-gradient-to-br {{ $m['color'] }} rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{{ $m['rank'] }}</div>
-            <span class="text-xl">{{ $m['emoji'] }}</span>
-            <div class="flex-1 min-w-0">
-                <p class="font-semibold text-sm text-gray-800 truncate">{{ $m['name'] }}</p>
-                <p class="text-[10px] text-gray-400">{{ $m['sold'] }} terjual</p>
+
+    {{-- Mobile cards --}}
+    <div class="sm:hidden p-4 space-y-3">
+        @foreach($monthlyData as $row)
+        <div class="p-4 rounded-xl bg-slate-800/40 border border-border {{ $loop->last ? 'border-primary-500/30 bg-primary-500/5' : '' }}">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-white font-bold">{{ $row['month'] }}
+                    @if($loop->last)<span class="ml-2 text-xs text-primary-400 font-normal">Aktif</span>@endif
+                </p>
+                @if($row['growth'])
+                <span class="text-xs font-mono font-semibold {{ $row['gdir'] === 'up' ? 'text-emerald-400' : 'text-red-400' }}">{{ $row['growth'] }}</span>
+                @endif
             </div>
-            <p class="font-heading font-bold text-sm text-emerald-600 flex-shrink-0">Rp {{ number_format($m['revenue']/1000, 0) }}rb</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                    <p class="text-slate-500">Transaksi</p>
+                    <p class="text-white font-semibold">{{ $row['trx'] }}</p>
+                </div>
+                <div>
+                    <p class="text-slate-500">Pemasukan</p>
+                    <p class="text-white font-semibold font-mono">{{ number_format($row['income'] / 1000000, 1, ',', '.') }}jt</p>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="text-slate-500">Capaian target</span>
+                    <span class="text-{{ $row['pct'] >= 90 ? 'emerald' : ($row['pct'] >= 75 ? 'amber' : 'red') }}-400 font-mono font-semibold">{{ $row['pct'] }}%</span>
+                </div>
+                <div class="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-{{ $row['pct'] >= 90 ? 'emerald' : ($row['pct'] >= 75 ? 'amber' : 'red') }}-500 rounded-full" style="width: {{ $row['pct'] }}%"></div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+
+{{-- ===== ANOMALY / NOTES ===== --}}
+<div class="glass-card rounded-2xl p-5">
+    <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
+        </div>
+        <div>
+            <h2 class="text-white font-bold text-base">Catatan Keuangan</h2>
+            <p class="text-slate-500 text-xs">Otomatis terdeteksi sistem</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        @php
+            $notes = [
+                ['icon' => 'fa-arrow-down', 'color' => 'amber', 'title' => 'Pemasukan April Turun', 'desc' => 'Turun 5.7% dibanding Maret. Kemungkinan karena libur sekolah.'],
+                ['icon' => 'fa-circle-check', 'color' => 'emerald', 'title' => 'Target Maret Tercapai', 'desc' => '93% capaian — bulan terbaik sejak Januari 2025.'],
+                ['icon' => 'fa-users', 'color' => 'primary', 'title' => 'Pengguna Meningkat', 'desc' => '+24 pengguna baru aktif bertransaksi bulan ini.'],
+            ];
+        @endphp
+        @foreach($notes as $n)
+        <div class="p-4 rounded-xl bg-{{ $n['color'] }}-500/5 border border-{{ $n['color'] }}-500/15">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fa-solid {{ $n['icon'] }} text-{{ $n['color'] }}-400 text-sm"></i>
+                <p class="text-white text-sm font-semibold">{{ $n['title'] }}</p>
+            </div>
+            <p class="text-slate-400 text-xs leading-relaxed">{{ $n['desc'] }}</p>
         </div>
         @endforeach
     </div>

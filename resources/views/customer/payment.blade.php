@@ -109,7 +109,7 @@
             </button>
 
             <p class="text-center text-xs text-gray-400 mt-4">
-                Butuh bantuan? <a href="https://wa.me/6281234567890" class="text-green-500 font-semibold hover:text-green-600 transition-colors"><i class="fa-brands fa-whatsapp mr-0.5"></i>Chat WA Kantin</a>
+                Butuh bantuan? <a href="https://telegram.me/6281234567890" class="text-green-500 font-semibold hover:text-green-600 transition-colors"><i class="fa-brands fa-telegram mr-0.5"></i>Chat Telegram Kantin</a>
             </p>
         </form>
     </div>
