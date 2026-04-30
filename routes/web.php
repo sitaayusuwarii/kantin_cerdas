@@ -113,8 +113,12 @@ Route::prefix('admin')
     Route::get('/report', function () {
         return view('admin.report');
     })->name('report');
-});
 
+    // Kelola User
+    Route::get('/kelola-user', function () {
+        return view('admin.kelola-user');
+    })->name('kelola-user');
+});
 
 // ──────────────────────────────────────────────────────
 // PENGELOLA ROUTES

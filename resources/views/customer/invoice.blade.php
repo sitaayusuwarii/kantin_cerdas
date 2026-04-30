@@ -14,8 +14,8 @@
             <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm">
                 <i class="fa-solid fa-print text-sm"></i>Cetak
             </button>
-            <a href="https://wa.me/6281234567890?text=Halo, saya ingin konfirmasi pembayaran Order %23SC-001" target="_blank" class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm">
-                <i class="fa-brands fa-whatsapp"></i>Konfirmasi WA
+            <a href="https://telegram.me/6281234567890?text=Halo, saya ingin konfirmasi pembayaran Order %23SC-001" target="_blank" class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                <i class="fa-brands fa-telegram"></i>Konfirmasi Telegram
             </a>
         </div>
     </div>
@@ -139,7 +139,7 @@
         <div class="mx-6 mb-6 sm:mx-8 p-4 bg-orange-50 rounded-xl border border-orange-100 flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <i class="fa-solid fa-circle-info text-primary-400 mt-0.5 flex-shrink-0"></i>
             <p class="text-xs text-gray-600 leading-relaxed">
-                Silakan upload bukti pembayaran melalui menu <strong>Upload Bukti Bayar</strong> atau konfirmasi via WhatsApp. Pembayaran diterima melalui transfer BRI: <strong>1234567890</strong> a/n SmartCanteen.
+                Silakan upload bukti pembayaran melalui menu <strong>Upload Bukti Bayar</strong> atau konfirmasi via Telegram. Pembayaran diterima melalui transfer BRI: <strong>1234567890</strong> a/n SmartCanteen.
             </p>
         </div>
 
@@ -148,8 +148,8 @@
             <a href="{{ url('/payment') }}" class="btn-primary text-white font-heading font-bold py-3.5 rounded-xl flex-1 text-sm text-center shadow-lg flex items-center justify-center gap-2">
                 <i class="fa-solid fa-upload"></i>Upload Bukti Bayar
             </a>
-            <a href="https://wa.me/6281234567890" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-heading font-bold py-3.5 rounded-xl flex-1 text-sm text-center shadow transition-colors flex items-center justify-center gap-2">
-                <i class="fa-brands fa-whatsapp text-base"></i>Konfirmasi via WA
+            <a href="https://telegram.me/6281234567890" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-heading font-bold py-3.5 rounded-xl flex-1 text-sm text-center shadow transition-colors flex items-center justify-center gap-2">
+                <i class="fa-brands fa-telegram text-base"></i>Konfirmasi via Telegram
             </a>
         </div>
     </div>

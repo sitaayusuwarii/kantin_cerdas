@@ -16,18 +16,18 @@
                 <h1 class="font-heading font-bold text-2xl md:text-3xl text-white mb-2">Mawar</h1>
                 <p class="text-orange-100 text-sm">Kelas XII IPA 2 · SMAN 1 Contoh · ID: <span class="font-semibold">SC-2024-0198</span></p>
                 <div class="flex flex-wrap items-center gap-2 mt-4">
-                    <span class="bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                    <!-- <span class="bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5">
                         <i class="fa-solid fa-circle text-green-300 text-[8px]"></i>Saldo Aktif
-                    </span>
+                    </span> -->
                     <span class="bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
                         <i class="fa-solid fa-star text-yellow-300 mr-1"></i>Member Silver
                     </span>
                 </div>
             </div>
-            <div class="text-center bg-white/15 rounded-2xl px-8 py-5 backdrop-blur-sm">
+            <!-- <div class="text-center bg-white/15 rounded-2xl px-8 py-5 backdrop-blur-sm">
                 <p class="text-orange-100 text-xs font-medium uppercase tracking-wider mb-1">Saldo</p>
                 <p class="font-heading font-bold text-3xl text-white">Rp 85.000</p>
-                <p class="text-orange-200 text-xs mt-1">Terakhir diisi: 15 Apr</p>
+                <p class="text-orange-200 text-xs mt-1">Terakhir diisi: 15 Apr</p> -->
             </div>
         </div>
     </div>

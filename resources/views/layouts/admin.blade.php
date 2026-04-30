@@ -174,6 +174,14 @@
                 </span>
                 Laporan Keuangan
             </a>
+
+            <a href="{{ route('admin.kelola-user') }}"
+                class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium {{ request()->routeIs('admin.kelola-user') ? 'active text-white' : 'text-slate-400' }}">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center {{ request()->routeIs('admin.kelola-user') ? 'bg-white/20' : 'bg-slate-700/50' }}">
+                    <i class="fa-solid fa-users text-xs"></i>
+                </span>
+                Kelola User
+            </a>
         </nav>
 
         <!-- User Profile Bottom -->
