@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+// use App\Http\Controllers\Admin\DashboardController;
+// use App\Http\Controllers\Admin\VerificationController;
+// use App\Http\Controllers\Admin\TransactionController;
+// use App\Http\Controllers\Admin\ReportController;
 /*
 |==========================================================================
 | SmartCanteen — Web Routes
@@ -82,60 +85,106 @@ Route::group([], function () {
 });
 
 
-// =============================================
-// ADMIN / PENGELOLA KANTIN ROUTES
-// =============================================
-// Production: ->middleware(['auth', 'role:admin'])
-Route::prefix('admin')->name('admin.')->group(function () {
+// ========================
+// ADMIN ROUTES
+// ========================
+Route::prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
     Route::get('/', fn() => redirect('/admin/dashboard'));
 
+    // Dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
+    // Verifikasi Pembayaran
+    Route::get('/verification', function () {
+        return view('admin.verification');
+    })->name('verification');
+
+    // Monitoring Transaksi
+    Route::get('/transactions', function () {
+        return view('admin.transactions');
+    })->name('transactions');
+
+    // Laporan
+    Route::get('/report', function () {
+        return view('admin.report');
+    })->name('report');
+});
+
+
+// ──────────────────────────────────────────────────────
+// PENGELOLA ROUTES
+// Production: ->middleware(['auth', 'role:pengelola'])
+// ──────────────────────────────────────────────────────
+Route::prefix('pengelola')->name('pengelola.')->group(function () {
+
+    // Redirect /pengelola → /pengelola/dashboard
+    Route::get('/', fn() => redirect('/pengelola/dashboard'));
+
+    // ── DASHBOARD ──────────────────────────────────
+    Route::get('/dashboard', function () {
+        return view('pengelola.dashboard');
+    })->name('dashboard');
+
+    // ── KELOLA MENU ────────────────────────────────
     Route::get('/menu', function () {
-        return view('admin.menu-management');
+        return view('pengelola.menu-management');
     })->name('menu.index');
 
     Route::post('/menu/store', function () {
-        return redirect('/admin/menu')->with('success', 'Menu berhasil ditambahkan!');
+        return redirect()->route('pengelola.menu.index')
+                         ->with('success', 'Menu berhasil ditambahkan!');
     })->name('menu.store');
 
     Route::put('/menu/{id}', function ($id) {
-        return redirect('/admin/menu')->with('success', 'Menu #' . $id . ' berhasil diperbarui!');
+        return redirect()->route('pengelola.menu.index')
+                         ->with('success', 'Menu #' . $id . ' berhasil diperbarui!');
     })->name('menu.update');
 
     Route::delete('/menu/{id}', function ($id) {
-        return redirect('/admin/menu')->with('success', 'Menu #' . $id . ' berhasil dihapus.');
+        return redirect()->route('pengelola.menu.index')
+                         ->with('success', 'Menu #' . $id . ' berhasil dihapus.');
     })->name('menu.destroy');
 
+    Route::patch('/menu/{id}/toggle', function ($id) {
+        return response()->json(['success' => true]);
+    })->name('menu.toggle');
+
+    // ── PESANAN MASUK ──────────────────────────────
     Route::get('/orders', function () {
-        return view('admin.orders');
+        return view('pengelola.orders');
     })->name('orders.index');
 
     Route::post('/orders/{id}/accept', function ($id) {
-        return redirect('/admin/orders')->with('success', 'Pesanan #' . $id . ' diterima!');
+        return redirect()->route('pengelola.orders.index')
+                         ->with('success', 'Pesanan #' . $id . ' diterima!');
     })->name('orders.accept');
 
+    // ── PROSES PENGIRIMAN ──────────────────────────
     Route::get('/delivery', function () {
-        return view('admin.delivery');
+        return view('pengelola.delivery');
     })->name('delivery.index');
 
-    Route::post('/delivery/{id}/update-status', function ($id) {
-        return redirect('/admin/delivery')->with('success', 'Status pesanan #' . $id . ' diperbarui!');
+    Route::post('/delivery/{id}/status', function ($id) {
+        return redirect()->route('pengelola.delivery.index')
+                         ->with('success', 'Status pesanan #' . $id . ' diperbarui!');
     })->name('delivery.updateStatus');
 
+    // ── LAPORAN FAVORIT ────────────────────────────
     Route::get('/report', function () {
-        return view('admin.report');
+        return view('pengelola.report');
     })->name('report.index');
 
     Route::get('/report/export', function () {
-        return redirect('/admin/report')->with('info', 'Export PDF dimulai...');
+        return redirect()->route('pengelola.report.index')
+                         ->with('info', 'Mengekspor PDF...');
     })->name('report.export');
 
 });
-
 
 /*
 |--------------------------------------------------------------------------

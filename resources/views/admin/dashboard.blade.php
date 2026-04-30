@@ -1,184 +1,251 @@
 @extends('layouts.admin')
-@section('title', 'Dashboard')
+
+@section('title', 'Dashboard — SmartCanteen Admin')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Ringkasan operasional kantin hari ini')
+@section('page-subtitle', 'Ringkasan sistem hari ini · ' . now()->isoFormat('dddd, D MMMM Y'))
 
 @section('content')
 
 {{-- ===== STAT CARDS ===== --}}
-@php
-$stats = [
-    ['label' => 'Total Pesanan', 'value' => '47', 'sub' => '+8 dari kemarin', 'icon' => 'fa-bag-shopping', 'color' => 'from-blue-500 to-blue-600', 'bg' => 'bg-blue-50', 'text' => 'text-blue-500', 'trend' => 'up'],
-    ['label' => 'Sedang Diproses', 'value' => '12', 'sub' => '3 butuh perhatian', 'icon' => 'fa-fire-burner', 'color' => 'from-brand-400 to-brand-600', 'bg' => 'bg-amber-50', 'text' => 'text-brand-500', 'trend' => 'warn'],
-    ['label' => 'Selesai', 'value' => '35', 'sub' => '74% dari total', 'icon' => 'fa-circle-check', 'color' => 'from-emerald-500 to-emerald-600', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-500', 'trend' => 'up'],
-    ['label' => 'Pendapatan', 'value' => 'Rp 587rb', 'sub' => 'Hari ini', 'icon' => 'fa-coins', 'color' => 'from-violet-500 to-violet-600', 'bg' => 'bg-violet-50', 'text' => 'text-violet-500', 'trend' => 'up'],
-];
-@endphp
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    @foreach($stats as $i => $s)
-    <div class="stat-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100" style="animation-delay: {{ $i * 60 }}ms">
+    {{-- Total Pemasukan Hari Ini --}}
+    <div class="relative glass-card rounded-2xl p-5 stat-card overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-emerald-500/10 -translate-y-6 translate-x-6 blur-xl"></div>
         <div class="flex items-start justify-between mb-4">
-            <div class="w-10 h-10 bg-gradient-to-br {{ $s['color'] }} rounded-xl flex items-center justify-center shadow-md">
-                <i class="fa-solid {{ $s['icon'] }} text-white text-sm"></i>
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-money-bill-wave text-emerald-400 text-base"></i>
             </div>
-            @if($s['trend'] === 'up')
-            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                <i class="fa-solid fa-arrow-trend-up text-[9px]"></i>+8%
-            </span>
-            @elseif($s['trend'] === 'warn')
-            <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
-            </span>
-            @endif
+            <span class="text-xs font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">+12.4%</span>
         </div>
-        <p class="font-heading font-bold text-xl sm:text-2xl text-gray-800">{{ $s['value'] }}</p>
-        <p class="text-gray-500 text-xs mt-0.5">{{ $s['label'] }}</p>
-        <p class="text-gray-400 text-[10px] mt-1">{{ $s['sub'] }}</p>
+        <p class="text-slate-400 text-xs font-medium mb-1">Pemasukan Hari Ini</p>
+        <p class="text-white font-bold text-2xl leading-none">Rp 4,85<span class="text-lg">jt</span></p>
+        <p class="text-slate-600 text-xs mt-1">vs kemarin Rp 4,31jt</p>
     </div>
-    @endforeach
+
+    {{-- Total Transaksi --}}
+    <div class="relative glass-card rounded-2xl p-5 stat-card overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-primary-500/10 -translate-y-6 translate-x-6 blur-xl"></div>
+        <div class="flex items-start justify-between mb-4">
+            <div class="w-11 h-11 rounded-xl bg-primary-500/10 border border-primary-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-receipt text-primary-400 text-base"></i>
+            </div>
+            <span class="text-xs font-semibold text-primary-400 bg-primary-500/10 border border-primary-500/20 px-2 py-0.5 rounded-full">+8 baru</span>
+        </div>
+        <p class="text-slate-400 text-xs font-medium mb-1">Total Transaksi</p>
+        <p class="text-white font-bold text-2xl leading-none">248</p>
+        <p class="text-slate-600 text-xs mt-1">Sepanjang bulan ini</p>
+    </div>
+
+    {{-- Pembayaran Pending --}}
+    <div class="relative glass-card rounded-2xl p-5 stat-card overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-amber-500/10 -translate-y-6 translate-x-6 blur-xl"></div>
+        <div class="flex items-start justify-between mb-4">
+            <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-clock text-amber-400 text-base"></i>
+            </div>
+            <span class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">Perlu aksi</span>
+        </div>
+        <p class="text-slate-400 text-xs font-medium mb-1">Pembayaran Pending</p>
+        <p class="text-white font-bold text-2xl leading-none">5</p>
+        <p class="text-slate-600 text-xs mt-1">Menunggu verifikasi</p>
+    </div>
+
+    {{-- Total Pengguna Aktif --}}
+    <div class="relative glass-card rounded-2xl p-5 stat-card overflow-hidden">
+        <div class="absolute top-0 right-0 w-24 h-24 rounded-full bg-violet-500/10 -translate-y-6 translate-x-6 blur-xl"></div>
+        <div class="flex items-start justify-between mb-4">
+            <div class="w-11 h-11 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                <i class="fa-solid fa-users text-violet-400 text-base"></i>
+            </div>
+            <span class="text-xs font-semibold text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full">Aktif</span>
+        </div>
+        <p class="text-slate-400 text-xs font-medium mb-1">Pengguna Aktif</p>
+        <p class="text-white font-bold text-2xl leading-none">312</p>
+        <p class="text-slate-600 text-xs mt-1">Siswa & guru terdaftar</p>
+    </div>
 </div>
 
-{{-- ===== MAIN CONTENT GRID ===== --}}
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+{{-- ===== CHART + RECENT ACTIVITY ===== --}}
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
 
-    {{-- Pesanan Terbaru --}}
-    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 class="font-heading font-bold text-gray-800 text-sm flex items-center gap-2">
-                <i class="fa-solid fa-bell text-brand-500"></i>Pesanan Terbaru
-            </h2>
-            <a href="{{ url('/admin/orders') }}" class="text-xs text-brand-500 hover:text-brand-700 font-semibold">Lihat Semua →</a>
-        </div>
-
-        {{-- Desktop --}}
-        <div class="hidden sm:block overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50/80">
-                    <tr>
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500">ID</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Siswa</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500">Menu</th>
-                        <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500">Total</th>
-                        <th class="text-center px-6 py-3 text-xs font-semibold text-gray-500">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @php
-                    $recentOrders = [
-                        ['id'=>'SC-047','name'=>'Ahmad Rizky','menu'=>'Nasi Gudeg + Es Teh','total'=>'Rp 16.000','status'=>'Baru','sc'=>'bg-blue-100 text-blue-700'],
-                        ['id'=>'SC-046','name'=>'Siti Rahma','menu'=>'Mie Goreng Spesial','total'=>'Rp 10.000','status'=>'Diproses','sc'=>'bg-amber-100 text-amber-700'],
-                        ['id'=>'SC-045','name'=>'Budi Santoso','menu'=>'Nasi Ayam Geprek','total'=>'Rp 13.000','status'=>'Selesai','sc'=>'bg-emerald-100 text-emerald-700'],
-                        ['id'=>'SC-044','name'=>'Dewi Lestari','menu'=>'Bakso Urat + Teh','total'=>'Rp 15.000','status'=>'Selesai','sc'=>'bg-emerald-100 text-emerald-700'],
-                    ];
-                    @endphp
-                    @foreach($recentOrders as $o)
-                    <tr class="hover:bg-gray-50/60 transition-colors">
-                        <td class="px-6 py-3.5 font-heading font-bold text-xs text-gray-700">#{{ $o['id'] }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-700 font-medium">{{ $o['name'] }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-500">{{ $o['menu'] }}</td>
-                        <td class="px-4 py-3.5 text-right text-xs font-heading font-bold text-gray-800">{{ $o['total'] }}</td>
-                        <td class="px-6 py-3.5 text-center">
-                            <span class="inline-flex items-center gap-1 {{ $o['sc'] }} text-[10px] font-bold px-2.5 py-1 rounded-full">{{ $o['status'] }}</span>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        {{-- Mobile --}}
-        <div class="sm:hidden divide-y divide-gray-50">
-            @foreach($recentOrders as $o)
-            <div class="px-5 py-3.5 flex items-center justify-between gap-3">
-                <div>
-                    <p class="font-heading font-bold text-xs text-gray-700">#{{ $o['id'] }} · {{ $o['name'] }}</p>
-                    <p class="text-[11px] text-gray-400 mt-0.5">{{ $o['menu'] }}</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="font-heading font-bold text-xs text-gray-800">{{ $o['total'] }}</p>
-                    <span class="inline-flex items-center {{ $o['sc'] }} text-[10px] font-bold px-2 py-0.5 rounded-full mt-1">{{ $o['status'] }}</span>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-
-    {{-- Top 3 Menu Terlaris --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div class="px-6 py-4 border-b border-gray-100">
-            <h2 class="font-heading font-bold text-gray-800 text-sm flex items-center gap-2">
-                <i class="fa-solid fa-fire text-brand-500"></i>Menu Terlaris Hari Ini
-            </h2>
-        </div>
-        <div class="p-5 space-y-4">
-            @php
-            $topMenus = [
-                ['rank'=>1,'emoji'=>'🍛','name'=>'Nasi Gudeg Komplit','sold'=>18,'pct'=>90,'color'=>'bg-gradient-to-r from-brand-400 to-brand-600'],
-                ['rank'=>2,'emoji'=>'🍜','name'=>'Mie Goreng Spesial','sold'=>14,'pct'=>70,'color'=>'bg-gradient-to-r from-blue-400 to-blue-600'],
-                ['rank'=>3,'emoji'=>'🍗','name'=>'Nasi Ayam Geprek','sold'=>11,'pct'=>55,'color'=>'bg-gradient-to-r from-emerald-400 to-emerald-600'],
-            ];
-            @endphp
-            @foreach($topMenus as $m)
+    {{-- Bar Chart Pemasukan 7 Hari --}}
+    <div class="xl:col-span-2 glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-6">
             <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="font-heading font-bold text-lg {{ $m['rank']===1?'text-brand-500':($m['rank']===2?'text-blue-500':'text-emerald-500') }} w-5 text-center flex-shrink-0">{{ $m['rank'] }}</span>
-                    <span class="text-xl">{{ $m['emoji'] }}</span>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-xs text-gray-800 truncate">{{ $m['name'] }}</p>
-                        <p class="text-[10px] text-gray-400">{{ $m['sold'] }} porsi terjual</p>
+                <h2 class="text-white font-bold text-base">Pemasukan Harian</h2>
+                <p class="text-slate-500 text-xs mt-0.5">7 hari terakhir</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                <span class="text-slate-400 text-xs">Pemasukan (Rp)</span>
+            </div>
+        </div>
+
+        {{-- Chart --}}
+        <div class="flex items-end gap-2 h-36 mb-3" id="chart-bars">
+            @php
+                $days = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+                $values = [3200000, 4100000, 3800000, 5200000, 4850000, 2100000, 1500000];
+                $max = max($values);
+            @endphp
+            @foreach($days as $i => $day)
+            <div class="flex-1 flex flex-col items-center gap-2">
+                <div class="w-full relative group cursor-pointer">
+                    <div class="w-full rounded-t-lg bg-primary-500/20 hover:bg-primary-500/30 transition-colors relative overflow-hidden"
+                         style="height: {{ round(($values[$i] / $max) * 128) }}px">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary-600 to-primary-400 opacity-80"></div>
+                        {{-- Tooltip --}}
+                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-border text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            Rp {{ number_format($values[$i], 0, ',', '.') }}
+                        </div>
                     </div>
                 </div>
-                <div class="ml-8 bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                    <div class="{{ $m['color'] }} h-full rounded-full" style="width: {{ $m['pct'] }}%"></div>
+                <span class="text-slate-500 text-xs font-medium">{{ $day }}</span>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Y-axis labels --}}
+        <div class="flex justify-between text-xs text-slate-700 font-mono border-t border-border/50 pt-2">
+            <span>Rp 0</span>
+            <span>Rp 2,6jt</span>
+            <span>Rp 5,2jt</span>
+        </div>
+    </div>
+
+    {{-- Status Breakdown --}}
+    <div class="glass-card rounded-2xl p-5">
+        <h2 class="text-white font-bold text-base mb-1">Status Pembayaran</h2>
+        <p class="text-slate-500 text-xs mb-5">Distribusi bulan ini</p>
+
+        @php
+            $statuses = [
+                ['label' => 'Lunas', 'count' => 231, 'pct' => 93, 'color' => 'emerald'],
+                ['label' => 'Pending', 'count' => 5, 'pct' => 2, 'color' => 'amber'],
+                ['label' => 'Ditolak', 'count' => 12, 'pct' => 5, 'color' => 'red'],
+            ];
+        @endphp
+
+        <div class="space-y-4">
+            @foreach($statuses as $s)
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-{{ $s['color'] }}-500"></div>
+                        <span class="text-slate-300 text-sm font-medium">{{ $s['label'] }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-500 text-xs">{{ $s['count'] }}</span>
+                        <span class="text-{{ $s['color'] }}-400 text-xs font-semibold font-mono">{{ $s['pct'] }}%</span>
+                    </div>
+                </div>
+                <div class="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div class="h-full bg-{{ $s['color'] }}-500 rounded-full" style="width: {{ $s['pct'] }}%"></div>
                 </div>
             </div>
             @endforeach
+        </div>
 
-            {{-- Mini Chart --}}
-            <div class="mt-6 pt-5 border-t border-dashed border-gray-200">
-                <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-3">Pesanan per Jam</p>
-                <div class="flex items-end gap-1.5 h-16">
-                    @php $bars = [3,5,8,12,9,15,18,14,11,7,4,6]; @endphp
-                    @foreach($bars as $bi => $b)
-                    <div class="flex-1 {{ $b === max($bars) ? 'bg-gradient-to-t from-brand-500 to-brand-400' : 'bg-gray-200' }} rounded-t-sm transition-all" style="height:{{ round(($b / max($bars)) * 100) }}%"></div>
-                    @endforeach
-                </div>
-                <div class="flex items-center justify-between mt-1">
-                    <span class="text-[9px] text-gray-400">07:00</span>
-                    <span class="text-[9px] text-gray-400">12:00</span>
-                    <span class="text-[9px] text-gray-400">15:00</span>
-                </div>
-            </div>
+        <div class="mt-6 p-4 rounded-xl bg-slate-800/60 border border-border">
+            <p class="text-slate-500 text-xs mb-1">Total Transaksi Bulan Ini</p>
+            <p class="text-white font-bold text-xl">248 <span class="text-slate-500 font-normal text-sm">transaksi</span></p>
+            <p class="text-emerald-400 text-xs mt-1 font-medium">
+                <i class="fa-solid fa-arrow-trend-up mr-1"></i> Naik 18% dari bulan lalu
+            </p>
         </div>
     </div>
 </div>
 
-{{-- ===== QUICK ACTION ROW ===== --}}
-<div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-    @php
-    $actions = [
-        ['url'=>'/admin/orders','icon'=>'fa-bell','label'=>'Pesanan Baru','count'=>3,'color'=>'from-blue-500 to-blue-600'],
-        ['url'=>'/admin/delivery','icon'=>'fa-motorcycle','label'=>'Dalam Pengiriman','count'=>5,'color'=>'from-brand-400 to-brand-600'],
-        ['url'=>'/admin/menu','icon'=>'fa-utensils','label'=>'Kelola Menu','count'=>12,'color'=>'from-violet-500 to-violet-600'],
-        ['url'=>'/admin/report','icon'=>'fa-chart-column','label'=>'Lihat Laporan','count'=>null,'color'=>'from-emerald-500 to-emerald-600'],
-    ];
-    @endphp
-    @foreach($actions as $a)
-    <a href="{{ url($a['url']) }}" class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3 hover:shadow-md transition-all group">
-        <div class="w-10 h-10 bg-gradient-to-br {{ $a['color'] }} rounded-xl flex items-center justify-center flex-shrink-0 shadow group-hover:scale-105 transition-transform">
-            <i class="fa-solid {{ $a['icon'] }} text-white text-sm"></i>
+{{-- ===== RECENT PENDING + QUICK ACTIONS ===== --}}
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+    {{-- Recent Pending Verifications --}}
+    <div class="xl:col-span-2 glass-card rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-white font-bold text-base">Pending Verifikasi</h2>
+                <p class="text-slate-500 text-xs mt-0.5">Membutuhkan perhatian segera</p>
+            </div>
+            <a href="{{ route('admin.verification') }}" class="text-xs text-primary-400 hover:text-primary-300 font-semibold flex items-center gap-1 transition-colors">
+                Lihat Semua <i class="fa-solid fa-arrow-right text-xs"></i>
+            </a>
         </div>
-        <div class="min-w-0">
-            <p class="text-xs font-semibold text-gray-700 truncate">{{ $a['label'] }}</p>
-            @if($a['count'])
-            <p class="text-[10px] text-gray-400">{{ $a['count'] }} item</p>
-            @else
-            <p class="text-[10px] text-brand-500 font-medium">Buka →</p>
-            @endif
+
+        <div class="space-y-3">
+            @php
+                $pending = [
+                    ['id' => 'TRX-0821', 'name' => 'Budi Santoso', 'class' => 'XI IPA 2', 'amount' => 45000, 'time' => '08:24'],
+                    ['id' => 'TRX-0822', 'name' => 'Sari Dewi', 'class' => 'X IPS 1', 'amount' => 32000, 'time' => '08:31'],
+                    ['id' => 'TRX-0823', 'name' => 'Agus Pratama', 'class' => 'XII IPA 1', 'amount' => 67000, 'time' => '08:45'],
+                    ['id' => 'TRX-0824', 'name' => 'Rina Melati', 'class' => 'X IPA 3', 'amount' => 28000, 'time' => '09:02'],
+                    ['id' => 'TRX-0825', 'name' => 'Doni Kurniawan', 'class' => 'XI IPS 2', 'amount' => 53000, 'time' => '09:15'],
+                ];
+            @endphp
+
+            @foreach($pending as $item)
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-amber-500/10 hover:border-amber-500/30 transition-all group">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    {{ substr($item['name'], 0, 1) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white text-sm font-semibold truncate">{{ $item['name'] }}</p>
+                    <p class="text-slate-500 text-xs">{{ $item['class'] }} · {{ $item['id'] }}</p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-white text-sm font-bold font-mono">Rp {{ number_format($item['amount'], 0, ',', '.') }}</p>
+                    <p class="text-slate-600 text-xs">{{ $item['time'] }} WIB</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <span class="badge px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">PENDING</span>
+                </div>
+            </div>
+            @endforeach
         </div>
-    </a>
-    @endforeach
+    </div>
+
+    {{-- Quick Stats --}}
+    <div class="space-y-4">
+        <div class="glass-card rounded-2xl p-5">
+            <h2 class="text-white font-bold text-base mb-4">Rekap Cepat</h2>
+            <div class="space-y-3">
+                @php
+                    $recaps = [
+                        ['label' => 'Pemasukan Minggu Ini', 'value' => 'Rp 24,3jt', 'icon' => 'fa-wallet', 'color' => 'emerald'],
+                        ['label' => 'Rata-rata per Transaksi', 'value' => 'Rp 38.500', 'icon' => 'fa-calculator', 'color' => 'primary'],
+                        ['label' => 'Transaksi Terbanyak', 'value' => 'Jumat', 'icon' => 'fa-calendar-day', 'color' => 'violet'],
+                        ['label' => 'Pengguna Bertransaksi', 'value' => '187 siswa', 'icon' => 'fa-user-check', 'color' => 'sky'],
+                    ];
+                @endphp
+                @foreach($recaps as $r)
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40">
+                    <div class="w-8 h-8 rounded-lg bg-{{ $r['color'] }}-500/10 border border-{{ $r['color'] }}-500/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid {{ $r['icon'] }} text-{{ $r['color'] }}-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-slate-500 text-xs">{{ $r['label'] }}</p>
+                        <p class="text-white text-sm font-bold">{{ $r['value'] }}</p>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-5">
+            <h2 class="text-white font-bold text-sm mb-3">Aksi Cepat</h2>
+            <div class="space-y-2">
+                <a href="{{ route('admin.verification') }}" class="flex items-center gap-3 w-full p-3 rounded-xl bg-primary-500/10 border border-primary-500/20 hover:bg-primary-500/20 transition-all text-primary-300 text-sm font-medium">
+                    <i class="fa-solid fa-circle-check text-primary-400"></i>
+                    Verifikasi Pembayaran
+                    <span class="ml-auto notif-badge text-white text-xs font-bold px-1.5">5</span>
+                </a>
+                <a href="{{ route('admin.report') }}" class="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800/40 hover:bg-slate-700/40 transition-all text-slate-300 text-sm font-medium">
+                    <i class="fa-solid fa-file-invoice-dollar text-slate-400"></i>
+                    Unduh Laporan
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 @endsection
