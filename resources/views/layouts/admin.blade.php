@@ -189,15 +189,32 @@
             <div class="flex items-center gap-3">
                 <div class="relative pulse-dot flex-shrink-0">
                     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-bold text-sm">A</div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-white text-sm font-semibold truncate">Admin Sekolah</p>
-                    <p class="text-slate-500 text-xs truncate">admin@sekolah.sch.id</p>
-                </div>
-                <button class="text-slate-500 hover:text-red-400 transition-colors" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                </button>
+                <!-- User Profile Bottom -->
+<div class="px-4 py-4 border-t border-border">
+    <div class="flex items-center gap-3">
+
+        <div class="relative pulse-dot flex-shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-bold text-sm">
+                A
             </div>
+        </div>
+
+        <div class="flex-1 min-w-0">
+            <p class="text-white text-sm font-semibold truncate">Admin Sekolah</p>
+            <p class="text-slate-500 text-xs truncate">admin@sekolah.sch.id</p>
+        </div>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                        onclick="return confirm('Yakin mau logout?')"
+                        class="text-slate-500 hover:text-red-400">
+                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    </button>
+                </form>
+
+            </div>
+        </div>
         </div>
     </aside>
 

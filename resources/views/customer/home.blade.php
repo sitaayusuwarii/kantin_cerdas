@@ -3,33 +3,57 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+{{-- Greeting Banner --}}
+<div class="relative overflow-hidden rounded-2xl mb-8 shadow-xl">
+    
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-orange-700"></div>
 
-    {{-- Greeting Banner --}}
-    <div class="relative overflow-hidden rounded-2xl mb-8 shadow-xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-orange-700"></div>
-        <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,<svg width=\"60\" height=\"60\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"none\" stroke=\"white\" stroke-width=\"1\"/></svg>'); background-size: 60px;"></div>
-        <div class="relative px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-                <p class="text-orange-100 text-sm font-medium mb-1">
-                    <i class="fa-regular fa-sun mr-1"></i>Selamat Pagi 👋
-                </p>
-                <h1 class="font-heading font-bold text-2xl md:text-3xl text-white mb-2">Mawar</h1>
-                <p class="text-orange-100 text-sm">Kelas XII IPA 2 · SMAN 1 Contoh · ID: <span class="font-semibold">SC-2024-0198</span></p>
-                <div class="flex flex-wrap items-center gap-2 mt-4">
-                    <!-- <span class="bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                        <i class="fa-solid fa-circle text-green-300 text-[8px]"></i>Saldo Aktif
-                    </span> -->
-                    <span class="bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                        <i class="fa-solid fa-star text-yellow-300 mr-1"></i>Member Silver
-                    </span>
-                </div>
-            </div>
-            <!-- <div class="text-center bg-white/15 rounded-2xl px-8 py-5 backdrop-blur-sm">
-                <p class="text-orange-100 text-xs font-medium uppercase tracking-wider mb-1">Saldo</p>
-                <p class="font-heading font-bold text-3xl text-white">Rp 85.000</p>
-                <p class="text-orange-200 text-xs mt-1">Terakhir diisi: 15 Apr</p> -->
-            </div>
+    <div class="absolute inset-0 opacity-10"
+        style="background-image: url('data:image/svg+xml,<svg width=\"60\" height=\"60\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"none\" stroke=\"white\" stroke-width=\"1\"/></svg>'); background-size: 60px;">
+    </div>
+
+    <div class="relative px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        
+        <div>
+            <p class="text-orange-100 text-sm font-medium mb-1">
+                <i class="fa-regular fa-sun mr-1"></i>
+
+                @php
+                    $hour = now()->format('H');
+
+                    if ($hour < 12) {
+                        $greeting = 'Selamat Pagi';
+                    } elseif ($hour < 15) {
+                        $greeting = 'Selamat Siang';
+                    } elseif ($hour < 18) {
+                        $greeting = 'Selamat Sore';
+                    } else {
+                        $greeting = 'Selamat Malam';
+                    }
+                @endphp
+
+                {{ $greeting }} 👋
+            </p>
+
+            {{-- Nama user login --}}
+            <h1 class="font-heading font-bold text-2xl md:text-3xl text-white mb-2">
+                {{ auth()->user()->full_name }}
+            </h1>
+
+            <!-- {{-- Data user login --}}
+            <p class="text-orange-100 text-sm">
+                {{ auth()->user()->class ?? '-' }}
+                · SmartCanteen
+                · ID:
+                <span class="font-semibold">
+                    SC-{{ str_pad(auth()->user()->id, 4, '0', STR_PAD_LEFT) }}
+                </span>
+            </p> -->
+
         </div>
+
+    </div>
+</div>
     </div>
 
     {{-- Stat Cards --}}

@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('order_items', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('order_id')
+                  ->constrained('orders')
+                  ->cascadeOnDelete(); // hapus order → hapus item
+
+            $table->foreignId('menu_id')
+                  ->constrained('menus')
+                  ->restrictOnDelete();
+
+            $table->unsignedSmallInteger('quantity');
+
+            // Snapshot harga saat dipesan — tidak ikut berubah
+            // meski harga menu diupdate di kemudian hari
+            $table->decimal('unit_price', 10, 2);
+            $table->decimal('subtotal', 10, 2);
+
+            $table->timestamps();
+
+            $table->index('order_id');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('order_items');
+    }
+};

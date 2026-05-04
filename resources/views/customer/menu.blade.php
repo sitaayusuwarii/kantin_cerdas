@@ -112,83 +112,148 @@
                    class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all">
         </div>
         <div class="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <button class="filter-btn active-filter btn-primary text-white text-sm font-semibold px-5 py-3 rounded-xl flex-shrink-0 transition-all" data-cat="Semua">Semua</button>
-            <button class="filter-btn bg-white border border-gray-200 text-gray-600 hover:border-primary-300 text-sm font-medium px-5 py-3 rounded-xl flex-shrink-0 transition-all" data-cat="Makanan">Makanan</button>
-            <button class="filter-btn bg-white border border-gray-200 text-gray-600 hover:border-primary-300 text-sm font-medium px-5 py-3 rounded-xl flex-shrink-0 transition-all" data-cat="Minuman">Minuman</button>
-            <button class="filter-btn bg-white border border-gray-200 text-gray-600 hover:border-primary-300 text-sm font-medium px-5 py-3 rounded-xl flex-shrink-0 transition-all" data-cat="Snack">Snack</button>
-        </div>
+
+    <button class="filter-btn active-filter btn-primary text-white text-sm font-semibold px-5 py-3 rounded-xl flex-shrink-0 transition-all"
+            data-cat="Semua">
+        Semua
+    </button>
+
+    @foreach($categories as $category)
+        <button class="filter-btn bg-white border border-gray-200 text-gray-600 hover:border-primary-300 text-sm font-medium px-5 py-3 rounded-xl flex-shrink-0 transition-all"
+                data-cat="{{ $category->name }}">
+            {{ $category->name }}
+        </button>
+    @endforeach
+
+</div>
     </div>
 
     {{-- Menu Grid --}}
-    <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-        @php
-        $menus = [
-            ['id'=>1,'name'=>'Nasi Gudeg Komplit','price'=>12000,'emoji'=>'🍛','cat'=>'Makanan','fav'=>true,'desc'=>'Nasi + gudeg + ayam suwir + kerupuk','color'=>'from-yellow-400 to-orange-400'],
-            ['id'=>2,'name'=>'Mie Goreng Spesial','price'=>10000,'emoji'=>'🍜','cat'=>'Makanan','fav'=>true,'desc'=>'Mie goreng + telur + sayuran segar','color'=>'from-orange-400 to-red-400'],
-            ['id'=>3,'name'=>'Nasi Ayam Geprek','price'=>13000,'emoji'=>'🍗','cat'=>'Makanan','fav'=>false,'desc'=>'Nasi + ayam geprek + sambal + lalapan','color'=>'from-red-400 to-orange-500'],
-            ['id'=>4,'name'=>'Bakso Urat Jumbo','price'=>11000,'emoji'=>'🍲','cat'=>'Makanan','fav'=>false,'desc'=>'Bakso urat + mie + kuah kaldu sapi','color'=>'from-amber-400 to-yellow-500'],
-            ['id'=>5,'name'=>'Es Teh Manis','price'=>4000,'emoji'=>'🧋','cat'=>'Minuman','fav'=>true,'desc'=>'Teh manis dingin segar','color'=>'from-amber-300 to-yellow-400'],
-            ['id'=>6,'name'=>'Jus Alpukat','price'=>8000,'emoji'=>'🥑','cat'=>'Minuman','fav'=>false,'desc'=>'Jus alpukat + susu + gula rendah','color'=>'from-green-400 to-emerald-500'],
-            ['id'=>7,'name'=>'Pisang Goreng','price'=>5000,'emoji'=>'🍌','cat'=>'Snack','fav'=>false,'desc'=>'3 pcs pisang goreng renyah','color'=>'from-yellow-300 to-amber-400'],
-            ['id'=>8,'name'=>'Indomie Rebus','price'=>7000,'emoji'=>'🍝','cat'=>'Makanan','fav'=>false,'desc'=>'Indomie rebus + telur + sayur','color'=>'from-orange-300 to-yellow-400'],
-            ['id'=>9,'name'=>'Air Mineral','price'=>3000,'emoji'=>'💧','cat'=>'Minuman','fav'=>false,'desc'=>'Air mineral 600ml dingin','color'=>'from-blue-300 to-cyan-400'],
-            ['id'=>10,'name'=>'Tahu Goreng','price'=>4000,'emoji'=>'🟡','cat'=>'Snack','fav'=>false,'desc'=>'4 pcs tahu goreng + sambal kecap','color'=>'from-yellow-400 to-amber-500'],
-            ['id'=>11,'name'=>'Nasi Goreng Spesial','price'=>12000,'emoji'=>'🍳','cat'=>'Makanan','fav'=>false,'desc'=>'Nasi goreng + telur + ayam + sayur','color'=>'from-orange-500 to-red-500'],
-            ['id'=>12,'name'=>'Es Jeruk','price'=>5000,'emoji'=>'🍊','cat'=>'Minuman','fav'=>false,'desc'=>'Jeruk peras segar + gula aren','color'=>'from-orange-300 to-amber-400'],
-        ];
-        @endphp
+<div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
 
-        @foreach($menus as $menu)
-        <div class="menu-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-             data-id="{{ $menu['id'] }}"
-             data-name="{{ $menu['name'] }}"
-             data-price="{{ $menu['price'] }}"
-             data-emoji="{{ $menu['emoji'] }}"
-             data-cat="{{ $menu['cat'] }}">
+    @forelse($menus as $menu)
+    <div class="menu-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+         data-id="{{ $menu->id }}"
+         data-name="{{ $menu->name }}"
+         data-price="{{ $menu->price }}"
+         data-emoji="🍽️"
+         data-cat="{{ $menu->category->name ?? 'Menu' }}">
 
-            {{-- Image Area --}}
-            <div class="relative bg-gradient-to-br {{ $menu['color'] }} h-44 flex items-center justify-center overflow-hidden">
-                <span class="text-6xl group-hover:scale-110 transition-transform duration-300 select-none">{{ $menu['emoji'] }}</span>
+        {{-- Image Area --}}
+        <div class="relative h-44 overflow-hidden">
 
-                @if($menu['fav'])
-                <div class="absolute top-3 right-3 badge-favorite text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                    <i class="fa-solid fa-fire text-[9px]"></i>FAVORIT
+            @if($menu->image)
+                <img src="{{ asset('storage/' . $menu->image) }}"
+                     alt="{{ $menu->name }}"
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            @else
+                <div class="w-full h-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
+                    <span class="text-6xl">🍽️</span>
                 </div>
-                @endif
-                <div class="absolute top-3 left-3 bg-white/90 text-gray-600 text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                    {{ $menu['cat'] }}
-                </div>
+            @endif
 
-                {{-- Qty overlay (muncul kalau sudah ditambah ke cart) --}}
-                <div id="qty-overlay-{{ $menu['id'] }}"
-                     class="absolute bottom-3 right-3 hidden">
-                    <div class="flex items-center gap-1.5 bg-white rounded-xl px-2 py-1 shadow-lg border border-orange-100">
-                        <button onclick="changeQty({{ $menu['id'] }}, -1)" class="w-6 h-6 flex items-center justify-center text-primary-500 hover:text-primary-700 font-bold text-base leading-none transition-colors">−</button>
-                        <span id="qty-display-{{ $menu['id'] }}" class="font-heading font-bold text-sm text-canteen-dark w-4 text-center">1</span>
-                        <button onclick="changeQty({{ $menu['id'] }}, 1)" class="w-6 h-6 flex items-center justify-center text-primary-500 hover:text-primary-700 font-bold text-base leading-none transition-colors">+</button>
-                    </div>
-                </div>
+            {{-- Category --}}
+            <div class="absolute top-3 left-3 bg-white/90 text-gray-600 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                {{ $menu->category->name ?? 'Menu' }}
             </div>
 
-            {{-- Content --}}
-            <div class="p-4">
-                <h3 class="font-heading font-bold text-sm text-canteen-dark mb-1 leading-tight">{{ $menu['name'] }}</h3>
-                <p class="text-gray-400 text-xs mb-3 leading-relaxed">{{ $menu['desc'] }}</p>
-                <div class="flex items-center justify-between gap-2">
-                    <p class="font-heading font-bold text-lg text-primary-500">Rp {{ number_format($menu['price'], 0, ',', '.') }}</p>
+            {{-- Stock Badge --}}
+            @if($menu->stock <= 5)
+                <div class="absolute top-3 right-3 bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                    Stok {{ $menu->stock }}
+                </div>
+            @endif
 
-                    {{-- Add to Cart Button --}}
-                    <button id="add-btn-{{ $menu['id'] }}"
-                            onclick="addToCart({{ $menu['id'] }}, '{{ $menu['name'] }}', {{ $menu['price'] }}, '{{ $menu['emoji'] }}')"
-                            class="btn-primary text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow transition-all active:scale-95">
-                        <i class="fa-solid fa-cart-plus text-xs"></i>
-                        <span>Tambah</span>
+            {{-- Qty Overlay --}}
+            <div id="qty-overlay-{{ $menu->id }}"
+                 class="absolute bottom-3 right-3 hidden">
+                <div class="flex items-center gap-1.5 bg-white rounded-xl px-2 py-1 shadow-lg border border-orange-100">
+                    <button onclick="changeQty({{ $menu->id }}, -1)"
+                            class="w-6 h-6 flex items-center justify-center text-primary-500 hover:text-primary-700 font-bold text-base leading-none transition-colors">
+                        −
+                    </button>
+
+                    <span id="qty-display-{{ $menu->id }}"
+                          class="font-heading font-bold text-sm text-canteen-dark w-4 text-center">
+                        1
+                    </span>
+
+                    <button onclick="changeQty({{ $menu->id }}, 1)"
+                            class="w-6 h-6 flex items-center justify-center text-primary-500 hover:text-primary-700 font-bold text-base leading-none transition-colors">
+                        +
                     </button>
                 </div>
             </div>
         </div>
-        @endforeach
+
+        {{-- Content --}}
+        <div class="p-4">
+
+            <h3 class="font-heading font-bold text-sm text-canteen-dark mb-1 leading-tight">
+                {{ $menu->name }}
+            </h3>
+
+            <p class="text-gray-400 text-xs mb-3 leading-relaxed line-clamp-2">
+                {{ $menu->description }}
+            </p>
+
+            {{-- Stock --}}
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-xs text-gray-400">
+                    Stok:
+                    <span class="font-semibold text-gray-600">
+                        {{ $menu->stock }}
+                    </span>
+                </p>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+
+                <p class="font-heading font-bold text-lg text-primary-500">
+                    Rp {{ number_format($menu->price, 0, ',', '.') }}
+                </p>
+
+                @if($menu->stock > 0)
+
+                {{-- Add To Cart --}}
+                <button id="add-btn-{{ $menu->id }}"
+                        onclick="addToCart(
+                            {{ $menu->id }},
+                            '{{ $menu->name }}',
+                            {{ $menu->price }},
+                            '🍽️'
+                        )"
+                        class="btn-primary text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow transition-all active:scale-95">
+
+                    <i class="fa-solid fa-cart-plus text-xs"></i>
+                    <span>Tambah</span>
+                </button>
+
+                @else
+
+                {{-- Habis --}}
+                <button disabled
+                        class="bg-gray-200 text-gray-500 text-xs font-semibold px-3.5 py-2 rounded-xl cursor-not-allowed">
+                    Stok Habis
+                </button>
+                @endif
+            </div>
+        </div>
     </div>
+    @empty
+    <div class="col-span-full text-center py-16">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-bowl-food text-gray-300 text-2xl"></i>
+        </div>
+        <p class="font-heading font-bold text-gray-500 mb-1">
+            Belum ada menu
+        </p>
+        <p class="text-gray-400 text-sm">
+            Menu masih kosong
+        </p>
+    </div>
+    @endforelse
+</div>
 
     {{-- No Result --}}
     <div id="no-result" class="hidden text-center py-16">

@@ -1,243 +1,172 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-// use App\Http\Controllers\Admin\DashboardController;
-// use App\Http\Controllers\Admin\VerificationController;
-// use App\Http\Controllers\Admin\TransactionController;
-// use App\Http\Controllers\Admin\ReportController;
-/*
-|==========================================================================
-| SmartCanteen — Web Routes
-|==========================================================================
-| Berisi semua route untuk dua role:
-|   1. Customer   → /home, /menu, /cart, /order, /invoice, /payment, /history
-|   2. Admin      → /admin/dashboard, /menu, /orders, /delivery, /report
-|
-| Untuk production, aktifkan middleware auth & role di masing-masing group.
-|==========================================================================
-*/
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PengelolaOrderController;
+use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LaporanFavoritController;
+use App\Http\Controllers\Pengelola\DashboardController;
+use App\Http\Controllers\NotificationController;
 
-
-// =============================================
-// ROOT
-// =============================================
 Route::get('/', function () {
-    return redirect('/home');
+    return view('auth/login');
 });
 
-
-// =============================================
-// CUSTOMER ROUTES
-// =============================================
-// Production: ->middleware(['auth', 'role:customer'])
-Route::group([], function () {
-
-    // HOME / DASHBOARD
-    Route::get('/home', function () {
-        return view('customer.home');
-    })->name('customer.home');
-
-    // MENU KANTIN
-    Route::get('/menu', function () {
-        return view('customer.menu');
-    })->name('customer.menu');
-
-    // ✅ KERANJANG — halaman penuh review cart
-    Route::get('/cart', function () {
-        return view('customer.cart');
-    })->name('customer.cart');
-
-    // DETAIL PESANAN / CHECKOUT
-    Route::get('/order', function () {
-        return view('customer.order');
-    })->name('customer.order');
-
-    // POST: Konfirmasi Pesanan (dummy)
-    Route::post('/order/confirm', function () {
-        return redirect('/history')->with('success', 'Pesanan berhasil dikonfirmasi!');
-    })->name('customer.order.confirm');
-
-    // TAGIHAN / INVOICE
-    Route::get('/invoice', function () {
-        return view('customer.invoice');
-    })->name('customer.invoice');
-
-    // Tagihan berdasarkan ID
-    Route::get('/invoice/{id}', function ($id) {
-        return view('customer.invoice', compact('id'));
-    })->name('customer.invoice.show');
-
-    // UPLOAD BUKTI PEMBAYARAN
-    Route::get('/payment', function () {
-        return view('customer.payment');
-    })->name('customer.payment');
-
-    // POST: Upload bukti bayar (dummy)
-    Route::post('/payment/upload', function () {
-        return redirect('/history')->with('success', 'Bukti pembayaran berhasil dikirim! Kami akan memverifikasi dalam 1x24 jam.');
-    })->name('customer.payment.upload');
-
-    // RIWAYAT PESANAN
-    Route::get('/history', function () {
-        return view('customer.history');
-    })->name('customer.history');
-
-});
-
-
-// ========================
-// ADMIN ROUTES
-// ========================
-Route::prefix('admin')
-    ->name('admin.')
+Route::middleware(['auth', 'role:admin'])
     ->group(function () {
 
-    Route::get('/', fn() => redirect('/admin/dashboard'));
+        Route::get('/admin/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
 
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+        Route::get('/admin/kelola-user', function () {
+            return view('admin.kelola-user');
+        })->name('admin.kelola-user');
 
-    // Verifikasi Pembayaran
-    Route::get('/verification', function () {
-        return view('admin.verification');
-    })->name('verification');
+        Route::get('/admin/report', function () {
+            return view('admin.report');
+        })->name('admin.report');
 
-    // Monitoring Transaksi
-    Route::get('/transactions', function () {
-        return view('admin.transactions');
-    })->name('transactions');
+        Route::get('/admin/transactions', function () {
+            return view('admin.transactions');
+        })->name('admin.transactions');
 
-    // Laporan
-    Route::get('/report', function () {
-        return view('admin.report');
-    })->name('report');
-
-    // Kelola User
-    Route::get('/kelola-user', function () {
-        return view('admin.kelola-user');
-    })->name('kelola-user');
+        Route::get('/admin/verification', function () {
+            return view('admin.verification');
+        })->name('admin.verification');
 });
 
-// ──────────────────────────────────────────────────────
-// PENGELOLA ROUTES
-// Production: ->middleware(['auth', 'role:pengelola'])
-// ──────────────────────────────────────────────────────
-Route::prefix('pengelola')->name('pengelola.')->group(function () {
+Route::middleware(['auth', 'role:pengelola'])
+    ->group(function () {
 
-    // Redirect /pengelola → /pengelola/dashboard
-    Route::get('/', fn() => redirect('/pengelola/dashboard'));
+       Route::get('/pengelola/dashboard', [DashboardController::class, 'index'])
+        ->name('pengelola.dashboard');
 
-    // ── DASHBOARD ──────────────────────────────────
-    Route::get('/dashboard', function () {
-        return view('pengelola.dashboard');
-    })->name('dashboard');
+        // MENU MANAGEMENT
+        Route::get('/pengelola/menu-management', [MenuController::class, 'index'])
+            ->name('pengelola.menu-management');
 
-    // ── KELOLA MENU ────────────────────────────────
-    Route::get('/menu', function () {
-        return view('pengelola.menu-management');
-    })->name('menu.index');
+        Route::post('/pengelola/menu-management/store', [MenuController::class, 'store'])
+            ->name('pengelola.menu.store');
 
-    Route::post('/menu/store', function () {
-        return redirect()->route('pengelola.menu.index')
-                         ->with('success', 'Menu berhasil ditambahkan!');
-    })->name('menu.store');
+        Route::put('/pengelola/menu-management/update/{menu}', [MenuController::class, 'update'])
+            ->name('pengelola.menu.update');
 
-    Route::put('/menu/{id}', function ($id) {
-        return redirect()->route('pengelola.menu.index')
-                         ->with('success', 'Menu #' . $id . ' berhasil diperbarui!');
-    })->name('menu.update');
+        Route::delete('/pengelola/menu-management/delete/{menu}', [MenuController::class, 'destroy'])
+            ->name('pengelola.menu.delete');
 
-    Route::delete('/menu/{id}', function ($id) {
-        return redirect()->route('pengelola.menu.index')
-                         ->with('success', 'Menu #' . $id . ' berhasil dihapus.');
-    })->name('menu.destroy');
+        Route::patch('/pengelola/menu-management/toggle/{menu}', [MenuController::class, 'toggle'])
+        ->name('pengelola.menu.toggle');
 
-    Route::patch('/menu/{id}/toggle', function ($id) {
-        return response()->json(['success' => true]);
-    })->name('menu.toggle');
 
-    // ── PESANAN MASUK ──────────────────────────────
-    Route::get('/orders', function () {
-        return view('pengelola.orders');
-    })->name('orders.index');
+        // CATEGORY
+        Route::get('/pengelola/categories', [CategoryController::class, 'index'])
+            ->name('pengelola.categories.index');
 
-    Route::post('/orders/{id}/accept', function ($id) {
-        return redirect()->route('pengelola.orders.index')
-                         ->with('success', 'Pesanan #' . $id . ' diterima!');
-    })->name('orders.accept');
+        Route::post('/pengelola/categories/store', [CategoryController::class, 'store'])
+            ->name('pengelola.categories.store');
 
-    // ── PROSES PENGIRIMAN ──────────────────────────
-    Route::get('/delivery', function () {
-        return view('pengelola.delivery');
-    })->name('delivery.index');
+        Route::put('/pengelola/categories/update/{id}', [CategoryController::class, 'update'])
+            ->name('pengelola.categories.update');
 
-    Route::post('/delivery/{id}/status', function ($id) {
-        return redirect()->route('pengelola.delivery.index')
-                         ->with('success', 'Status pesanan #' . $id . ' diperbarui!');
-    })->name('delivery.updateStatus');
+        Route::delete('/pengelola/categories/delete/{id}', [CategoryController::class, 'destroy'])
+            ->name('pengelola.categories.delete');
 
-    // ── LAPORAN FAVORIT ────────────────────────────
-    Route::get('/report', function () {
-        return view('pengelola.report');
-    })->name('report.index');
+        // ORDER
 
-    Route::get('/report/export', function () {
-        return redirect()->route('pengelola.report.index')
-                         ->with('info', 'Mengekspor PDF...');
-    })->name('report.export');
+         Route::get('pengelola/orders', [PengelolaOrderController::class, 'index'])
+        ->name('pengelola.orders');
 
+        Route::patch('pengelola/orders/{order}/confirm', [PengelolaOrderController::class, 'confirm'])
+            ->name('pengelola.orders.confirm');
+
+        Route::patch('pengelola/orders/{order}/process', [PengelolaOrderController::class, 'process'])
+            ->name('pengelola.orders.process');
+
+        Route::patch('pengelola/orders/{order}/complete', [PengelolaOrderController::class, 'complete'])
+            ->name('pengelola.orders.complete');
+        
+        // REPORT
+        Route::get('/pengelola/report', [LaporanFavoritController::class, 'index'])
+            ->name('pengelola.report');
+
+        Route::get('/pengelola/report/export', [LaporanFavoritController::class, 'exportExcel'])
+            ->name('pengelola.report.export');
+
+        // DELIVERY
+        Route::get('/pengelola/delivery', [DeliveryController::class, 'index'])
+        ->name('pengelola.delivery');
+
+        Route::patch('/pengelola/delivery/{delivery}/send', [DeliveryController::class, 'send'])
+            ->name('pengelola.delivery.send');
+
+        Route::patch('/pengelola/delivery/{delivery}/complete', [DeliveryController::class, 'complete'])
+            ->name('pengelola.delivery.complete');
+
+        // NOTIFICATIONS
+         Route::get('/pengelola/notifications', [NotificationController::class, 'index'])
+        ->name('pengelola.notifications');
+        Route::patch('/pengelola/notifications/{notification}/read', [NotificationController::class, 'markRead'])
+            ->name('pengelola.notifications.read');
+        Route::post('/pengelola/notifications/read-all', [NotificationController::class, 'markAllRead'])
+            ->name('pengelola.notifications.read-all');
+        Route::delete('/pengelola/notifications/{notification}', [NotificationController::class, 'destroy'])
+            ->name('pengelola.notifications.destroy');
+        Route::get('/pengelola/notifications/count', [NotificationController::class, 'unreadCount'])
+            ->name('pengelola.notifications.count');
 });
 
-/*
-|--------------------------------------------------------------------------
-| VERSI PRODUCTION — Dengan Controller & Middleware (Uncomment saat siap)
-|--------------------------------------------------------------------------
+Route::middleware(['auth', 'role:customer'])
+    ->group(function () {
 
-use App\Http\Controllers\Customer\DashboardController;
-use App\Http\Controllers\Customer\MenuController;
-use App\Http\Controllers\Customer\CartController;
-use App\Http\Controllers\Customer\OrderController;
-use App\Http\Controllers\Customer\InvoiceController;
-use App\Http\Controllers\Customer\PaymentController;
-use App\Http\Controllers\Customer\HistoryController;
+        Route::get('/home', function () {
+            return view('customer.home');
+        })->name('customer.home');
 
-use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
-use App\Http\Controllers\Admin\MenuController      as AdminMenu;
-use App\Http\Controllers\Admin\OrderController     as AdminOrder;
-use App\Http\Controllers\Admin\DeliveryController;
-use App\Http\Controllers\Admin\ReportController;
+        Route::get('/order', function () {
+            return view('customer.order');
+        })->name('customer.order');
+        
+        Route::get('/payment', function () {
+            return view('customer.payment');
+        })->name('customer.payment');
 
-// --- Customer ---
-Route::middleware(['auth', 'role:customer'])->group(function () {
-    Route::get('/home',             [DashboardController::class, 'index'])->name('customer.home');
-    Route::get('/menu',             [MenuController::class, 'index'])->name('customer.menu');
-    Route::get('/cart',             [CartController::class, 'index'])->name('customer.cart');
-    Route::get('/order',            [OrderController::class, 'index'])->name('customer.order');
-    Route::post('/order/confirm',   [OrderController::class, 'confirm'])->name('customer.order.confirm');
-    Route::get('/invoice',          [InvoiceController::class, 'index'])->name('customer.invoice');
-    Route::get('/invoice/{id}',     [InvoiceController::class, 'show'])->name('customer.invoice.show');
-    Route::get('/payment',          [PaymentController::class, 'index'])->name('customer.payment');
-    Route::post('/payment/upload',  [PaymentController::class, 'upload'])->name('customer.payment.upload');
-    Route::get('/history',          [HistoryController::class, 'index'])->name('customer.history');
+        Route::get('/invoice', function () {
+            return view('customer.invoice');
+        })->name('customer.invoice');
+
+        Route::get('/menu', [MenuController::class, 'customerMenu'])
+        ->name('customer.menu');
+
+        Route::get('/history', function () {
+            return view('customer.history');
+        })->name('customer.history');
+
+        Route::get('/cart', function () {
+            return view('customer.cart');
+        })->name('customer.cart');
+
+    });
+
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/profile/edit',     [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+    Route::put('/profile/update',   [ProfileController::class, 'update'])
+        ->name('profile.update');
+    Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])
+        ->name('profile.photo.delete');
 });
 
-// --- Admin / Pengelola ---
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard',                    [AdminDashboard::class, 'index'])->name('dashboard');
-    Route::get('/menu',                         [AdminMenu::class, 'index'])->name('menu.index');
-    Route::post('/menu/store',                  [AdminMenu::class, 'store'])->name('menu.store');
-    Route::put('/menu/{id}',                    [AdminMenu::class, 'update'])->name('menu.update');
-    Route::delete('/menu/{id}',                 [AdminMenu::class, 'destroy'])->name('menu.destroy');
-    Route::patch('/menu/{id}/toggle-status',    [AdminMenu::class, 'toggleStatus'])->name('menu.toggleStatus');
-    Route::get('/orders',                       [AdminOrder::class, 'index'])->name('orders.index');
-    Route::post('/orders/{id}/accept',          [AdminOrder::class, 'accept'])->name('orders.accept');
-    Route::get('/delivery',                     [DeliveryController::class, 'index'])->name('delivery.index');
-    Route::post('/delivery/{id}/update-status', [DeliveryController::class, 'updateStatus'])->name('delivery.updateStatus');
-    Route::get('/report',                       [ReportController::class, 'index'])->name('report.index');
-    Route::get('/report/export',                [ReportController::class, 'export'])->name('report.export');
-});
 
-|--------------------------------------------------------------------------
-*/
+Route::post('/password/resend', [PasswordResetLinkController::class, 'resend'])
+    ->name('password.resend');
+
+Route::post('/password/update', [NewPasswordController::class, 'store'])
+    ->name('password.update');
+require __DIR__.'/auth.php';
