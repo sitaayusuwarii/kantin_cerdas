@@ -6,7 +6,7 @@
 
     {{-- Header --}}
     <div class="flex items-center gap-3 mb-8">
-        <a href="{{ url('/menu') }}" class="w-10 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
+        <a href="{{ route('customer.menu') }}" class="w-10 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
             <i class="fa-solid fa-arrow-left text-sm text-gray-600"></i>
         </a>
         <div>
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="mt-5 pt-4 border-t border-dashed border-gray-200">
-                    <a href="{{ url('/menu') }}" class="text-sm text-primary-500 hover:text-primary-700 font-semibold flex items-center gap-2 transition-colors">
+                    <a href="{{ route('customer.menu') }}" class="text-sm text-primary-500 hover:text-primary-700 font-semibold flex items-center gap-2 transition-colors">
                         <i class="fa-solid fa-plus-circle"></i>Tambah Item
                     </a>
                 </div>

@@ -68,7 +68,7 @@
         </div>
 
         {{-- CTA --}}
-        <a href="{{ url('/cart') }}" id="checkout-btn"
+        <a href="{{ route('customer.cart.index') }}" id="checkout-btn"
            class="btn-primary w-full text-white font-heading font-bold py-3.5 rounded-xl text-sm shadow-lg flex items-center justify-center gap-2 transition-all">
             <i class="fa-solid fa-bag-shopping"></i>
             Lihat Keranjang & Pesan

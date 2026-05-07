@@ -84,23 +84,26 @@
 
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ url('/') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('/') ? 'active' : '' }}">
+                    {{-- Menggunakan route() karena routenya sudah aktif di web.php --}}
+                    <a href="{{ route('customer.home') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->routeIs('customer.home') ? 'active' : '' }}">
                         <i class="fa-solid fa-house mr-1.5 text-xs"></i>Home
                     </a>
-                    <a href="{{ url('/menu') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('menu*') ? 'active' : '' }}">
+                    <a href="{{ route('customer.menu') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->routeIs('customer.menu') ? 'active' : '' }}">
                         <i class="fa-solid fa-utensils mr-1.5 text-xs"></i>Menu
                     </a>
-                    <a href="{{ url('/history') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('history*') ? 'active' : '' }}">
+                    
+                    {{-- Menggunakan url() sementara karena routenya masih di-comment (//) di web.php --}}
+                    <a href="{{ url('/customer/history') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('customer/history*') ? 'active' : '' }}">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-xs"></i>Riwayat
                     </a>
-                    <a href="{{ url('/invoice') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('invoice*') ? 'active' : '' }}">
+                    <a href="{{ url('/customer/invoice') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('customer/invoice*') ? 'active' : '' }}">
                         <i class="fa-solid fa-file-invoice-dollar mr-1.5 text-xs"></i>Tagihan
                     </a>
                 </div>
 
                 {{-- Right Actions --}}
                 <div class="hidden md:flex items-center gap-3">
-                    <a href="{{ url('/payment') }}" class="btn-primary text-white text-sm font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow-md">
+                    <a href="{{ route('customer.payment.index') }}" class="btn-primary text-white text-sm font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow-md">
                         <i class="fa-solid fa-upload text-xs"></i>
                         Upload Bukti Bayar
                     </a>
@@ -119,20 +122,20 @@
         {{-- Mobile Menu --}}
         <div id="mobile-menu" class="md:hidden border-t border-orange-100 animate-slide-down">
             <div class="px-4 py-4 space-y-1 bg-white/95">
-                <a href="{{ url('/') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('/') ? 'bg-orange-50 text-primary-600' : '' }}">
+                <a href="{{ route('customer.home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->routeIs('customer.home') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-house w-4 text-center text-primary-400"></i>Home
                 </a>
-                <a href="{{ url('/menu') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('menu*') ? 'bg-orange-50 text-primary-600' : '' }}">
+                <a href="{{ route('customer.menu') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->routeIs('customer.menu') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-utensils w-4 text-center text-primary-400"></i>Menu
                 </a>
-                <a href="{{ url('/history') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('history*') ? 'bg-orange-50 text-primary-600' : '' }}">
+                <a href="{{ url('/customer/history') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('customer/history*') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-clock-rotate-left w-4 text-center text-primary-400"></i>Riwayat
                 </a>
-                <a href="{{ url('/invoice') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('invoice*') ? 'bg-orange-50 text-primary-600' : '' }}">
+                <a href="{{ url('/customer/invoice') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('customer/invoice*') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-file-invoice-dollar w-4 text-center text-primary-400"></i>Tagihan
                 </a>
                 <div class="pt-3 pb-1 border-t border-orange-100">
-                    <a href="{{ url('/payment') }}" class="btn-primary text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 w-full shadow-md">
+                    <a href="{{ route('customer.payment.index') }}" class="btn-primary text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 w-full shadow-md">
                         <i class="fa-solid fa-upload text-xs"></i>Upload Bukti Bayar
                     </a>
                 </div>
@@ -167,10 +170,10 @@
                 <div>
                     <h4 class="font-heading font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">Navigasi</h4>
                     <ul class="space-y-2.5">
-                        <li><a href="{{ url('/') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Home</a></li>
-                        <li><a href="{{ url('/menu') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Menu Kantin</a></li>
-                        <li><a href="{{ url('/history') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Riwayat Pesanan</a></li>
-                        <li><a href="{{ url('/invoice') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Tagihan</a></li>
+                        <li><a href="{{ route('customer.home') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Home</a></li>
+                        <li><a href="{{ route('customer.menu') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Menu Kantin</a></li>
+                        <li><a href="{{ url('/customer/history') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Riwayat Pesanan</a></li>
+                        <li><a href="{{ url('/customer/invoice') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Tagihan</a></li>
                     </ul>
                 </div>
 

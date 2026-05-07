@@ -6,7 +6,7 @@
 
     {{-- Header --}}
     <div class="flex items-center gap-3 mb-8">
-        <a href="{{ url('/menu') }}" class="w-10 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
+        <a href="{{ route('customer.menu') }}" class="w-10 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
             <i class="fa-solid fa-arrow-left text-sm text-gray-600"></i>
         </a>
         <div>
@@ -28,7 +28,7 @@
         </div>
         <h2 class="font-heading font-bold text-xl text-gray-700 mb-2">Keranjang Masih Kosong</h2>
         <p class="text-gray-400 text-sm max-w-xs leading-relaxed mb-6">Yuk tambahkan menu favoritmu dan nikmati makanan lezat dari kantin sekolah!</p>
-        <a href="{{ url('/menu') }}" class="btn-primary text-white font-heading font-bold px-8 py-3.5 rounded-2xl shadow-lg flex items-center gap-2 text-sm">
+        <a href="{{ route('customer.menu') }}" class="btn-primary text-white font-heading font-bold px-8 py-3.5 rounded-2xl shadow-lg flex items-center gap-2 text-sm">
             <i class="fa-solid fa-utensils"></i>Jelajahi Menu
         </a>
     </div>
@@ -56,7 +56,7 @@
             </div>
 
             {{-- Tambah Item --}}
-            <a href="{{ url('/menu') }}"
+            <a href="{{ route('customer.menu') }}"
                class="flex items-center gap-3 bg-white border-2 border-dashed border-primary-200 hover:border-primary-400 rounded-2xl p-4 transition-all group">
                 <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
                     <i class="fa-solid fa-plus text-primary-500 text-sm"></i>
