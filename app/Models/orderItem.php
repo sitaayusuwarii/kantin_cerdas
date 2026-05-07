@@ -1,22 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-// =============================================================================
-// FILE: app/Models/OrderItem.php
-// =============================================================================
-
 class OrderItem extends Model
 {
-    use HasFactory;
-
-    /** @var list<string> */
     protected $fillable = [
         'order_id',
         'menu_id',
@@ -25,9 +15,6 @@ class OrderItem extends Model
         'subtotal',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -37,21 +24,19 @@ class OrderItem extends Model
         ];
     }
 
-    /**
-     * Format subtotal ke Rupiah. Akses: $item->formatted_subtotal
-     */
-    public function getFormattedSubtotalAttribute(): string
-    {
-        return 'Rp ' . number_format((float) $this->subtotal, 0, ',', '.');
-    }
+    // ─── Accessors ────────────────────────────────────────
 
-    /**
-     * Format harga satuan ke Rupiah. Akses: $item->formatted_unit_price
-     */
     public function getFormattedUnitPriceAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->unit_price, 0, ',', '.');
+        return 'Rp ' . number_format($this->unit_price, 0, ',', '.');
     }
+
+    public function getFormattedSubtotalAttribute(): string
+    {
+        return 'Rp ' . number_format($this->subtotal, 0, ',', '.');
+    }
+
+    // ─── Relasi ───────────────────────────────────────────
 
     public function order(): BelongsTo
     {

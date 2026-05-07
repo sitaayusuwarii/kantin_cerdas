@@ -1,124 +1,114 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Payment extends Model
 {
-    use HasFactory;
-
-    /** @var list<string> */
     protected $fillable = [
         'order_id',
-        'payment_method',
-        'payment_proof',
+        'user_id',
         'amount',
+        'method',
+        'proof_path',
         'status',
-        'admin_note',
-        'verified_by',
+        'note',
+        'rejection_reason',
         'verified_at',
-        'paid_at',
+        'verified_by',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
             'amount'      => 'decimal:2',
             'verified_at' => 'datetime',
-            'paid_at'     => 'datetime',
         ];
     }
 
-    // =========================================================================
-    // ACCESSORS
-    // =========================================================================
+    // ─── Konstanta ────────────────────────────────────────
 
-    /**
-     * Format jumlah pembayaran ke Rupiah. Akses: $payment->formatted_amount
-     */
-    public function getFormattedAmountAttribute(): string
-    {
-        return 'Rp ' . number_format((float) $this->amount, 0, ',', '.');
-    }
+    const STATUS_MENUNGGU      = 'menunggu';
+    const STATUS_TERVERIFIKASI = 'terverifikasi';
+    const STATUS_DITOLAK       = 'ditolak';
 
-    /**
-     * URL publik bukti pembayaran. Akses: $payment->proof_url
-     */
+    public static array $methodLabels = [
+        'transfer_bri'     => 'Transfer BRI',
+        'transfer_bca'     => 'Transfer BCA',
+        'transfer_mandiri' => 'Transfer Mandiri',
+        'gopay'            => 'GoPay',
+        'ovo'              => 'OVO',
+        'dana'             => 'DANA',
+        'tunai'            => 'Tunai',
+    ];
+
+    public static array $statusLabels = [
+        'menunggu'      => 'Menunggu Verifikasi',
+        'terverifikasi' => 'Terverifikasi',
+        'ditolak'       => 'Ditolak',
+    ];
+
+    public static array $statusColors = [
+        'menunggu'      => 'bg-yellow-100 text-yellow-700',
+        'terverifikasi' => 'bg-emerald-100 text-emerald-700',
+        'ditolak'       => 'bg-red-100 text-red-600',
+    ];
+
+    // ─── Accessors ────────────────────────────────────────
+
     public function getProofUrlAttribute(): ?string
     {
-        if (empty($this->payment_proof)) {
-            return null;
+        if (!$this->proof_path) return null;
+
+        if (Str::startsWith($this->proof_path, 'http')) {
+            return $this->proof_path;
         }
 
-        return \Storage::disk('public')->url($this->payment_proof);
+        return Storage::url($this->proof_path);
     }
 
-    /**
-     * Label status pembayaran. Akses: $payment->status_label
-     * Enum: pending, accepted, rejected
-     */
+    public function getFormattedAmountAttribute(): string
+    {
+        return 'Rp ' . number_format($this->amount, 0, ',', '.');
+    }
+
+    public function getMethodLabelAttribute(): string
+    {
+        return self::$methodLabels[$this->method] ?? $this->method;
+    }
+
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
-            'pending'  => 'Menunggu Verifikasi',
-            'accepted' => 'Diterima',
-            'rejected' => 'Ditolak',
-            default    => ucfirst($this->status),
-        };
+        return self::$statusLabels[$this->status] ?? $this->status;
     }
 
-    /**
-     * Warna badge status. Akses: $payment->status_color
-     */
     public function getStatusColorAttribute(): string
     {
-        return match ($this->status) {
-            'pending'  => 'warning',
-            'accepted' => 'success',
-            'rejected' => 'danger',
-            default    => 'secondary',
-        };
+        return self::$statusColors[$this->status] ?? 'bg-gray-100 text-gray-600';
     }
 
-    // =========================================================================
-    // HELPERS
-    // =========================================================================
+    // ─── Status Helpers ───────────────────────────────────
 
-    public function isAccepted(): bool
-    {
-        return $this->status === 'accepted';
-    }
+    public function isMenunggu(): bool      { return $this->status === self::STATUS_MENUNGGU; }
+    public function isTerverifikasi(): bool { return $this->status === self::STATUS_TERVERIFIKASI; }
+    public function isDitolak(): bool       { return $this->status === self::STATUS_DITOLAK; }
 
-    public function isPending(): bool
-    {
-        return $this->status === 'pending';
-    }
-
-    public function hasProof(): bool
-    {
-        return ! empty($this->payment_proof);
-    }
-
-    // =========================================================================
-    // RELATIONSHIPS
-    // =========================================================================
+    // ─── Relasi ───────────────────────────────────────────
 
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Admin yang memverifikasi pembayaran ini.
-     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');

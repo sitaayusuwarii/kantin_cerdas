@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +10,6 @@ class CartItem extends Model
 {
     use HasFactory;
 
-    /** @var list<string> */
     protected $fillable = [
         'cart_id',
         'menu_id',
@@ -21,46 +18,39 @@ class CartItem extends Model
         'subtotal',
     ];
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'quantity' => 'integer',
             'subtotal' => 'decimal:2',
         ];
     }
 
-    // =========================================================================
-    // RELATIONSHIPS
-    // =========================================================================
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
 
-    /**
-     * Item ini milik satu cart.
-     */
+    // item milik cart tertentu
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);
     }
 
-    /**
-     * Item ini mereferensikan satu menu.
-     */
+    // item terkait menu tertentu
     public function menu(): BelongsTo
     {
         return $this->belongsTo(Menu::class);
     }
 
-    // =========================================================================
-    // ACCESSORS
-    // =========================================================================
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSORS
+    |--------------------------------------------------------------------------
+    */
 
-    /**
-     * Format subtotal ke Rupiah. Akses: $cartItem->formatted_subtotal
-     */
     public function getFormattedSubtotalAttribute(): string
     {
-        return 'Rp ' . number_format((float) $this->subtotal, 0, ',', '.');
+        return 'Rp ' . number_format($this->subtotal, 0, ',', '.');
     }
 }
