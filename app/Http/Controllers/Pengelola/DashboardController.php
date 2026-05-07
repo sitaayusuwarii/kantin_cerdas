@@ -39,7 +39,7 @@ class DashboardController extends Controller
         )->sum('subtotal');
 
         // ── RECENT ORDERS ─────────────────────────────────────
-        $recentOrders = Order::with(['user', 'orderItems.menu'])
+        $recentOrders = Order::with(['user', 'items.menu'])
             ->whereDate('created_at', $today)
             ->latest()
             ->limit(4)

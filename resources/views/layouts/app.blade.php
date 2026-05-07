@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SmartCanteen') — Kantin Sekolah Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -103,9 +104,7 @@
                     <a href="{{ url('/history') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('history*') ? 'active' : '' }}">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-xs"></i>Riwayat
                     </a>
-                    <a href="{{ url('/invoice') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('invoice*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-file-invoice-dollar mr-1.5 text-xs"></i>Tagihan
-                    </a>
+                  
                 </div>
 
                 {{-- Right Actions --}}
@@ -256,9 +255,6 @@
                 <a href="{{ url('/history') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('history*') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-clock-rotate-left w-4 text-center text-primary-400"></i>Riwayat
                 </a>
-                <a href="{{ url('/invoice') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('invoice*') ? 'bg-orange-50 text-primary-600' : '' }}">
-                    <i class="fa-solid fa-file-invoice-dollar w-4 text-center text-primary-400"></i>Tagihan
-                </a>
 
                 <div class="pt-3 pb-1 border-t border-orange-100 space-y-2">
                     <a href="{{ url('/payment') }}" class="btn-primary text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 w-full shadow-md">
@@ -330,17 +326,16 @@
                         <li><a href="{{ url('/home') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Home</a></li>
                         <li><a href="{{ url('/menu') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Menu Kantin</a></li>
                         <li><a href="{{ url('/history') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Riwayat Pesanan</a></li>
-                        <li><a href="{{ url('/invoice') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Tagihan</a></li>
                     </ul>
                 </div>
 
                 <div>
                     <h4 class="font-heading font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">Bantuan</h4>
                     <ul class="space-y-2.5 mb-5">
-                        <li class="flex items-center gap-2 text-sm text-gray-300">
+                        <!-- <li class="flex items-center gap-2 text-sm text-gray-300">
                             <i class="fa-solid fa-school text-primary-400 w-4"></i>
                             SMA Negeri 1 Contoh
-                        </li>
+                        </li> -->
                         <li class="flex items-center gap-2 text-sm text-gray-300">
                             <i class="fa-brands fa-whatsapp text-green-400 w-4"></i>
                             +62 812-3456-7890

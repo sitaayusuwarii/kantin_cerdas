@@ -45,33 +45,34 @@
 @php
 $cols = [
     'diproses' => [
-        'dot' => 'bg-amber-500',
-        'icon' => 'fa-fire-burner',
-        'head' => 'bg-amber-600',
-        'next' => 'dikirim',
+        'label'    => 'Sedang Diproses',   
+        'dot'      => 'bg-amber-500',
+        'icon'     => 'fa-fire-burner',
+        'head'     => 'bg-amber-600',
+        'next'     => 'dikirim',
         'btnLabel' => 'Kirim Sekarang',
         'btnClass' => 'btn-primary',
     ],
-
     'dikirim' => [
-        'dot' => 'bg-forest-500',
-        'icon' => 'fa-truck-fast',
-        'head' => 'bg-forest-700',
-        'next' => 'selesai',
+        'label'    => 'Sedang Dikirim',  
+        'dot'      => 'bg-forest-500',
+        'icon'     => 'fa-truck-fast',
+        'head'     => 'bg-forest-700',
+        'next'     => 'selesai',
         'btnLabel' => 'Tandai Selesai',
         'btnClass' => 'bg-emerald-600 hover:bg-emerald-700',
     ],
-
     'selesai' => [
-        'dot' => 'bg-emerald-500',
-        'icon' => 'fa-circle-check',
-        'head' => 'bg-emerald-700',
-        'next' => null,
+        'label'    => 'Selesai',          
+        'dot'      => 'bg-emerald-500',
+        'icon'     => 'fa-circle-check',
+        'head'     => 'bg-emerald-700',
+        'next'     => null,
         'btnLabel' => null,
         'btnClass' => '',
     ],
 ];
-@endphp 
+@endphp
 
 {{-- ── DESKTOP KANBAN ───────────────────────────────────── --}}
 <div class="hidden md:grid md:grid-cols-3 gap-5">
@@ -84,7 +85,7 @@ $cols = [
             <div class="w-7 h-7 {{ $col['head'] }} rounded-lg flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid {{ $col['icon'] }} text-white text-xs"></i>
             </div>
-            <h3 class="font-display font-semibold text-sm text-forest-900">{{ $colName }}</h3>
+            <h3 class="font-display font-semibold text-sm text-forest-900">{{ $col['label'] }}</h3>
             <span class="ml-auto w-6 h-6 bg-cream-200 text-forest-600 text-xs font-bold rounded-full flex items-center justify-center">
                 {{ $colItems->count() }}
             </span>
@@ -187,8 +188,7 @@ $cols = [
                         <p class="text-[10px] text-forest-400">{{ $d->order->user->name }} · {{ $d->order->user->class }}</p>
                     </div>
                 </div>
-                <span class="{{ $stBg }} text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ $d->status }}</span>
-            </div>
+                <span class="{{ $stBg }} text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ $col['label'] }}</span>
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <div class="space-y-1">

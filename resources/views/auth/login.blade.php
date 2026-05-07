@@ -86,11 +86,11 @@
         {{-- Brand mark --}}
         <div class="flex justify-center mb-6 animate-fade-up">
             <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
+                <!-- <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"/>
                     </svg>
-                </div>
+                </div> -->
                 <span class="text-gray-800 font-bold text-lg tracking-tight">SmartCanteen</span>
             </div>
         </div>
@@ -273,7 +273,7 @@
 
         {{-- Footer note --}}
         <p class="text-center text-xs text-gray-400 mt-5">
-            &copy; {{ date('Y') }} SmartCanteen · SMA Negeri 1
+            &copy; {{ date('Y') }} SmartCanteen 
         </p>
     </div>
 

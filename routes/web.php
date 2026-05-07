@@ -13,6 +13,13 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\LaporanFavoritController;
 use App\Http\Controllers\Pengelola\DashboardController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\VerificationController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -21,9 +28,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'role:admin'])
     ->group(function () {
 
-        Route::get('/admin/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('admin.dashboard');
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::get('/admin/kelola-user', function () {
             return view('admin.kelola-user');
@@ -33,13 +38,18 @@ Route::middleware(['auth', 'role:admin'])
             return view('admin.report');
         })->name('admin.report');
 
-        Route::get('/admin/transactions', function () {
-            return view('admin.transactions');
-        })->name('admin.transactions');
+        Route::get('/transactions',              [TransactionController::class, 'index'])->name('admin.transactions');
+        Route::get('/transactions/{payment}/detail', [TransactionController::class, 'detail'])->name('admin.transactions.detail');
+        Route::get('/transactions/export',       [TransactionController::class, 'export'])->name('admin.transactions.export');
 
-        Route::get('/admin/verification', function () {
-            return view('admin.verification');
-        })->name('admin.verification');
+        Route::get('/admin/verification', [VerificationController::class, 'index'])->name('admin.verification');
+
+        // Kelola User
+        Route::get('/users',                  [UserController::class, 'index'])->name('users.index');
+        Route::post('/users',                 [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}',           [UserController::class, 'update'])->name('users.update');
+        Route::patch('/users/{user}/suspend', [UserController::class, 'toggleSuspend'])->name('users.suspend');
+        Route::delete('/users/{user}',        [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 Route::middleware(['auth', 'role:pengelola'])
@@ -125,32 +135,33 @@ Route::middleware(['auth', 'role:pengelola'])
 Route::middleware(['auth', 'role:customer'])
     ->group(function () {
 
-        Route::get('/home', function () {
-            return view('customer.home');
-        })->name('customer.home');
+       Route::get('/home', [HomeController::class, 'index'])->name('customer.home');
 
-        Route::get('/order', function () {
-            return view('customer.order');
-        })->name('customer.order');
+        //ORDER
+        Route::get('/order',          [OrderController::class, 'index'])->name('customer.order');
+        Route::post('/order/confirm', [OrderController::class, 'confirm'])->name('customer.order.confirm');
         
         Route::get('/payment', function () {
             return view('customer.payment');
         })->name('customer.payment');
 
-        Route::get('/invoice', function () {
-            return view('customer.invoice');
-        })->name('customer.invoice');
+        Route::get('/invoice',          [InvoiceController::class, 'latest'])->name('customer.invoice');
+        Route::get('/invoice/{orderNumber}', [InvoiceController::class, 'show'])->name('customer.invoice.show');
 
         Route::get('/menu', [MenuController::class, 'customerMenu'])
         ->name('customer.menu');
 
-        Route::get('/history', function () {
-            return view('customer.history');
-        })->name('customer.history');
+        Route::get('/history', [HistoryController::class, 'index'])->name('customer.history');
 
-        Route::get('/cart', function () {
-            return view('customer.cart');
-        })->name('customer.cart');
+        Route::get('/cart',                         [CartController::class, 'index'])->name('cart');
+        Route::post('/cart/add',                    [CartController::class, 'add'])->name('cart.add');
+        Route::put('/cart/update/{cartItem}',       [CartController::class, 'update'])->name('cart.update');
+        Route::delete('/cart/remove/{cartItem}',    [CartController::class, 'remove'])->name('cart.remove');
+        Route::get('/cart/data',                    [CartController::class, 'data'])->name('cart.data');
+        Route::post('/cart/update-ajax/{cartItem}', [CartController::class, 'updateAjax'])->name('cart.update-ajax');
+        Route::post('/cart/clear',                  [CartController::class, 'clear'])->name('cart.clear');
+        Route::post('/cart/remove-ajax/{cartItem}', [CartController::class, 'removeAjax'])->name('cart.remove-ajax');
+        Route::post('/cart/remove-ajax/{id}', [CartController::class, 'removeAjax']);
 
     });
 

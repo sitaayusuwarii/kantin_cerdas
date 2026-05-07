@@ -4,23 +4,35 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use App\Models\Delivery; 
 
 class PengelolaOrderController extends Controller
 {
+    // Status yang relevan untuk pengelola kantin
+    // (hanya setelah admin verifikasi pembayaran)
+    const VISIBLE_STATUSES = [
+        'pembayaran_terverifikasi',
+        'dikonfirmasi',
+        'diproses',
+        'selesai',
+    ];
+
     public function index()
     {
         $orders = Order::with([
                 'user',
                 'items.menu.category'
             ])
+            ->whereIn('status', self::VISIBLE_STATUSES) // ← hanya order terverifikasi
             ->latest()
             ->get();
 
-        $totalOrders = Order::count();
-        $newOrders = Order::where('status', 'baru')->count();
-        $confirmedOrders = Order::where('status', 'dikonfirmasi')->count();
-        $processedOrders = Order::where('status', 'diproses')->count();
-        $completedOrders = Order::where('status', 'selesai')->count();
+        // Stats hanya untuk order yang sudah masuk ke pengelola
+        $totalOrders      = Order::whereIn('status', self::VISIBLE_STATUSES)->count();
+        $newOrders        = Order::where('status', 'pembayaran_terverifikasi')->count();
+        $confirmedOrders  = Order::where('status', 'dikonfirmasi')->count();
+        $processedOrders  = Order::where('status', 'diproses')->count();
+        $completedOrders  = Order::where('status', 'selesai')->count();
 
         return view('pengelola.orders', compact(
             'orders',
@@ -32,40 +44,49 @@ class PengelolaOrderController extends Controller
         ));
     }
 
+    // Pengelola konfirmasi → mulai diproses dapur
     public function confirm(Order $order)
 {
+    abort_if($order->status !== 'pembayaran_terverifikasi', 403, 'Pesanan tidak valid untuk dikonfirmasi.');
+
     $order->update([
-        'status' => 'dikonfirmasi',
+        'status'       => 'dikonfirmasi',
+        'confirmed_at' => now(),
     ]);
 
+    // ↓ Otomatis buat record delivery saat pesanan diterima
     Delivery::create([
-        'order_id' => $order->id,
-        'status' => 'diproses',
+        'order_id'     => $order->id,
+        'status'       => 'diproses',
         'processed_at' => now(),
     ]);
 
-    return back()->with('success', 'Pesanan dikonfirmasi');
+    return back()->with('success', 'Pesanan dikonfirmasi dan masuk antrian pengiriman.');
 }
 
+    // Pengelola mulai memproses (masak/siapkan)
     public function process(Order $order)
     {
+        abort_if($order->status !== 'dikonfirmasi', 403, 'Pesanan belum dikonfirmasi.');
+
         $order->update([
-            'status' => Order::STATUS_DIPROSES,
+            'status'       => 'diproses',
             'processed_at' => now(),
         ]);
 
-        return back()->with('success', 'Pesanan diproses');
+        return back()->with('success', 'Pesanan sedang diproses.');
     }
 
+    // Pengelola tandai selesai
     public function complete(Order $order)
     {
+        abort_if($order->status !== 'diproses', 403, 'Pesanan belum diproses.');
+
         $order->update([
-            'status' => Order::STATUS_SELESAI,
+            'status'       => 'selesai',
             'completed_at' => now(),
         ]);
 
-        return back()->with('success', 'Pesanan selesai');
+        return back()->with('success', 'Pesanan selesai.');
     }
-
-    
 }

@@ -16,17 +16,48 @@ class NotificationService
         }
     }
 
-    public static function orderBaru(int $orderNumber, int $orderId): void
-    {
-        self::toAllPengelola([
-            'type'    => 'order_new',
-            'title'   => 'Pesanan Baru Masuk',
-            'message' => "Order #{$orderNumber} menunggu konfirmasi.",
-            'icon'    => 'fa-bag-shopping',
-            'color'   => 'bg-forest-500',
-            'url'     => '/pengelola/orders',
-        ]);
+    public static function orderBaru($order, $user)
+{
+    if (!$user->telegram_chat_id) return;
+
+    // Ambil item pesanan
+    $order->load('items.menu');
+
+    $text = "🧾 *Detail Pesanan*\n\n";
+    $text .= "No Order: *{$order->order_number}*\n\n";
+
+    foreach ($order->items as $item) {
+        $text .= "🍽 {$item->menu->name}\n";
+        $text .= "   {$item->quantity} x Rp " . number_format($item->unit_price,0,',','.') . "\n";
+        $text .= "   Subtotal: Rp " . number_format($item->subtotal,0,',','.') . "\n\n";
     }
+
+    $text .= "💰 *Total: Rp " . number_format($order->total_price,0,',','.') . "*\n\n";
+
+    if ($order->note) {
+        $text .= "📝 Catatan: {$order->note}\n\n";
+    }
+
+    $text .= "Silakan pilih metode pembayaran 👇";
+
+    \Illuminate\Support\Facades\Http::post(
+        "https://api.telegram.org/bot".env('TELEGRAM_BOT_TOKEN')."/sendMessage",
+        [
+            'chat_id' => $user->telegram_chat_id,
+            'text' => $text,
+            'parse_mode' => 'Markdown',
+            'reply_markup' => json_encode([
+                'inline_keyboard' => [
+                    [
+                        ['text' => '💳 QRIS', 'callback_data' => 'pay_qris'],
+                        ['text' => '🏦 BCA', 'callback_data' => 'pay_bca'],
+                        ['text' => '🏦 BRI', 'callback_data' => 'pay_bri'],
+                    ]
+                ]
+            ])
+        ]
+    );
+}
 
     public static function pembayaranBaru(int $orderNumber): void
     {

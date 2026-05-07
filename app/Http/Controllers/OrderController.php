@@ -6,53 +6,57 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Cart;
 use App\Services\NotificationService; 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Http;
+
 
 class OrderController extends Controller
 {
-    public function index(): View
+    public function index()
     {
-        return view('customer.order');
+        // Ambil cart aktif user
+        $cart = Cart::with('items.menu')
+            ->where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart')->with('error', 'Keranjang kosong!');
+        }
+
+        $totalPrice = $cart->items->sum('subtotal');
+
+        return view('customer.order', compact('cart', 'totalPrice'));
     }
 
     public function confirm(Request $request): RedirectResponse
     {
         $request->validate([
-            'cart'   => ['required', 'string'],
             'pickup' => ['required', 'in:istirahat_1,istirahat_2,pulang'],
             'note'   => ['nullable', 'string', 'max:500'],
         ]);
 
-        $cartItems = json_decode($request->cart, true);
+        $user = $request->user();
 
-        if (empty($cartItems)) {
-            return back()->withErrors(['cart' => 'Keranjang kosong.']);
+        // Ambil cart aktif
+        $cart = Cart::with('items.menu')
+            ->where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart')->with('error', 'Keranjang kosong!');
         }
 
-        $menuIds = collect($cartItems)->pluck('id')->toArray();
-        $menus   = Menu::available()->whereIn('id', $menuIds)->get()->keyBy('id');
+        $total = $cart->items->sum('subtotal');
 
-        foreach ($cartItems as $item) {
-            if (!isset($menus[$item['id']])) {
-                return back()->withErrors([
-                    'cart' => "Menu '{$item['name']}' tidak tersedia atau sudah habis.",
-                ]);
-            }
-        }
-
-        $total = collect($cartItems)->sum(function ($item) use ($menus) {
-            return $menus[$item['id']]->price * $item['qty'];
-        });
-
-        $user  = $request->user();
-        $order = null; // ← deklarasi di luar transaksi
-
-        DB::transaction(function () use ($request, $user, $cartItems, $menus, $total, &$order) {
-            // &$order pakai reference agar bisa diakses di luar
+        $order = DB::transaction(function () use ($request, $user, $cart, $total) {
 
             $order = Order::create([
                 'user_id'         => $user->id,
@@ -63,28 +67,60 @@ class OrderController extends Controller
                 'total_price'     => $total,
             ]);
 
-            foreach ($cartItems as $item) {
-                $menu = $menus[$item['id']];
+            foreach ($cart->items as $item) {
                 OrderItem::create([
                     'order_id'   => $order->id,
-                    'menu_id'    => $menu->id,
-                    'quantity'   => $item['qty'],
-                    'unit_price' => $menu->price,
-                    'subtotal'   => $menu->price * $item['qty'],
+                    'menu_id'    => $item->menu_id,
+                    'quantity'   => $item->quantity,
+                    'unit_price' => $item->menu->price,
+                    'subtotal'   => $item->subtotal,
                 ]);
+
+                Menu::where('id', $item->menu_id)
+                    ->increment('total_sold', $item->quantity);
             }
 
-            foreach ($cartItems as $item) {
-                Menu::where('id', $item['id'])
-                    ->increment('total_sold', $item['qty']);
-            }
+            $cart->items()->delete();
+            $cart->update(['status' => 'checkout']);
+
+            return $order; // penting
         });
 
-        // Sekarang $order sudah bisa diakses di sini
-        NotificationService::orderBaru($order->order_number, $order->id);
+        // Clear cache cart
+        Cache::forget('cart_' . $user->id);
 
-        return redirect()->route('customer.history')
-            ->with('success', 'Pesanan berhasil dibuat! Tunggu konfirmasi dari kantin.');
+        // Kirim notifikasi ke pengelola
+        NotificationService::orderBaru($order, $user);
+
+        $chatId = $user->telegram_chat_id;
+
+        if ($chatId) {
+
+            $message = "🧾 Pesanan Baru\n\n";
+
+            foreach ($order->items as $item) {
+                $message .= "- {$item->menu->name} x{$item->quantity}\n";
+            }
+
+            $message .= "\n💰 Total: Rp " . number_format($order->total_price, 0, ',', '.');
+            $message .= "\n\nPilih metode pembayaran 👇";
+
+            Http::post("https://api.telegram.org/bot".env('8699640620:AAEElsnAHuwK8fh7G1oKLz37WEGy56UJTA8')."/sendMessage", [
+                'chat_id' => $chatId,
+                'text' => $message,
+                'reply_markup' => json_encode([
+                    'inline_keyboard' => [
+                        [
+                            ['text' => 'QRIS', 'callback_data' => 'pay_qris'],
+                            ['text' => 'BCA', 'callback_data' => 'pay_bca'],
+                            ['text' => 'BRI', 'callback_data' => 'pay_bri'],
+                        ]
+                    ]
+                ])
+            ]);
+        }
+
+        return redirect("https://t.me/KantinCerdasBot");
     }
 
     public function invoice(string $orderNumber): View
@@ -105,4 +141,6 @@ class OrderController extends Controller
 
         return view('pengelola.orders', compact('orders'));
     }
+
+    
 }

@@ -139,9 +139,9 @@ $accentMap = [
                             <p class="text-[10px] text-forest-400">{{ $r->user->phone ?? '-' }}</p>
                         </td>
                         <td class="px-4 py-3.5 text-xs text-forest-600">
-                            {{ $r->orderItems->take(2)->map(fn($i) => $i->menu->name ?? '-')->join(', ') }}
-                            @if($r->orderItems->count() > 2)
-                                <span class="text-forest-400">+{{ $r->orderItems->count() - 2 }} lainnya</span>
+                            {{ $r->items->take(2)->map(fn($i) => $i->menu->name ?? '-')->join(', ') }}
+                            @if($r->items->count() > 2)
+                                <span class="text-forest-400">+{{ $r->items->count() - 2 }} lainnya</span>
                             @endif
                         </td>
                         <td class="px-4 py-3.5 text-right font-display font-semibold text-sm text-forest-900">
@@ -175,7 +175,7 @@ $accentMap = [
                         #{{ $r->order_number }} · {{ $r->user->name ?? '-' }}
                     </p>
                     <p class="text-[11px] text-forest-400 mt-0.5 truncate">
-                        {{ $r->orderItems->first()?->menu->name ?? '-' }}
+                        {{ $r->items->first()?->menu->name ?? '-' }}
                     </p>
                 </div>
                 <div class="text-right flex-shrink-0">

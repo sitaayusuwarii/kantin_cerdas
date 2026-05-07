@@ -5,82 +5,215 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Menu;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class CartController extends Controller
 {
-    public function index(): View
+    // ─────────────────────────────────────────
+    // HELPER: ambil cart aktif milik user
+    // ─────────────────────────────────────────
+    private function getActiveCart(bool $withItems = false): ?Cart
     {
-        $cart = Cart::with('items.menu')
-            ->where('user_id', auth()->id())
-            ->where('status', 'active')
-            ->first();
+        $query = Cart::where('user_id', auth()->id())
+                     ->where('status', 'active');
+
+        if ($withItems) {
+            // select hanya kolom yang dibutuhkan → lebih ringan
+            $query->with(['items' => function ($q) {
+                $q->select('id', 'cart_id', 'menu_id', 'quantity', 'subtotal')
+                  ->with(['menu' => function ($q2) {
+                      $q2->select('id', 'name', 'price', 'image');
+                  }]);
+            }]);
+        }
+
+        return $query->first();
+    }
+
+    // ─────────────────────────────────────────
+    // Tampil halaman cart
+    // ─────────────────────────────────────────
+    public function index()
+    {
+        $cart = $this->getActiveCart(withItems: true);
 
         return view('customer.cart', compact('cart'));
     }
-    
-    public function add(Request $request, int $menuId): RedirectResponse
+
+    // ─────────────────────────────────────────
+    // Tambah item ke cart
+    // ─────────────────────────────────────────
+    public function add(Request $request)
     {
-        $menu = Menu::findOrFail($menuId);
+        $request->validate([
+            'menu_id'  => 'required|exists:menus,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
 
-        $cart = Cart::firstOrCreate(
-            [
-                'user_id' => auth()->id(),
-                'status' => 'active',
-            ]
-        );
+        // Ambil price saja, tidak perlu load seluruh kolom
+        $menu = Menu::select('id', 'price')->findOrFail($request->menu_id);
 
-        $cartItem = CartItem::where('cart_id', $cart->id)
+        $cart = Cart::firstOrCreate([
+            'user_id' => auth()->id(),
+            'status'  => 'active',
+        ]);
+
+        $existing = CartItem::where('cart_id', $cart->id)
             ->where('menu_id', $menu->id)
+            ->select('id', 'quantity')
             ->first();
 
-        if ($cartItem) {
-            $cartItem->quantity += 1;
-            $cartItem->subtotal = $cartItem->quantity * $menu->price;
-            $cartItem->save();
+        if ($existing) {
+            $newQty = $existing->quantity + $request->quantity;
+            $existing->update([
+                'quantity' => $newQty,
+                'subtotal' => $newQty * $menu->price,
+            ]);
         } else {
             CartItem::create([
-                'cart_id' => $cart->id,
-                'menu_id' => $menu->id,
-                'quantity' => 1,
-                'subtotal' => $menu->price,
+                'cart_id'  => $cart->id,
+                'menu_id'  => $menu->id,
+                'quantity' => $request->quantity,
+                'subtotal' => $request->quantity * $menu->price,
             ]);
         }
 
-        return redirect()->back()
-            ->with('success', 'Menu berhasil ditambahkan ke keranjang');
+        // Agregat DB langsung — tidak load semua item
+        $count = CartItem::where('cart_id', $cart->id)->sum('quantity');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Menu berhasil ditambahkan ke keranjang!',
+            'count'   => $count,
+        ]);
     }
 
-    /**
-     * Update qty
-     */
-    public function update(Request $request, int $id): RedirectResponse
+    // ─────────────────────────────────────────
+    // Update quantity — form submit (fallback)
+    // ─────────────────────────────────────────
+    public function update(Request $request, CartItem $cartItem)
     {
-        $request->validate([
-            'quantity' => 'required|integer|min:1'
-        ]);
+        $qty = (int) $request->quantity;
 
-        $item = CartItem::findOrFail($id);
-
-        $item->quantity = $request->quantity;
-        $item->subtotal = $item->quantity * $item->menu->price;
-        $item->save();
+        if ($qty <= 0) {
+            $cartItem->delete();
+        } else {
+            $cartItem->load('menu:id,price');
+            $cartItem->update([
+                'quantity' => $qty,
+                'subtotal' => $qty * $cartItem->menu->price,
+            ]);
+        }
 
         return redirect()->back();
     }
 
-    /**
-     * Hapus item cart
-     */
-    public function remove(int $id): RedirectResponse
+    // ─────────────────────────────────────────
+    // Hapus satu item — form submit (fallback)
+    // ─────────────────────────────────────────
+    public function remove(CartItem $cartItem)
     {
-        $item = CartItem::findOrFail($id);
+        $cartItem->delete();
+        return redirect()->back()->with('success', 'Item dihapus.');
+    }
 
+    // ─────────────────────────────────────────
+    // AJAX: hapus item
+    // ─────────────────────────────────────────
+    // CartController.php
+    public function removeAjax($id)
+    {
+        $item = CartItem::where('id', $id)
+                        ->where('user_id', auth()->id()) // pastikan milik user ini
+                        ->firstOrFail();
         $item->delete();
 
-        return redirect()->back()
-            ->with('success', 'Item berhasil dihapus');
+        return response()->json(['success' => true]);
+    }
+
+    // ─────────────────────────────────────────
+    // AJAX: data cart untuk drawer menu page
+    // ─────────────────────────────────────────
+    public function data()
+    {
+        $cart = $this->getActiveCart(withItems: true);
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return response()->json([
+                'items'       => [],
+                'total_qty'   => 0,
+                'total_price' => 0,
+            ]);
+        }
+
+        $items = $cart->items->map(fn($item) => [
+            'cart_item_id' => $item->id,
+            'menu_id'      => $item->menu_id,
+            'name'         => $item->menu->name,
+            'price'        => $item->menu->price,
+            'qty'          => $item->quantity,
+            'subtotal'     => $item->subtotal,
+            'image'        => $item->menu->image
+                                ? asset('storage/' . $item->menu->image)
+                                : null,
+        ]);
+
+        return response()->json([
+            'items'       => $items,
+            'total_qty'   => $cart->items->sum('quantity'), // dari collection, bukan query baru
+            'total_price' => $cart->items->sum('subtotal'),
+        ]);
+    }
+
+    // ─────────────────────────────────────────
+    // AJAX: update qty dari drawer / cart page
+    // ─────────────────────────────────────────
+    public function updateAjax(Request $request, CartItem $cartItem)
+    {
+        // Load relasi yang dibutuhkan saja — 1 query
+        $cartItem->load(['cart:id,user_id', 'menu:id,price']);
+
+        if ($cartItem->cart->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $cartId = $cartItem->cart_id;
+        $qty    = (int) $request->quantity;
+
+        if ($qty <= 0) {
+            $cartItem->delete();
+        } else {
+            $cartItem->update([
+                'quantity' => $qty,
+                'subtotal' => $qty * $cartItem->menu->price,
+            ]);
+        }
+
+        // Agregat DB — 1 query, tidak load semua item
+        $totalQty   = CartItem::where('cart_id', $cartId)->sum('quantity');
+        $totalPrice = CartItem::where('cart_id', $cartId)->sum('subtotal');
+
+        return response()->json([
+            'success'     => true,
+            'total_qty'   => $totalQty,
+            'total_price' => $totalPrice,
+        ]);
+    }
+
+    // ─────────────────────────────────────────
+    // AJAX: kosongkan cart
+    // ─────────────────────────────────────────
+    public function clear()
+    {
+        $cart = Cart::select('id')
+            ->where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if ($cart) {
+            CartItem::where('cart_id', $cart->id)->delete(); // delete massal, 1 query
+        }
+
+        return response()->json(['success' => true]);
     }
 }

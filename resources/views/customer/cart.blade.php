@@ -2,314 +2,350 @@
 @section('title', 'Keranjang — SmartCanteen')
 
 @section('content')
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28">
 
     {{-- Header --}}
     <div class="flex items-center gap-3 mb-8">
-        <a href="{{ url('/menu') }}" class="w-10 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
-            <i class="fa-solid fa-arrow-left text-sm text-gray-600"></i>
+        <a href="{{ url('/menu') }}" class="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors flex-shrink-0">
+            <i class="fa-solid fa-arrow-left text-gray-500 text-sm"></i>
         </a>
         <div>
-            <h1 class="font-heading font-bold text-2xl text-canteen-dark flex items-center gap-2">
-                Keranjang
-                @php
-                    $totalQty = $cart?->items->sum('quantity') ?? 0;
-                    $totalPrice = $cart?->items->sum('subtotal') ?? 0;
-                @endphp
-
-                <span class="text-base bg-primary-100 text-primary-600 px-2.5 py-0.5 rounded-full font-bold {{ $totalQty == 0 ? 'hidden' : '' }}">
-                    {{ $totalQty }}
-                </span>            
-            </h1>
-            <p class="text-gray-400 text-sm mt-0.5">Review pesananmu sebelum checkout</p>
+            <h1 class="font-heading font-bold text-2xl text-canteen-dark leading-none">Keranjang</h1>
+            <p id="cart-header-count" class="text-gray-400 text-sm mt-0.5">Memuat...</p>
         </div>
     </div>
 
-    {{-- ====== EMPTY STATE ====== --}}
-        @if(!$cart || $cart->items->count() == 0)
-        <div class="flex flex-col items-center justify-center py-24 text-center">
-            <div class="relative mb-6">
-            <div class="w-28 h-28 bg-orange-50 rounded-full flex items-center justify-center mx-auto">
-                <i class="fa-solid fa-cart-shopping text-primary-200 text-5xl"></i>
-            </div>
-            <div class="absolute -bottom-1 -right-1 w-10 h-10 bg-yellow-50 border-4 border-white rounded-full flex items-center justify-center text-xl shadow">😢</div>
+    {{-- Loading State --}}
+    <div id="cart-loading" class="text-center py-16">
+        <div class="w-10 h-10 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-gray-400 text-sm">Memuat keranjang...</p>
+    </div>
+
+    {{-- Empty State --}}
+    <div id="cart-empty" class="hidden text-center py-20">
+        <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-5">
+            <i class="fa-solid fa-cart-shopping text-primary-200 text-4xl"></i>
         </div>
-        <h2 class="font-heading font-bold text-xl text-gray-700 mb-2">Keranjang Masih Kosong</h2>
-        <p class="text-gray-400 text-sm max-w-xs leading-relaxed mb-6">Yuk tambahkan menu favoritmu dan nikmati makanan lezat dari kantin sekolah!</p>
-        <a href="{{ url('/menu') }}" class="btn-primary text-white font-heading font-bold px-8 py-3.5 rounded-2xl shadow-lg flex items-center gap-2 text-sm">
-            <i class="fa-solid fa-utensils"></i>Jelajahi Menu
+        <p class="font-heading font-bold text-gray-700 text-lg mb-1">Keranjang Kosong</p>
+        <p class="text-gray-400 text-sm mb-6">Tambahkan menu favoritmu dulu yuk!</p>
+        <a href="{{ url('/menu') }}"
+           class="btn-primary inline-flex items-center gap-2 text-white font-heading font-bold px-6 py-3 rounded-xl shadow text-sm transition-all hover:scale-105 active:scale-95">
+            <i class="fa-solid fa-bowl-food"></i>
+            Lihat Menu
         </a>
     </div>
 
-    @else
-    {{-- ====== CART CONTENT ====== --}}
-    <div id="cart-content" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {{-- Cart Content --}}
+    <div id="cart-content" class="hidden space-y-4">
 
-        {{-- Left: Items --}}
-        <div class="lg:col-span-2 space-y-4">
+        {{-- Items List --}}
+        <div id="cart-items-list" class="space-y-3"></div>
 
-            {{-- Cart Items Card --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                    <h2 class="font-heading font-bold text-sm text-canteen-dark flex items-center gap-2">
-                        <i class="fa-solid fa-basket-shopping text-primary-500"></i>
-                        Item Pesanan (<span>{{ $totalQty }}</span>)
-                    </h2>
-                    <!-- <button onclick="clearAllCart()" class="text-xs text-red-400 hover:text-red-600 font-semibold transition-colors flex items-center gap-1.5 hover:bg-red-50 px-3 py-1.5 rounded-lg">
-                        <i class="fa-solid fa-trash-can text-xs"></i>Hapus Semua
-                    </button> -->
-                </div>
+        {{-- Divider --}}
+        <div class="border-t border-dashed border-gray-200 pt-4 space-y-4">
 
-                {{-- Items List --}}
-<div class="divide-y divide-gray-50 px-2 py-2">
-
-    @forelse($cart?->items ?? [] as $item)
-
-    <div class="flex items-center gap-3 p-3 hover:bg-gray-50/80 rounded-xl transition-colors">
-
-        {{-- Image --}}
-        <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-            @if($item->menu->image)
-                <img src="{{ asset('storage/' . $item->menu->image) }}"
-                     class="w-full h-full object-cover">
-            @else
-                <div class="w-full h-full flex items-center justify-center text-2xl">
-                    🍽️
-                </div>
-            @endif
-        </div>
-
-        {{-- Info --}}
-        <div class="flex-1 min-w-0">
-            <p class="font-heading font-bold text-sm text-canteen-dark truncate">
-                {{ $item->menu->name }}
-            </p>
-
-            <p class="text-xs text-gray-400 mt-0.5">
-                @Rp {{ number_format($item->menu->price, 0, ',', '.') }}
-            </p>
-        </div>
-
-        {{-- Qty --}}
-        <div class="flex items-center gap-0 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-
-            <form action="{{ url('/cart/update/' . $item->id) }}"
-                  method="POST">
-                @csrf
-                @method('PUT')
-
-                <input type="hidden"
-                       name="quantity"
-                       value="{{ $item->quantity - 1 }}">
-
-                <button class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-red-50 font-bold text-lg transition-colors">
-                    −
-                </button>
-            </form>
-
-            <span class="font-heading font-bold text-sm text-canteen-dark w-8 text-center">
-                {{ $item->quantity }}
-            </span>
-
-            <form action="{{ url('/cart/update/' . $item->id) }}"
-                  method="POST">
-                @csrf
-                @method('PUT')
-
-                <input type="hidden"
-                       name="quantity"
-                       value="{{ $item->quantity + 1 }}">
-
-                <button class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-primary-500 hover:bg-orange-50 font-bold text-lg transition-colors">
-                    +
-                </button>
-            </form>
-
-        </div>
-
-        {{-- Subtotal --}}
-        <div class="text-right flex-shrink-0 w-20">
-            <p class="font-heading font-bold text-sm text-canteen-dark">
-                Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-            </p>
-        </div>
-
-        {{-- Delete --}}
-        <form action="{{ url('/cart/remove/' . $item->id) }}"
-              method="POST">
-            @csrf
-            @method('DELETE')
-
-            <button class="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-xl transition-colors flex-shrink-0">
-                <i class="fa-solid fa-trash-can text-xs"></i>
-            </button>
-        </form>
-    </div>
-            @empty
-            <div class="text-center py-10">
-                <p class="text-gray-400 text-sm">
-                    Keranjang kosong
-                </p>
-            </div>
-            @endforelse
-        </div>
+            {{-- Note --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <label class="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-note-sticky text-primary-400"></i>Catatan Pesanan (opsional)
+                </label>
+                <input type="text" id="cart-note"
+                       placeholder="Contoh: tanpa sambal, extra nasi..."
+                       class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all">
             </div>
 
-            {{-- Tambah Item --}}
-            <a href="{{ url('/menu') }}"
-               class="flex items-center gap-3 bg-white border-2 border-dashed border-primary-200 hover:border-primary-400 rounded-2xl p-4 transition-all group">
-                <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-                    <i class="fa-solid fa-plus text-primary-500 text-sm"></i>
+            {{-- Summary --}}
+            <div class="bg-orange-50 rounded-2xl p-4 space-y-2">
+                <div class="flex justify-between text-sm text-gray-500">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">Rp 0</span>
                 </div>
-                <div>
-                    <p class="font-semibold text-sm text-primary-500">Tambah item lagi</p>
-                    <p class="text-xs text-gray-400">Kembali ke halaman menu</p>
+                <div class="flex justify-between text-sm text-gray-500">
+                    <span>Jumlah Item</span>
+                    <span id="cart-qty-summary">0 item</span>
                 </div>
-                <i class="fa-solid fa-chevron-right text-gray-300 text-xs ml-auto group-hover:text-primary-400 transition-colors"></i>
-            </a>
-
-            {{-- Catatan Pesanan --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <h3 class="font-heading font-bold text-sm text-canteen-dark mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-note-sticky text-primary-500"></i>Catatan Pesanan
-                </h3>
-                <textarea id="order-note" rows="2"
-                          placeholder="Catatan khusus untuk dapur, misal: extra sambal, tidak pakai bawang..."
-                          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 resize-none transition-all"></textarea>
-            </div>
-
-            {{-- Waktu Pengambilan --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <h3 class="font-heading font-bold text-sm text-canteen-dark mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-clock text-primary-500"></i>Waktu Pengambilan
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    @foreach([
-                        ['val'=>'1','time'=>'Istirahat 1','sub'=>'09:30 — 10:00'],
-                        ['val'=>'2','time'=>'Istirahat 2','sub'=>'12:00 — 12:30'],
-                        ['val'=>'3','time'=>'Pulang','sub'=>'14:30 — 15:00'],
-                    ] as $i => $slot)
-                    <label class="cursor-pointer">
-                        <input type="radio" name="pickup" value="{{ $slot['val'] }}" class="sr-only pickup-radio" {{ $i===0?'checked':'' }}>
-                        <div class="pickup-opt p-3 rounded-xl border-2 {{ $i===0 ? 'border-primary-400 bg-orange-50' : 'border-gray-200' }} hover:border-primary-300 transition-all text-center">
-                            <p class="text-xs font-bold text-gray-700">{{ $slot['time'] }}</p>
-                            <p class="text-[10px] text-gray-400 mt-0.5">{{ $slot['sub'] }}</p>
-                        </div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- Right: Summary --}}
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
-                <h2 class="font-heading font-bold text-base text-canteen-dark mb-5 flex items-center gap-2">
-                    <i class="fa-solid fa-receipt text-primary-500"></i>Ringkasan Pesanan
-                </h2>
-
-                {{-- Breakdown --}}
-                <div class="space-y-2 mb-4 text-sm max-h-40 overflow-y-auto pr-1">
-                @foreach($cart?->items ?? [] as $item)
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-gray-500 text-xs truncate">
-                        {{ $item->menu->name }} ×{{ $item->quantity }}
-                    </span>
-                    <span class="font-medium text-gray-700 text-xs flex-shrink-0">
-                        Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                    </span>
-                </div>
-                @endforeach
-            </div>
-
-                {{-- Divider --}}
-                <div class="border-t border-dashed border-gray-200 pt-4 space-y-2">
-                    <div class="flex justify-between text-sm text-gray-500">
-                        <span>Subtotal</span>
-                    <span class="font-medium text-gray-700">
-                        Rp {{ number_format($totalPrice, 0, ',', '.') }}
-                    </span>                    
-                </div>
-                    <div class="flex justify-between text-sm text-green-600">
-                        <span class="flex items-center gap-1"><i class="fa-solid fa-tag text-xs"></i>Biaya layanan</span>
-                        <span class="font-semibold">Gratis</span>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-200 mt-4 pt-4 flex justify-between items-center">
+                <div class="flex justify-between items-center pt-2 border-t border-orange-100">
                     <span class="font-heading font-bold text-canteen-dark">Total</span>
-                <span class="font-heading font-bold text-2xl text-primary-500">
-                    Rp {{ number_format($totalPrice, 0, ',', '.') }}
-                </span>                
-            </div>
-
-                {{-- Saldo --}}
-                <div class="mt-4 p-3 bg-green-50 rounded-xl border border-green-100 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-wallet text-green-500 text-sm"></i>
-                        <div>
-                            <p class="text-xs font-medium text-gray-700">Saldo Tersedia</p>
-                            <p class="text-[10px] text-gray-500">Rp 85.000</p>
-                        </div>
-                    </div>
-                    <span id="saldo-status" class="text-xs font-semibold text-green-600 bg-green-100 px-2.5 py-1 rounded-lg">Cukup ✓</span>
+                    <span id="cart-total" class="font-heading font-bold text-2xl text-primary-500">Rp 0</span>
                 </div>
-
-                {{-- CTA --}}
-                <a href="{{ route('order') }}"
-                        onclick="proceedToOrder()"
-                        class="btn-primary w-full text-white font-heading font-bold py-4 rounded-xl mt-5 text-sm shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fa-solid fa-check-circle"></i>
-                    Lanjut ke Detail Pesanan
-                </a>
-
-                <a href="{{ route('menu') }}" class="block text-center text-xs text-gray-400 hover:text-gray-600 mt-3 transition-colors">
-                    ← Kembali pilih menu lagi
-                </a>
             </div>
+
+            {{-- Checkout Button --}}
+            <button id="checkout-btn"
+                    onclick="submitOrder()"
+                    class="btn-primary w-full text-white font-heading font-bold py-4 rounded-2xl text-base shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-95">
+                <i class="fa-solid fa-bag-shopping"></i>
+                Pesan Sekarang
+            </button>
+
+            {{-- Clear Cart --}}
+            <button onclick="clearCart()"
+                    class="w-full text-xs text-gray-400 hover:text-red-400 font-medium transition-colors py-1.5">
+                <i class="fa-solid fa-trash-can mr-1"></i>Kosongkan keranjang
+            </button>
         </div>
     </div>
-
 </div>
-@endif
+
 @endsection
 
 @push('styles')
 <style>
     .btn-primary { background: linear-gradient(135deg, #f97316, #ea580c); }
-    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(234,88,12,0.3); }
 
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(-12px); }
-        to   { opacity: 1; transform: translateX(0); }
+    @keyframes itemIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
-    .item-row { animation: slideIn 0.25s ease both; }
+    .cart-item { animation: itemIn 0.2s ease both; }
 
-    @keyframes removeRow {
-        from { opacity: 1; transform: translateX(0); max-height: 80px; }
-        to   { opacity: 0; transform: translateX(12px); max-height: 0; padding: 0; }
+    @keyframes removeItem {
+        from { opacity: 1; max-height: 100px; }
+        to   { opacity: 0; max-height: 0; padding: 0; margin: 0; overflow: hidden; }
     }
-    .removing { animation: removeRow 0.25s ease forwards; overflow: hidden; }
+    .removing { animation: removeItem 0.22s ease forwards; pointer-events: none; }
 </style>
 @endpush
 
 @push('scripts')
 <script>
+const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-// ====================================================
-// PICKUP RADIO
-// ====================================================
-document.querySelectorAll('.pickup-radio').forEach(r => {
-    r.addEventListener('change', () => {
-        document.querySelectorAll('.pickup-opt').forEach(el => {
-            el.classList.remove('border-primary-400', 'bg-orange-50');
-            el.classList.add('border-gray-200');
-        });
-        r.nextElementSibling.classList.add('border-primary-400', 'bg-orange-50');
-        r.nextElementSibling.classList.remove('border-gray-200');
+let cartItems = [];
+const pendingRemove = new Set();
+
+function formatRp(num) {
+    return 'Rp ' + Number(num).toLocaleString('id-ID');
+}
+
+function getTotalQty()   { return cartItems.reduce((s, i) => s + i.qty, 0); }
+function getTotalPrice() { return cartItems.reduce((s, i) => s + i.price * i.qty, 0); }
+
+// ============================================================
+// LOAD DARI SERVER
+// ============================================================
+function loadCart() {
+    return fetch('/cart/data', { headers: { 'X-CSRF-TOKEN': CSRF } })
+    .then(r => r.json())
+    .then(res => {
+        cartItems = (res.items || []).filter(i => !pendingRemove.has(i.cart_item_id));
+        renderCart();
+        return res;
     });
+}
+
+// ============================================================
+// RENDER CART
+// ============================================================
+function renderCart() {
+    document.getElementById('cart-loading').classList.add('hidden');
+
+    if (cartItems.length === 0) {
+        document.getElementById('cart-empty').classList.remove('hidden');
+        document.getElementById('cart-content').classList.add('hidden');
+        document.getElementById('cart-header-count').textContent = 'Keranjang kosong';
+        return;
+    }
+
+    document.getElementById('cart-empty').classList.add('hidden');
+    document.getElementById('cart-content').classList.remove('hidden');
+
+    const qty   = getTotalQty();
+    const price = getTotalPrice();
+
+    document.getElementById('cart-header-count').textContent = qty + ' item dipilih';
+    document.getElementById('cart-subtotal').textContent     = formatRp(price);
+    document.getElementById('cart-qty-summary').textContent  = qty + ' item';
+    document.getElementById('cart-total').textContent        = formatRp(price);
+
+    const list = document.getElementById('cart-items-list');
+    list.innerHTML = cartItems.map((item, idx) => `
+        <div class="cart-item bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center gap-3"
+             id="cart-row-${item.cart_item_id}"
+             style="animation-delay:${idx * 0.05}s">
+
+            <div class="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center text-2xl flex-shrink-0 border border-gray-100">
+                ${item.image
+                    ? `<img src="${item.image}" class="w-full h-full object-cover" alt="${item.name}">`
+                    : '🍽️'}
+            </div>
+
+            <div class="flex-1 min-w-0">
+                <p class="font-heading font-semibold text-sm text-canteen-dark truncate">${item.name}</p>
+                <p class="text-primary-500 font-bold text-sm mt-0.5">${formatRp(item.price)}</p>
+                <p id="sub-${item.cart_item_id}" class="text-gray-400 text-xs mt-0.5">
+                    Subtotal: ${formatRp(item.price * item.qty)}
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <div class="flex items-center bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
+                    <button onclick="changeQty(${item.cart_item_id}, -1)"
+                            class="w-8 h-8 flex items-center justify-center font-bold transition-colors
+                                   ${item.qty <= 1 ? 'text-red-400 hover:bg-red-50' : 'text-gray-400 hover:text-red-400 hover:bg-gray-100'}">
+                        ${item.qty <= 1 ? '<i class="fa-solid fa-trash text-xs"></i>' : '−'}
+                    </button>
+                    <span id="qty-${item.cart_item_id}"
+                          class="font-bold text-sm text-gray-800 w-7 text-center">
+                        ${item.qty}
+                    </span>
+                    <button onclick="changeQty(${item.cart_item_id}, 1)"
+                            class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary-500 hover:bg-gray-100 font-bold text-base transition-colors">
+                        +
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function syncSummary() {
+    const qty   = getTotalQty();
+    const price = getTotalPrice();
+    document.getElementById('cart-header-count').textContent = qty + ' item dipilih';
+    document.getElementById('cart-subtotal').textContent     = formatRp(price);
+    document.getElementById('cart-qty-summary').textContent  = qty + ' item';
+    document.getElementById('cart-total').textContent        = formatRp(price);
+    localStorage.setItem('cart_count', qty);
+    localStorage.setItem('cart_price', price);
+}
+
+// ============================================================
+// CHANGE QTY — OPTIMISTIC
+// ============================================================
+function changeQty(cartItemId, delta) {
+    const item = cartItems.find(i => i.cart_item_id === cartItemId);
+    if (!item) return;
+
+    const oldQty = item.qty;
+    const newQty = oldQty + delta;
+
+    if (newQty <= 0) {
+        removeItem(cartItemId);
+        return;
+    }
+
+    item.qty = newQty;
+
+    const qtyEl = document.getElementById('qty-' + cartItemId);
+    const subEl = document.getElementById('sub-' + cartItemId);
+    const row   = document.getElementById('cart-row-' + cartItemId);
+
+    if (qtyEl) qtyEl.textContent = newQty;
+    if (subEl) subEl.textContent = 'Subtotal: ' + formatRp(item.price * newQty);
+
+    // Update tombol minus
+    if (row) {
+        const minusBtn = row.querySelector('button:first-child');
+        if (minusBtn) {
+            if (newQty <= 1) {
+                minusBtn.innerHTML = '<i class="fa-solid fa-trash text-xs"></i>';
+                minusBtn.className = 'w-8 h-8 flex items-center justify-center font-bold transition-colors text-red-400 hover:bg-red-50';
+            } else {
+                minusBtn.innerHTML = '−';
+                minusBtn.className = 'w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-400 hover:bg-gray-100 font-bold text-base transition-colors';
+            }
+        }
+    }
+
+    syncSummary();
+
+    fetch('/cart/update-ajax/' + cartItemId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+        body: JSON.stringify({ quantity: newQty })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (!res.success) {
+            item.qty = oldQty;
+            if (qtyEl) qtyEl.textContent = oldQty;
+            if (subEl) subEl.textContent = 'Subtotal: ' + formatRp(item.price * oldQty);
+            syncSummary();
+        }
+    })
+    .catch(() => {
+        item.qty = oldQty;
+        if (qtyEl) qtyEl.textContent = oldQty;
+        if (subEl) subEl.textContent = 'Subtotal: ' + formatRp(item.price * oldQty);
+        syncSummary();
+    });
+}
+
+// ============================================================
+// REMOVE ITEM — OPTIMISTIC + PERMANENT DELETE
+// ============================================================
+function removeItem(cartItemId) {
+    const row = document.getElementById('cart-row-' + cartItemId);
+    pendingRemove.add(cartItemId);
+
+    if (row) {
+        row.classList.add('removing');
+        setTimeout(() => row.remove(), 220);
+    }
+
+    cartItems = cartItems.filter(i => i.cart_item_id !== cartItemId);
+    syncSummary();
+
+    if (cartItems.length === 0) {
+        setTimeout(() => {
+            document.getElementById('cart-content').classList.add('hidden');
+            document.getElementById('cart-empty').classList.remove('hidden');
+            document.getElementById('cart-header-count').textContent = 'Keranjang kosong';
+        }, 230);
+    }
+
+    fetch('/cart/remove-ajax/' + cartItemId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
+    })
+    .then(r => r.json())
+    .then(res => {
+        pendingRemove.delete(cartItemId);
+        if (!res.success) {
+            loadCart(); // rollback jika gagal
+        }
+    })
+    .catch(() => {
+        pendingRemove.delete(cartItemId);
+        loadCart();
+    });
+}
+
+// ============================================================
+// CLEAR CART
+// ============================================================
+function clearCart() {
+    if (!confirm('Kosongkan semua keranjang?')) return;
+
+    cartItems = [];
+    renderCart();
+    localStorage.setItem('cart_count', 0);
+    localStorage.setItem('cart_price', 0);
+
+    fetch('/cart/clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF }
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (!res.success) loadCart();
+    });
+}
+
+// ============================================================
+// SUBMIT ORDER
+// ============================================================
+function submitOrder() {
+    window.location.href = '/order';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    loadCart();
 });
-
-
 </script>
 @endpush
