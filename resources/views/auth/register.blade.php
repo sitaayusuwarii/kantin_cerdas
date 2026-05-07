@@ -229,9 +229,10 @@
                                 placeholder="Buat password yang kuat"
                                 autocomplete="new-password"
                                 required
-                                class="input-field w-full pl-10 pr-11 py-2.5 text-sm text-gray-900 bg-gray-50 border rounded-xl placeholder-gray-400
+                                class="input-field w-full pl-10 pr-11 py-2.5 text-sm text-gray-900 bg-gray-50 border rounded-xl transition-all duration-150 placeholder-gray-400
                                     {{ $errors->has('password') ? 'border-red-400 error' : 'border-gray-200' }}"
                             >
+                            {{-- Toggle show/hide --}}
                             <button type="button" id="toggle-password"
                                 class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 transition-colors"
                                 aria-label="Toggle password visibility">
@@ -244,23 +245,9 @@
                                 </svg>
                             </button>
                         </div>
-
-                        {{-- Password strength meter --}}
-                        <div class="mt-2">
-                            <div class="flex gap-1 mb-1">
-                                <div id="str-1" class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
-                                <div id="str-2" class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
-                                <div id="str-3" class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
-                                <div id="str-4" class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
-                            </div>
-                            <p id="str-label" class="text-xs text-gray-400"></p>
-                        </div>
-
                         @error('password')
                         <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
-                            <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                            </svg>
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                             {{ $message }}
                         </p>
                         @enderror

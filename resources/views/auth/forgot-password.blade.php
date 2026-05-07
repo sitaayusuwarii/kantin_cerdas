@@ -432,7 +432,7 @@
                 {{-- Back to login --}}
                 <p class="text-center text-sm text-gray-500">
                     Ingat password Anda?
-                    <a href="{{ url('/login') }}"
+                    <a href="{{ route('login') }}"
                        class="text-purple-600 hover:text-purple-700 font-semibold hover:underline transition-colors ml-1">
                         Kembali Login
                     </a>

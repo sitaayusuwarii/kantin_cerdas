@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel Pengelola') — SmartCanteen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,10 +51,15 @@
                             '0%':   { opacity: '0', transform: 'translateX(-20px)' },
                             '100%': { opacity: '1', transform: 'translateX(0)' },
                         },
+                        fadeScale: {
+                            '0%':   { opacity: '0', transform: 'scale(0.95) translateY(-4px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+                        },
                     },
                     animation: {
                         'fade-up':    'fadeSlideUp 0.45s ease both',
                         'slide-left': 'slideInLeft 0.3s ease both',
+                        'fade-scale': 'fadeScale 0.15s ease-out',
                     },
                 }
             }
@@ -128,6 +134,14 @@
         #menu-modal { display: none; }
         #menu-modal.open { display: flex; }
 
+        /* ── Profile Dropdown ─────────────────────────────── */
+        #profile-dropdown-pengelola {
+            display: none;
+            animation: fadeScale 0.15s ease-out;
+            transform-origin: top right;
+        }
+        #profile-dropdown-pengelola.open { display: block; }
+
         /* ── Misc ─────────────────────────────────────────── */
         .badge-new  { animation: pulse-badge 2s infinite; }
         @keyframes pulse-badge {
@@ -181,11 +195,13 @@
 
         @php
         $navLinks = [
-            ['url' => '/pengelola/dashboard',  'icon' => 'fa-gauge',           'label' => 'Dashboard',          'match' => 'pengelola/dashboard'],
-            ['url' => '/pengelola/menu',        'icon' => 'fa-utensils',        'label' => 'Kelola Menu',         'match' => 'pengelola/menu'],
-            ['url' => '/pengelola/orders',      'icon' => 'fa-bell',            'label' => 'Pesanan Masuk',       'match' => 'pengelola/orders',   'badge' => 3],
-            ['url' => '/pengelola/delivery',    'icon' => 'fa-truck-fast',      'label' => 'Proses Pengiriman',   'match' => 'pengelola/delivery'],
-            ['url' => '/pengelola/report',      'icon' => 'fa-chart-bar',       'label' => 'Laporan Favorit',     'match' => 'pengelola/report'],
+            ['url' => '/pengelola/dashboard',       'icon' => 'fa-gauge',      'label' => 'Dashboard',        'match' => 'pengelola/dashboard'],
+            ['url' => '/pengelola/menu-management', 'icon' => 'fa-utensils',   'label' => 'Kelola Menu',      'match' => 'pengelola/menu-management'],
+            ['url' => '/pengelola/categories',      'icon' => 'fa-tags',       'label' => 'Kelola Kategori',  'match' => 'pengelola/categories'],
+            ['url' => '/pengelola/orders',          'icon' => 'fa-bell',       'label' => 'Pesanan Masuk',    'match' => 'pengelola/orders',  
+                        'badge' => \App\Models\Order::where('status', 'baru')->count()],
+            ['url' => '/pengelola/delivery',        'icon' => 'fa-truck-fast', 'label' => 'Proses Pengiriman','match' => 'pengelola/delivery'],
+            ['url' => '/pengelola/report',          'icon' => 'fa-chart-bar',  'label' => 'Laporan Favorit',  'match' => 'pengelola/report'],
         ];
         @endphp
 
@@ -214,18 +230,38 @@
         @endforeach
     </nav>
 
-    {{-- User --}}
+    {{-- Sidebar User Section --}}
     <div class="px-3 pb-4 flex-shrink-0 border-t border-white/8 pt-3">
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/6 transition-colors cursor-pointer">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-forest-400 to-forest-600
-                        flex items-center justify-center text-white font-display font-bold text-sm flex-shrink-0">
-                R
+        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
+            <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                @auth
+                    @if(auth()->user()->photo)
+                        <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                            class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full bg-gradient-to-br from-forest-400 to-forest-600
+                                    flex items-center justify-center text-white font-display font-bold text-sm">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                    @endif
+                @endauth
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-cream-200 text-xs font-semibold truncate">Bu Ratna</p>
-                <p class="text-forest-500 text-[10px] truncate">Pengelola Kantin</p>
+                <p class="text-cream-200 text-xs font-semibold truncate">
+                    @auth {{ auth()->user()->name }} @else Pengelola @endauth
+                </p>
+                <p class="text-forest-400 text-[10px] truncate">Pengelola Kantin</p>
             </div>
-            <i class="fa-solid fa-ellipsis-vertical text-forest-600 text-xs flex-shrink-0"></i>
+            {{-- Logout langsung dari sidebar --}}
+            <form method="POST" action="{{ route('logout') }}" class="flex-shrink-0">
+                @csrf
+                <button type="submit"
+                        title="Logout"
+                        class="w-7 h-7 flex items-center justify-center text-forest-500
+                               hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
+            </form>
         </div>
     </div>
 </aside>
@@ -252,12 +288,13 @@
                 @yield('page-title', 'Dashboard')
             </h1>
             <p class="text-forest-500 text-xs mt-0.5 hidden sm:block truncate">
-                @yield('page-subtitle', 'Selamat datang kembali, Bu Ratna!')
+                @yield('page-subtitle', 'Selamat datang kembali!')
             </p>
         </div>
 
         {{-- Right --}}
         <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+
             {{-- Date chip --}}
             <div class="hidden md:flex items-center gap-2 bg-cream-200 rounded-xl px-3 py-1.5">
                 <i class="fa-regular fa-calendar text-forest-500 text-xs"></i>
@@ -267,24 +304,133 @@
             </div>
 
             {{-- Notif --}}
-            <button class="relative w-9 h-9 rounded-xl bg-cream-200 hover:bg-cream-300
-                           flex items-center justify-center transition-colors">
+            <a href="{{ route('pengelola.notifications') }}"
+            class="relative w-9 h-9 rounded-xl bg-cream-200 hover:bg-cream-300
+                    flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-bell text-forest-600 text-sm"></i>
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-400 rounded-full"></span>
-            </button>
+                @php
+                    $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
+                                    ->whereNull('read_at')->count();
+                @endphp
+                @if($unreadCount > 0)
+                <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white
+                            text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                </span>
+                @endif
+            </a>
 
-            {{-- Profile --}}
-            <div class="flex items-center gap-2 cursor-pointer group">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-forest-400 to-forest-700
-                            flex items-center justify-center text-white font-display font-bold text-sm shadow">
-                    R
+            {{-- Profile Dropdown --}}
+            <div class="relative" id="profile-dropdown-pengelola-wrap">
+
+                {{-- Avatar + Name Button --}}
+                <button onclick="togglePengelolaDropdown()"
+                        class="flex items-center gap-2 cursor-pointer group select-none">
+                    <div class="w-9 h-9 rounded-xl overflow-hidden shadow">
+                        @auth
+                            @if(auth()->user()->photo)
+                                <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-gradient-to-br from-forest-400 to-forest-700
+                                            flex items-center justify-center text-white font-display font-bold text-sm">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        @endauth
+                    </div>
+                    <div class="hidden sm:block text-left">
+                        <p class="text-forest-900 text-xs font-semibold leading-none">
+                            @auth {{ auth()->user()->name }} @else Pengelola @endauth
+                        </p>
+                        <p class="text-forest-500 text-[10px] mt-0.5">Pengelola</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-forest-400 text-xs hidden sm:block
+                              group-hover:text-forest-600 transition-colors"></i>
+                </button>
+
+                {{-- Dropdown Panel --}}
+                <div id="profile-dropdown-pengelola"
+                     class="absolute right-0 top-12 w-56 bg-white rounded-2xl shadow-xl
+                            border border-cream-200 overflow-hidden z-50">
+
+                    {{-- User Info --}}
+                    <div class="px-4 py-3.5 bg-forest-50 border-b border-forest-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow">
+                                @auth
+                                    @if(auth()->user()->photo)
+                                        <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full bg-gradient-to-br from-forest-400 to-forest-700
+                                                    flex items-center justify-center text-white font-display font-bold text-sm">
+                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                @endauth
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-display font-semibold text-sm text-forest-900 truncate">
+                                    @auth {{ auth()->user()->name }} @else Pengelola @endauth
+                                </p>
+                                <p class="text-xs text-forest-500 truncate">
+                                    @auth {{ auth()->user()->email }} @endauth
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-[10px] bg-forest-100 text-forest-700 font-semibold px-2.5 py-0.5 rounded-full">
+                                Pengelola Kantin
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Menu Items --}}
+                    <div class="py-1.5">
+                        <a href="{{ url('/pengelola/dashboard') }}"
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-forest-700
+                                  hover:bg-forest-50 hover:text-forest-900 transition-colors group">
+                            <div class="w-7 h-7 rounded-lg bg-cream-200 group-hover:bg-forest-100
+                                        flex items-center justify-center transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-gauge text-forest-500 group-hover:text-forest-600 text-xs"></i>
+                            </div>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+
+                        <a href="{{ route('profile.edit') }}"
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-forest-700
+                                  hover:bg-forest-50 hover:text-forest-900 transition-colors group">
+                            <div class="w-7 h-7 rounded-lg bg-cream-200 group-hover:bg-forest-100
+                                        flex items-center justify-center transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-user-pen text-forest-500 group-hover:text-forest-600 text-xs"></i>
+                            </div>
+                            <span class="font-medium">Edit Profil</span>
+                        </a>
+                    </div>
+
+                    {{-- Logout --}}
+                    <div class="border-t border-cream-200 py-1.5">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                                           text-red-500 hover:bg-red-50 transition-colors group text-left">
+                                <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
+                                            flex items-center justify-center transition-colors flex-shrink-0">
+                                    <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Logout</span>
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
-                <div class="hidden sm:block">
-                    <p class="text-forest-900 text-xs font-semibold leading-none">Bu Ratna</p>
-                    <p class="text-forest-500 text-[10px] mt-0.5">Pengelola</p>
-                </div>
-                <i class="fa-solid fa-chevron-down text-forest-400 text-xs hidden sm:block group-hover:text-forest-600 transition-colors"></i>
+                {{-- End Dropdown Panel --}}
+
             </div>
+            {{-- End Profile Dropdown --}}
+
         </div>
     </header>
 
@@ -308,6 +454,7 @@
 </div>
 
 <script>
+    // ── Sidebar ───────────────────────────────────────────
     function openSidebar() {
         document.getElementById('sidebar').classList.remove('-translate-x-full');
         document.getElementById('sidebar-overlay').classList.add('visible');
@@ -318,6 +465,26 @@
         document.getElementById('sidebar-overlay').classList.remove('visible');
         document.body.style.overflow = '';
     }
+
+    // ── Profile Dropdown ──────────────────────────────────
+    function togglePengelolaDropdown() {
+        document.getElementById('profile-dropdown-pengelola').classList.toggle('open');
+    }
+
+    // Tutup kalau klik di luar
+    document.addEventListener('click', function (e) {
+        const wrap = document.getElementById('profile-dropdown-pengelola-wrap');
+        if (wrap && !wrap.contains(e.target)) {
+            document.getElementById('profile-dropdown-pengelola').classList.remove('open');
+        }
+    });
+
+    // Tutup kalau tekan Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.getElementById('profile-dropdown-pengelola').classList.remove('open');
+        }
+    });
 </script>
 @stack('scripts')
 </body>

@@ -34,6 +34,7 @@ class User extends Authenticatable
         'password',
         'role',
         'photo',
+        'telegram_chat_id', // <--- INI DIA! Kolom dari temanmu untuk verifikasi Telegram
     ];
 
     /** @var list<string> */

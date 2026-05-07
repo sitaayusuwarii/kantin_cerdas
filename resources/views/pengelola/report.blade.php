@@ -8,26 +8,70 @@
 {{-- ── CONTROLS ─────────────────────────────────────────── --}}
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div class="flex gap-2 flex-wrap">
-        @foreach(['Hari Ini','Minggu Ini','Bulan Ini'] as $i => $p)
-        <button class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
-            {{ $i===2 ? 'bg-forest-800 text-cream-100 shadow-md' : 'bg-cream-50 border border-cream-300 text-forest-600 hover:border-forest-400' }}">
-            {{ $p }}
-        </button>
+        @foreach([
+            'hari'   => 'Hari Ini',
+            'minggu' => 'Minggu Ini',
+            'bulan'  => 'Bulan Ini',
+        ] as $key => $label)
+        <a href="{{ route('pengelola.report', ['period' => $key]) }}"
+           class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
+               {{ $period === $key
+                   ? 'bg-forest-800 text-cream-100 shadow-md'
+                   : 'bg-cream-50 border border-cream-300 text-forest-600 hover:border-forest-400' }}">
+            {{ $label }}
+        </a>
         @endforeach
     </div>
-    <button class="btn-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg flex-shrink-0">
-        <i class="fa-solid fa-file-pdf text-xs"></i>Export PDF
-    </button>
+
+    {{-- Export Excel --}}
+    <a href="{{ route('pengelola.report.export', ['period' => $period]) }}"
+       class="btn-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl
+              flex items-center gap-2 shadow-lg flex-shrink-0 no-underline">
+        <i class="fa-solid fa-file-excel text-xs"></i>Export Excel
+    </a>
 </div>
+
+{{-- ── Sub-label periode aktif ───────────────────────────── --}}
+<p class="text-xs text-forest-400 -mt-3 mb-5 font-medium">
+    <i class="fa-regular fa-calendar text-forest-300 mr-1"></i>
+    {{ $periodLabel }}
+</p>
 
 {{-- ── SUMMARY CARDS ───────────────────────────────────── --}}
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-7">
     @php
     $summaries = [
-        ['label'=>'Total Transaksi','val'=>'847','sub'=>'Bulan April','icon'=>'fa-receipt','bg'=>'bg-forest-700'],
-        ['label'=>'Pendapatan',     'val'=>'Rp 9,8jt','sub'=>'+12% vs bulan lalu','icon'=>'fa-coins','bg'=>'bg-amber-600'],
-        ['label'=>'Menu Aktif',     'val'=>'10','sub'=>'dari 12 total','icon'=>'fa-utensils','bg'=>'bg-teal-700'],
-        ['label'=>'Menu Terlaris',  'val'=>'Gudeg','sub'=>'203 porsi terjual','icon'=>'fa-fire','bg'=>'bg-red-600'],
+        [
+            'label' => 'Total Transaksi',
+            'val' => $totalTransactions,
+            'sub' => 'Semua transaksi',
+            'icon' => 'fa-receipt',
+            'bg' => 'bg-forest-700'
+        ],
+
+        [
+            'label' => 'Pendapatan',
+            'val' => 'Rp ' . number_format($totalRevenue,0,',','.'),
+            'sub' => 'Total pendapatan',
+            'icon' => 'fa-coins',
+            'bg' => 'bg-amber-600'
+        ],
+
+        [
+            'label' => 'Menu Aktif',
+            'val' => $activeMenus,
+            'sub' => 'Menu tersedia',
+            'icon' => 'fa-utensils',
+            'bg' => 'bg-teal-700'
+        ],
+
+        [
+            'label' => 'Menu Terlaris',
+            'val' => $bestMenu?->name ?? '-',
+            'sub' => ($bestMenu?->total_sold ?? 0) . ' porsi terjual',
+            'icon' => 'fa-fire',
+            'bg' => 'bg-red-600'
+        ],
     ];
     @endphp
     @foreach($summaries as $s)
@@ -53,19 +97,9 @@
                     <i class="fa-solid fa-ranking-star text-amber-600 text-sm"></i>
                     Top 5 Menu Favorit
                 </h2>
-                <p class="text-forest-400 text-xs mt-0.5">April 2025 · semua kategori</p>
+                <p class="text-forest-400 text-xs mt-0.5">{{ $periodLabel }} · semua kategori</p>
             </div>
         </div>
-
-        @php
-        $topMenus = [
-            ['r'=>1,'e'=>'🍛','n'=>'Nasi Gudeg Komplit','cat'=>'Makanan','sold'=>203,'rev'=>2436000,'pct'=>100,'bar'=>'bg-forest-600'],
-            ['r'=>2,'e'=>'🧋','n'=>'Es Teh Manis',      'cat'=>'Minuman','sold'=>187,'rev'=>748000, 'pct'=>92, 'bar'=>'bg-forest-500'],
-            ['r'=>3,'e'=>'🍜','n'=>'Mie Goreng Spesial','cat'=>'Makanan','sold'=>164,'rev'=>1640000,'pct'=>81, 'bar'=>'bg-forest-400'],
-            ['r'=>4,'e'=>'🍗','n'=>'Nasi Ayam Geprek',  'cat'=>'Makanan','sold'=>142,'rev'=>1846000,'pct'=>70, 'bar'=>'bg-forest-300'],
-            ['r'=>5,'e'=>'🍲','n'=>'Bakso Urat Jumbo',  'cat'=>'Makanan','sold'=>118,'rev'=>1298000,'pct'=>58, 'bar'=>'bg-forest-200'],
-        ];
-        @endphp
 
         <div class="space-y-5">
             @foreach($topMenus as $m)
@@ -77,8 +111,8 @@
                     </span>
                     <span class="text-xl">{{ $m['e'] }}</span>
                     <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm text-forest-900 truncate">{{ $m['n'] }}</p>
-                        <p class="text-[10px] text-forest-400">{{ $m['cat'] }}</p>
+                        <p class="font-semibold text-sm text-forest-900 truncate">{{ $m->menu->name }}</p>
+                        <p class="text-[10px] text-forest-400">{{ $m->menu->category->name ?? '-' }}</p>
                     </div>
                     <p class="font-display font-bold text-sm text-forest-800 flex-shrink-0">
                         {{ $m['sold'] }} porsi
@@ -105,8 +139,8 @@
         <div class="bg-cream-50 rounded-2xl shadow-sm border border-cream-200 p-5">
             <h3 class="font-display font-semibold text-sm text-forest-900 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-forest-500 text-xs"></i>
-                Tren Harian (Apr)
-            </h3>
+               Tren Harian ({{ Carbon\Carbon::now()->translatedFormat('M') }})</h3>
+
             @php $trendBars = [22,28,31,25,29,35,38,30,27,33,40,38,35,42,44,38,41,47,39,36]; @endphp
             <div class="flex items-end gap-1 h-20">
                 @foreach($trendBars as $ti => $tv)
@@ -134,12 +168,31 @@
                 <i class="fa-solid fa-chart-pie text-forest-500 text-xs"></i>
                 Distribusi Kategori
             </h3>
+
             @php
-            $cats = [
-                ['name'=>'Makanan','pct'=>62,'bar'=>'bg-forest-600'],
-                ['name'=>'Minuman','pct'=>28,'bar'=>'bg-amber-500'],
-                ['name'=>'Snack',  'pct'=>10,'bar'=>'bg-teal-500'],
-            ];
+            // Kelompokkan berdasarkan kategori
+            $grouped = $topMenus->groupBy(function ($m) {
+                return $m->menu->category->name ?? 'Lainnya';
+            });
+
+            // total semua terjual
+            $total = $topMenus->sum('sold');
+
+            // mapping jadi format kategori
+            $cats = $grouped->map(function ($items, $name) use ($total) {
+                $sold = $items->sum('sold');
+                return [
+                    'name' => $name,
+                    'pct' => $total ? round(($sold / $total) * 100) : 0,
+                ];
+            })->values();
+
+            // warna (biar tetap cakep)
+            $colors = ['bg-forest-600','bg-amber-500','bg-teal-500','bg-red-400'];
+
+            foreach ($cats as $i => $c) {
+                $cats[$i]['bar'] = $colors[$i % count($colors)];
+            }
             @endphp
             <div class="flex h-3 rounded-full overflow-hidden gap-0.5 mb-3">
                 @foreach($cats as $c)
@@ -166,31 +219,59 @@
                 Rekomendasi Stok
             </h3>
             <div class="space-y-2.5">
-                @php
-                $recs = [
-                    ['n'=>'Nasi Gudeg Komplit','a'=>'Tambah stok +15%','lvl'=>'high'],
-                    ['n'=>'Es Teh Manis',      'a'=>'Pertahankan stok','lvl'=>'ok'],
-                    ['n'=>'Jus Alpukat',       'a'=>'Restok — habis!', 'lvl'=>'low'],
-                ];
-                @endphp
-                @foreach($recs as $rec)
-                <div class="flex items-center gap-2.5 bg-white rounded-xl p-2.5 border border-amber-100">
-                    <div class="w-2 h-2 rounded-full flex-shrink-0
-                        {{ $rec['lvl']==='high'?'bg-amber-500':($rec['lvl']==='low'?'bg-red-500':'bg-forest-500') }}">
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-forest-900 truncate">{{ $rec['n'] }}</p>
-                        <p class="text-[10px] {{ $rec['lvl']==='low'?'text-red-500':'text-forest-500' }}">{{ $rec['a'] }}</p>
-                    </div>
-                    <i class="fa-solid text-xs flex-shrink-0
-                        {{ $rec['lvl']==='high'?'fa-arrow-trend-up text-amber-500':($rec['lvl']==='low'?'fa-exclamation text-red-400':'fa-check text-forest-500') }}">
-                    </i>
+
+            @foreach($topMenus as $m)
+            @php
+                // logic rekomendasi berdasarkan ranking
+                if ($loop->iteration === 1) {
+                    $action = 'Tambah stok +15%';
+                    $lvl = 'high';
+                } elseif ($loop->iteration === 2) {
+                    $action = 'Pertahankan stok';
+                    $lvl = 'ok';
+                } else {
+                    $action = 'Normal';
+                    $lvl = 'low';
+                }
+
+            @endphp
+
+            <div class="flex items-center gap-2.5 bg-white rounded-xl p-2.5 border border-amber-100">
+
+                {{-- indikator --}}
+                <div class="w-2 h-2 rounded-full flex-shrink-0
+                    {{ $lvl==='high'?'bg-amber-500':($lvl==='low'?'bg-red-500':'bg-forest-500') }}">
                 </div>
-                @endforeach
+
+                {{-- nama menu --}}
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-forest-900 truncate">
+                        {{ $m->menu->name }}
+                    </p>
+
+                    <p class="text-[10px]
+                        {{ $lvl==='low'?'text-red-500':'text-forest-500' }}">
+                        {{ $action }}
+                    </p>
+                </div>
+
+                {{-- icon --}}
+                <i class="fa-solid text-xs flex-shrink-0
+                    {{ $lvl==='high'
+                        ? 'fa-arrow-trend-up text-amber-500'
+                        : ($lvl==='low'
+                            ? 'fa-exclamation text-red-400'
+                            : 'fa-check text-forest-500') }}">
+                </i>
+
+            </div>
+
+            @endforeach
+
+        </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
 {{-- ── DETAIL TABLE ─────────────────────────────────────── --}}
 <div class="mt-6 bg-cream-50 rounded-2xl shadow-sm border border-cream-200 overflow-hidden">
@@ -198,7 +279,7 @@
         <h3 class="font-display font-semibold text-forest-900 text-sm flex items-center gap-2">
             <i class="fa-solid fa-table-list text-forest-500 text-xs"></i>Detail Semua Menu
         </h3>
-        <span class="text-xs text-forest-400">April 2025</span>
+        <span class="text-xs text-forest-400">{{ $periodLabel }}</span>
     </div>
 
     {{-- Desktop --}}
@@ -219,13 +300,13 @@
                     <td class="px-6 py-3.5 flex items-center gap-2.5">
                         <span class="text-xl">{{ $m['e'] }}</span>
                         <div>
-                            <p class="font-semibold text-sm text-forest-900">{{ $m['n'] }}</p>
-                            <p class="text-[10px] text-forest-400">{{ $m['cat'] }}</p>
+                            <p class="font-semibold text-sm text-forest-900">{{ $m->menu->name }}</p>
+                            <p class="text-[10px] text-forest-400">{{ $m->menu->category->name ?? '-' }}</p>
                         </div>
                     </td>
-                    <td class="px-4 py-3.5 text-center font-display font-bold text-forest-900">{{ $m['sold'] }}</td>
+                    <td class="px-4 py-3.5 text-center font-display font-bold text-forest-900">{{ $m->sold }}</td>
                     <td class="px-4 py-3.5 text-right font-display font-bold text-emerald-700">
-                        Rp {{ number_format($m['rev'],0,',','.') }}
+                        Rp {{ number_format($m->revenue,0,',','.') }}
                     </td>
                     <td class="px-4 py-3.5 text-center">
                         <span class="text-xs text-emerald-700 bg-emerald-100 font-semibold px-2.5 py-1 rounded-xl flex items-center gap-1 justify-center">
@@ -255,11 +336,11 @@
                 {{ $m['r']===1?'text-amber-600':'text-forest-400' }}">{{ $m['r'] }}</span>
             <span class="text-xl">{{ $m['e'] }}</span>
             <div class="flex-1 min-w-0">
-                <p class="font-semibold text-sm text-forest-900 truncate">{{ $m['n'] }}</p>
-                <p class="text-[10px] text-forest-400">{{ $m['sold'] }} terjual</p>
+                <p class="font-semibold text-sm text-forest-900 truncate">{{ $m->menu->name }}</p>
+                <p class="text-[10px] text-forest-400">{{ $m->sold }} terjual</p>
             </div>
             <p class="font-display font-bold text-sm text-emerald-700 flex-shrink-0">
-                Rp {{ number_format($m['rev']/1000,0) }}rb
+                Rp {{ number_format($m->revenue/1000,0) }}rb
             </p>
         </div>
         @endforeach

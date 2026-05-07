@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'SmartCanteen') — Kantin Sekolah Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,10 +37,12 @@
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
                         'slide-down': 'slideDown 0.3s ease-out',
+                        'fade-scale': 'fadeScale 0.15s ease-out',
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
                         slideDown: { '0%': { opacity: '0', transform: 'translateY(-10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        fadeScale: { '0%': { opacity: '0', transform: 'scale(0.95) translateY(-4px)' }, '100%': { opacity: '1', transform: 'scale(1) translateY(0)' } },
                     }
                 }
             }
@@ -61,6 +64,14 @@
         #mobile-menu { display: none; }
         #mobile-menu.open { display: block; }
         .badge-favorite { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+
+        /* Dropdown */
+        #profile-dropdown {
+            display: none;
+            animation: fadeScale 0.15s ease-out;
+            transform-origin: top right;
+        }
+        #profile-dropdown.open { display: block; }
     </style>
     @stack('styles')
 </head>
@@ -84,15 +95,12 @@
 
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center gap-8">
-                    {{-- Menggunakan route() karena routenya sudah aktif di web.php --}}
                     <a href="{{ route('customer.home') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->routeIs('customer.home') ? 'active' : '' }}">
                         <i class="fa-solid fa-house mr-1.5 text-xs"></i>Home
                     </a>
                     <a href="{{ route('customer.menu') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->routeIs('customer.menu') ? 'active' : '' }}">
                         <i class="fa-solid fa-utensils mr-1.5 text-xs"></i>Menu
                     </a>
-                    
-                    {{-- Menggunakan url() sementara karena routenya masih di-comment (//) di web.php --}}
                     <a href="{{ url('/customer/history') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('customer/history*') ? 'active' : '' }}">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5 text-xs"></i>Riwayat
                     </a>
@@ -107,9 +115,111 @@
                         <i class="fa-solid fa-upload text-xs"></i>
                         Upload Bukti Bayar
                     </a>
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold text-sm shadow cursor-pointer hover:scale-105 transition-transform">
-                        A
+
+                    {{-- Profile Dropdown --}}
+                    <div class="relative" id="profile-dropdown-wrap">
+
+                        {{-- Avatar Button --}}
+                        <button onclick="toggleProfileDropdown()"
+                            id="profile-btn"
+                            class="w-9 h-9 rounded-full overflow-hidden shadow
+                                cursor-pointer hover:scale-105 transition-transform select-none">
+                        @auth
+                            @if(auth()->user()->photo)
+                                <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                    alt="Profile"
+                                    class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600
+                                            flex items-center justify-center text-white font-bold text-sm">
+                                    {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->username ?? 'U', 0, 1)) }}
+                                </div>
+                            @endif
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600
+                                        flex items-center justify-center text-white font-bold text-sm">
+                                A
+                            </div>
+                        @endauth
+                        </button>
+
+                        {{-- Dropdown Panel --}}
+                        <div id="profile-dropdown"
+                             class="absolute right-0 top-12 w-56 bg-white rounded-2xl shadow-xl
+                                    border border-gray-100 overflow-hidden z-50">
+
+                            {{-- User Info --}}
+                            <div class="px-4 py-3.5 bg-orange-50/70 border-b border-orange-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0">
+                                    @auth
+                                        @if(auth()->user()->photo)
+                                            <img src="{{ asset('storage/' . auth()->user()->photo) }}"
+                                                alt="Profile"
+                                                class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gradient-to-br from-primary-400 to-primary-600
+                                                        flex items-center justify-center text-white font-bold text-sm">
+                                                {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->username ?? 'U', 0, 1)) }}
+                                            </div>
+                                        @endif
+                                    @endif
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="font-heading font-bold text-sm text-canteen-dark truncate">
+                                            @auth {{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }} @else Guest @endauth
+                                        </p>
+                                        <p class="text-xs text-gray-400 truncate">
+                                            @auth {{ auth()->user()->username ?? '' }} @endauth
+                                        </p>
+                                    </div>
+                                </div>
+                                @auth
+                                    @if(auth()->user()->class)
+                                    <div class="flex flex-wrap gap-1.5 mt-2">
+                                        <span class="text-[10px] bg-gray-100 text-gray-500 font-medium px-2 py-0.5 rounded-full">
+                                            Kelas {{ auth()->user()->class }}
+                                        </span>
+                                    </div>
+                                    @endif
+                                @endauth
+                            </div>
+
+                            {{-- Menu Items --}}
+                            <div class="py-1.5">
+                                {{-- (Anggap route profile.edit sudah ada atau akan dibuat nanti) --}}
+                                <a href="{{ url('/profile/edit') }}"
+                                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
+                                          hover:bg-orange-50 hover:text-primary-600 transition-colors group">
+                                    <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-primary-100
+                                                flex items-center justify-center transition-colors flex-shrink-0">
+                                        <i class="fa-solid fa-user-pen text-gray-500 group-hover:text-primary-500 text-xs"></i>
+                                    </div>
+                                    <span class="font-medium">Edit Profil</span>
+                                </a>
+                            </div>
+
+                            {{-- Logout --}}
+                            <div class="border-t border-gray-100 py-1.5">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                                                   text-red-500 hover:bg-red-50 transition-colors group text-left">
+                                        <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
+                                                    flex items-center justify-center transition-colors flex-shrink-0">
+                                            <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
+                                        </div>
+                                        <span class="font-semibold">Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                        {{-- End Dropdown Panel --}}
+
                     </div>
+                    {{-- End Profile Dropdown --}}
                 </div>
 
                 {{-- Hamburger --}}
@@ -134,10 +244,43 @@
                 <a href="{{ url('/customer/invoice') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('customer/invoice*') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-file-invoice-dollar w-4 text-center text-primary-400"></i>Tagihan
                 </a>
-                <div class="pt-3 pb-1 border-t border-orange-100">
+
+                {{-- Gabungan Action Payment dan Mobile Profile temanmu --}}
+                <div class="pt-4 pb-1 border-t border-orange-100 space-y-3 mt-2">
                     <a href="{{ route('customer.payment.index') }}" class="btn-primary text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 w-full shadow-md">
                         <i class="fa-solid fa-upload text-xs"></i>Upload Bukti Bayar
                     </a>
+
+                    {{-- Mobile Profile Row --}}
+                    <div class="flex items-center gap-3 px-4 py-3 bg-orange-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600
+                                    flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            @auth {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->username ?? 'U', 0, 1)) }} @else A @endauth
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-heading font-bold text-sm text-canteen-dark truncate">
+                                @auth {{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }} @else Guest @endauth
+                            </p>
+                            <p class="text-xs text-gray-400 truncate">
+                                @auth {{ auth()->user()->class ?? auth()->user()->username ?? '' }} @endauth
+                            </p>
+                        </div>
+                    </div>
+
+                    <a href="{{ url('/profile/edit') }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                              text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all">
+                        <i class="fa-solid fa-user-pen w-4 text-center text-primary-400"></i>Edit Profil
+                    </a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                                       text-red-500 hover:bg-red-50 transition-all">
+                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -181,10 +324,6 @@
                     <h4 class="font-heading font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">Bantuan</h4>
                     <ul class="space-y-2.5 mb-5">
                         <li class="flex items-center gap-2 text-sm text-gray-300">
-                            <i class="fa-solid fa-school text-primary-400 w-4"></i>
-                            SMA Negeri 1 Contoh
-                        </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-300">
                             <i class="fa-brands fa-whatsapp text-green-400 w-4"></i>
                             +62 812-3456-7890
                         </li>
@@ -206,14 +345,36 @@
     </footer>
 
     <script>
-        const btn = document.getElementById('hamburger-btn');
+        // ── Hamburger ─────────────────────────────────────
+        const btn  = document.getElementById('hamburger-btn');
         const menu = document.getElementById('mobile-menu');
         const icon = document.getElementById('hamburger-icon');
+
         btn.addEventListener('click', () => {
             menu.classList.toggle('open');
             icon.className = menu.classList.contains('open')
                 ? 'fa-solid fa-xmark text-primary-500 text-base'
                 : 'fa-solid fa-bars text-primary-500 text-base';
+        });
+
+        // ── Profile Dropdown ──────────────────────────────
+        function toggleProfileDropdown() {
+            document.getElementById('profile-dropdown').classList.toggle('open');
+        }
+
+        // Tutup kalau klik di luar
+        document.addEventListener('click', function (e) {
+            const wrap = document.getElementById('profile-dropdown-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('profile-dropdown').classList.remove('open');
+            }
+        });
+
+        // Tutup kalau tekan Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                document.getElementById('profile-dropdown').classList.remove('open');
+            }
         });
     </script>
     @stack('scripts')

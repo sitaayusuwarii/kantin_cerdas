@@ -1,7 +1,5 @@
 <?php
-// ============================================================
-// FILE: UserSeeder.php
-// ============================================================
+
 declare(strict_types=1);
 
 namespace Database\Seeders;
@@ -13,63 +11,56 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Buat 3 akun demo:
-     * 1. Admin
-     * 2. Customer Siswa (dengan NIS, saldo Rp50.000)
-     * 3. Customer Orang Tua (tanpa NIS, saldo Rp100.000)
-     *
-     * Setelah user dibuat, tambahkan beberapa favorit demo untuk customer.
-     */
     public function run(): void
     {
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@smartcanteen.test'],
+        // 1. Akun Admin (Dari kode temanmu)
+        User::firstOrCreate(
+            ['username' => 'admin'],
             [
-                'name'       => 'Administrator',
-                'password'   => Hash::make('password'),
-                'role'       => 'admin',
-                'balance'    => 0,
-                'student_id' => null,
+                'full_name' => 'Administrator',
+                'phone'     => '081234567890',
+                'class'     => '-',
+                'password'  => Hash::make('password'),
+                'role'      => 'admin',
             ]
         );
 
+        // 2. Akun Pengelola (Dari kode temanmu)
+        User::firstOrCreate(
+            ['username' => 'kantin'],
+            [
+                'full_name' => 'Pengelola Kantin',
+                'phone'     => '081111111111',
+                'class'     => '-',
+                'password'  => Hash::make('password'),
+                'role'      => 'pengelola',
+            ]
+        );
+
+        // 3. Akun Customer Demo (Diadaptasi dari kodemu agar sesuai ERD baru)
         $budi = User::firstOrCreate(
-            ['email' => 'budi@smartcanteen.test'],
+            ['username' => 'budi'],
             [
-                'name'       => 'Budi Santoso',
-                'password'   => Hash::make('password'),
-                'role'       => 'customer',
-                'balance'    => 50000.00,
-                'student_id' => '2024001',
+                'full_name' => 'Budi Santoso',
+                'phone'     => '082222222222',
+                'class'     => '10A',
+                'password'  => Hash::make('password'),
+                'role'      => 'customer',
             ]
         );
 
-        $siti = User::firstOrCreate(
-            ['email' => 'siti@smartcanteen.test'],
-            [
-                'name'       => 'Siti Rahayu',
-                'password'   => Hash::make('password'),
-                'role'       => 'customer',
-                'balance'    => 100000.00,
-                'student_id' => null,
-            ]
-        );
-
-        // Tambahkan menu favorit untuk akun demo customer
-        // (hanya jika tabel menus sudah terisi oleh MenuSeeder)
+        // Tambahkan menu favorit untuk akun demo customer (Ide dari kodemu)
+        // (Pastikan tabel menus sudah ada isinya)
         $menuIds = Menu::inRandomOrder()->limit(3)->pluck('id');
 
         if ($menuIds->isNotEmpty()) {
             $budi->favoriteMenus()->syncWithoutDetaching($menuIds->toArray());
-            $siti->favoriteMenus()->syncWithoutDetaching(
-                Menu::inRandomOrder()->limit(2)->pluck('id')->toArray()
-            );
         }
 
+        // Tampilkan info di terminal saat di-seed
         $this->command->info('✓ UserSeeder: 3 akun demo berhasil dibuat.');
-        $this->command->line('  admin@smartcanteen.test  | password');
-        $this->command->line('  budi@smartcanteen.test   | password');
-        $this->command->line('  siti@smartcanteen.test   | password');
+        $this->command->line('  admin  | password (Admin)');
+        $this->command->line('  kantin | password (Pengelola)');
+        $this->command->line('  budi   | password (Customer)');
     }
 }

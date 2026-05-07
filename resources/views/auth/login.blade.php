@@ -95,6 +95,16 @@
             </div>
         </div>
 
+        {{-- Success alert setelah ganti password dari temanmu --}}
+        @if (session('success_password'))
+        <div class="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm animate-fade-in">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+            </svg>
+            <span>{{ session('success_password') }}</span>
+        </div>
+        @endif
+
         {{-- Card --}}
         <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/80 border border-gray-100 p-8">
 
@@ -132,7 +142,7 @@
             @endif
 
             {{-- Form --}}
-            <form method="POST" action="{{ url('/login') }}" class="space-y-5" novalidate>
+            <form method="POST" action="{{ route('login') }}" class="space-y-5" novalidate>
                 @csrf
 
                 {{-- Username --}}
@@ -209,7 +219,7 @@
 
                     {{-- Forgot password --}}
                     <div class="flex justify-end mt-2">
-                        <a href="{{ url('/forgot-password') }}"
+                        <a href="{{ route('password.request') }}"
                            class="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors">
                             Lupa Password?
                         </a>
@@ -255,7 +265,7 @@
             {{-- Register link --}}
             <p class="text-center text-sm text-gray-500">
                 Belum punya akun?
-                <a href="{{ url('/register') }}"
+                <a href="{{ route('register') }}"
                    class="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors ml-1">
                     Daftar sekarang
                 </a>
