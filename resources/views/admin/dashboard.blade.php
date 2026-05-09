@@ -27,14 +27,11 @@
             @endif
         </div>
         <p class="text-slate-400 text-xs font-medium mb-1">Pemasukan Hari Ini</p>
-        @php
-            $incomeM = $incomeToday / 1_000_000;
-        @endphp
         <p class="text-white font-bold text-2xl leading-none">
-            Rp {{ number_format($incomeM, 2, ',', '.') }}<span class="text-lg">jt</span>
+            Rp {{ number_format($incomeToday, 0, ',', '.') }}
         </p>
         <p class="text-slate-600 text-xs mt-1">
-            vs kemarin Rp {{ number_format($incomeYesterday / 1_000_000, 2, ',', '.') }}jt
+           vs kemarin Rp {{ number_format($incomeYesterday, 0, ',', '.') }}
         </p>
     </div>
 
@@ -291,7 +288,7 @@
                     <span class="ml-auto notif-badge text-white text-xs font-bold px-1.5">{{ $pendingCount }}</span>
                     @endif
                 </a>
-                <a href="{{ route('admin.report') }}"
+                <a href="{{ route('admin.laporan-keuangan') }}"
                    class="flex items-center gap-3 w-full p-3 rounded-xl bg-slate-800/40 hover:bg-slate-700/40 transition-all text-slate-300 text-sm font-medium">
                     <i class="fa-solid fa-file-invoice-dollar text-slate-400"></i>
                     Unduh Laporan

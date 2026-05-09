@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Services\NotificationService;
+use App\Models\PaymentMethod;
 
 class PaymentController extends Controller
 {
@@ -18,18 +19,19 @@ class PaymentController extends Controller
      * Bisa pre-fill order_number dari query: /payment?order=SC-006
      */
     public function index(Request $request): View
-    {
-        // Pre-fill jika ada ?order=SC-006 di URL
-        $order = null;
-        if ($request->filled('order')) {
-            $order = Order::with('items.menu')
-                          ->where('order_number', $request->order)
-                          ->where('user_id', auth()->id())
-                          ->first();
-        }
-
-        return view('customer.payment', compact('order'));
+{
+    $order = null;
+    if ($request->filled('order')) {
+        $order = Order::with('items.menu')
+                      ->where('order_number', $request->order)
+                      ->where('user_id', auth()->id())
+                      ->first();
     }
+
+    $paymentMethods = PaymentMethod::where('is_active', true)->get(); // ← add this
+
+    return view('customer.payment', compact('order', 'paymentMethods')); // ← add to compact
+}
 
     /**
      * POST /payment/upload

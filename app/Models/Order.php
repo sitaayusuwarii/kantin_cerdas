@@ -13,20 +13,23 @@ class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'user_id',
-        'order_number',
-        'status',
-        'pickup_schedule',
-        'note',
-        'total_price',
-        'confirmed_at',
-        'processed_at',
-        'shipped_at',
-        'completed_at',
-        'cancelled_at',
-        'confirmed_by',
-    ];
+   protected $fillable = [
+    'user_id',
+    'order_number',
+    'status',
+    'pickup_schedule',
+    'note',
+    'total_price',
+    'confirmed_at',
+    'processed_at',
+    'shipped_at',
+    'completed_at',
+    'cancelled_at',
+    'confirmed_by',
+    'payment_method',   
+    'payment_proof',    
+    'payment_status',  
+];
 
     protected function casts(): array
     {
@@ -197,4 +200,6 @@ class Order extends Model
 {
     return $this->hasOne(Delivery::class);
 }
+
+
 }

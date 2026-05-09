@@ -150,7 +150,7 @@
                    
 
                     {{-- Submit --}}
-                    <button type="submit"
+                    <button type="button" id="btn-confirm"
                             class="btn-primary w-full text-white font-heading font-bold py-4 rounded-xl mt-5 text-sm shadow-lg flex items-center justify-center gap-2">
                         <i class="fa-solid fa-check-circle"></i>
                         Konfirmasi Pesanan
@@ -166,7 +166,76 @@
 
         </div>
     </form>
+
 </div>
+<div id="payment-modal"
+     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 hidden"
+     role="dialog" aria-modal="true" aria-labelledby="modal-title">
+ 
+    {{-- Backdrop --}}
+    <div id="modal-backdrop"
+         class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+ 
+    {{-- Sheet --}}
+    <div id="modal-sheet"
+         class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 translate-y-8 opacity-0 transition-all duration-300">
+ 
+        {{-- Handle bar (mobile) --}}
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
+ 
+        <h3 id="modal-title" class="font-heading font-bold text-lg text-canteen-dark text-center mb-1">
+            Pilih Cara Pembayaran
+        </h3>
+        <p class="text-xs text-gray-400 text-center mb-6">Konfirmasi pesanan dan lanjutkan pembayaran</p>
+ 
+        {{-- Opsi Telegram --}}
+        <button id="btn-pay-telegram" type="button"
+                class="group w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 mb-3 text-left">
+            <div class="w-11 h-11 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                <i class="fa-brands fa-telegram text-white text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm text-gray-800">Bayar via Telegram</p>
+                <p class="text-xs text-gray-400 mt-0.5">QRIS, BCA, atau BRI lewat bot Telegram</p>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-blue-400 transition-colors"></i>
+        </button>
+ 
+        {{-- Opsi Upload Manual --}}
+        <button id="btn-pay-upload" type="button"
+                class="group w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-primary-400 hover:bg-orange-50 transition-all duration-200 mb-5 text-left">
+            <div class="w-11 h-11 btn-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-cloud-arrow-up text-white text-lg"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm text-gray-800">Upload Bukti Transfer</p>
+                <p class="text-xs text-gray-400 mt-0.5">BRI, BCA, GoPay, OVO, DANA, Tunai</p>
+            </div>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-primary-400 transition-colors"></i>
+        </button>
+ 
+        {{-- Batal --}}
+        <button id="btn-cancel-modal" type="button"
+                class="w-full text-center text-sm text-gray-400 hover:text-gray-600 transition-colors py-1">
+            Batal
+        </button>
+    </div>
+</div>
+ 
+{{-- Form tersembunyi untuk submit order lalu redirect ke Telegram --}}
+<form id="form-confirm-telegram" action="{{ route('customer.order.confirm') }}" method="POST" class="hidden">
+    @csrf
+    <input type="hidden" name="pickup" id="hidden-pickup">
+    <input type="hidden" name="note"   id="hidden-note">
+    <input type="hidden" name="redirect_to" value="telegram">
+</form>
+ 
+<form id="form-confirm-upload" action="{{ route('customer.order.confirm') }}" method="POST" class="hidden">
+    @csrf
+    <input type="hidden" name="pickup" id="hidden-pickup-upload">
+    <input type="hidden" name="note"   id="hidden-note-upload">
+    <input type="hidden" name="redirect_to" value="payment">
+</form>
 @endsection
 
 @push('styles')
@@ -179,6 +248,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // === Pickup radio existing logic ===
     document.querySelectorAll('.pickup-radio').forEach(r => {
         r.addEventListener('change', () => {
             document.querySelectorAll('.pickup-opt').forEach(el => {
@@ -188,6 +258,53 @@ document.addEventListener('DOMContentLoaded', function () {
             r.nextElementSibling.classList.add('border-primary-400', 'bg-orange-50');
             r.nextElementSibling.classList.remove('border-gray-200');
         });
+    });
+ 
+    // === Modal logic ===
+    const modal      = document.getElementById('payment-modal');
+    const backdrop   = document.getElementById('modal-backdrop');
+    const sheet      = document.getElementById('modal-sheet');
+    const btnConfirm = document.getElementById('btn-confirm');
+ 
+    function openModal() {
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            backdrop.classList.add('opacity-100');
+            backdrop.classList.remove('opacity-0');
+            sheet.classList.add('opacity-100', 'translate-y-0');
+            sheet.classList.remove('opacity-0', 'translate-y-8');
+        });
+    }
+ 
+    function closeModal() {
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0');
+        sheet.classList.remove('opacity-100', 'translate-y-0');
+        sheet.classList.add('opacity-0', 'translate-y-8');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+ 
+    // Ambil nilai pickup & note dari form utama
+    function syncHiddenFields(pickupId, noteId) {
+        const selectedPickup = document.querySelector('.pickup-radio:checked');
+        const note = document.querySelector('textarea[name="note"]');
+        document.getElementById(pickupId).value = selectedPickup ? selectedPickup.value : '';
+        document.getElementById(noteId).value   = note ? note.value : '';
+    }
+ 
+    btnConfirm.addEventListener('click', openModal);
+ 
+    document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+ 
+    document.getElementById('btn-pay-telegram').addEventListener('click', function () {
+        syncHiddenFields('hidden-pickup', 'hidden-note');
+        document.getElementById('form-confirm-telegram').submit();
+    });
+ 
+    document.getElementById('btn-pay-upload').addEventListener('click', function () {
+        syncHiddenFields('hidden-pickup-upload', 'hidden-note-upload');
+        document.getElementById('form-confirm-upload').submit();
     });
 });
 </script>

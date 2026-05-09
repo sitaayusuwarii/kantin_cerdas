@@ -99,15 +99,15 @@
                         </span>
                     </td>
                     <td class="px-4 py-4 text-center">
-                        @if($paymentStatus === 'accepted')
+                        @if($paymentStatus === 'terverifikasi')
                             <span class="inline-flex items-center gap-1 bg-green-50 text-green-600 text-xs font-semibold px-2.5 py-1 rounded-full">
                                 <i class="fa-solid fa-check text-[9px]"></i>Lunas
                             </span>
-                        @elseif($paymentStatus === 'pending')
+                        @elseif($paymentStatus === 'menunggu')
                             <span class="inline-flex items-center gap-1 bg-yellow-50 text-yellow-600 text-xs font-semibold px-2.5 py-1 rounded-full">
                                 <i class="fa-solid fa-clock text-[9px]"></i>Verifikasi
                             </span>
-                        @elseif($paymentStatus === 'rejected')
+                        @elseif($paymentStatus === 'ditolak')
                             <span class="inline-flex items-center gap-1 bg-red-50 text-red-500 text-xs font-semibold px-2.5 py-1 rounded-full">
                                 <i class="fa-solid fa-xmark text-[9px]"></i>Ditolak
                             </span>
@@ -123,7 +123,7 @@
                                class="text-xs text-primary-500 hover:text-primary-700 font-semibold px-3 py-1.5 bg-orange-50 hover:bg-orange-100 rounded-lg transition-all">
                                 <i class="fa-solid fa-eye mr-1"></i>Detail
                             </a>
-                            @if(!$order->payment || $order->payment->status === 'rejected')
+                            @if(!$order->payment || $order->payment->status === 'ditolak')
                             <a href="{{ url('/payment') }}"
                                class="text-xs text-white btn-primary font-semibold px-3 py-1.5 rounded-lg shadow transition-all">
                                 <i class="fa-solid fa-upload mr-1"></i>Bayar
@@ -186,11 +186,11 @@
                     <p class="font-heading font-bold text-xl text-primary-500">
                         Rp {{ number_format($order->total_price, 0, ',', '.') }}
                     </p>
-                    @if($paymentStatus === 'accepted')
+                    @if($paymentStatus === 'terverifikasi')
                         <span class="inline-flex items-center gap-1 bg-green-50 text-green-600 text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1">
                             <i class="fa-solid fa-check text-[8px]"></i>Lunas
                         </span>
-                    @elseif($paymentStatus === 'pending')
+                    @elseif($paymentStatus === 'menunggu')
                         <span class="inline-flex items-center gap-1 bg-yellow-50 text-yellow-600 text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1">
                             <i class="fa-solid fa-clock text-[8px]"></i>Verifikasi
                         </span>
@@ -205,7 +205,7 @@
                        class="text-xs text-primary-500 font-semibold px-3.5 py-2 bg-orange-50 hover:bg-orange-100 rounded-xl transition-all">
                         <i class="fa-solid fa-eye mr-1"></i>Detail
                     </a>
-                    @if(!$order->payment || $order->payment->status === 'rejected')
+                    @if(!$order->payment || $order->payment->status === 'ditolak')
                     <a href="{{ url('/payment') }}"
                        class="text-xs text-white btn-primary font-semibold px-3.5 py-2 rounded-xl shadow-md">
                         <i class="fa-solid fa-upload mr-1"></i>Bayar

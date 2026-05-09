@@ -20,6 +20,9 @@ class Payment extends Model
         'rejection_reason',
         'verified_at',
         'verified_by',
+        'payment_method',   
+        'payment_proof',    
+        'payment_status',
     ];
 
     protected function casts(): array

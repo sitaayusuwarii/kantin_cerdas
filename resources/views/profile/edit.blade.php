@@ -1,3 +1,32 @@
+@push('styles')
+<style>
+  /* Tombol utama — admin dark theme */
+  .btn-primary {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    padding: 0.65rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(79, 70, 229, 0.5);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+</style>
+@endpush
+
 @extends($layout)
 
 @section('title', 'Edit Profil')

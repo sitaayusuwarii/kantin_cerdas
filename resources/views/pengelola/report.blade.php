@@ -185,7 +185,7 @@
                     'name' => $name,
                     'pct' => $total ? round(($sold / $total) * 100) : 0,
                 ];
-            })->values();
+            })->values()->toArray();
 
             // warna (biar tetap cakep)
             $colors = ['bg-forest-600','bg-amber-500','bg-teal-500','bg-red-400'];

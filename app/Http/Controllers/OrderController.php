@@ -92,35 +92,30 @@ class OrderController extends Controller
         // Kirim notifikasi ke pengelola
         NotificationService::orderBaru($order, $user);
 
-        $chatId = $user->telegram_chat_id;
+    //    if ($user->telegram_chat_id) {
+    //     (new \App\Http\Controllers\TelegramController)->sendMessage(
+    //         $user->telegram_chat_id,
+    //         "✅ *Pesanan Berhasil Dibuat!*\n\n" .
+    //         "Pesanan *#{$order->order_number}* senilai *Rp " . number_format($order->total_price, 0, ',', '.') . "* telah diterima.\n\n" .
+    //         "Silakan selesaikan pembayaran melalui menu *📋 Tagihan Saya* di bot ini, atau langsung upload bukti bayar di website.\n\n" .
+    //         "Terima kasih! 🍽"
+    //     );
 
-        if ($chatId) {
+    // }
 
-            $message = "🧾 Pesanan Baru\n\n";
+        $redirectTo = $request->input('redirect_to');
 
-            foreach ($order->items as $item) {
-                $message .= "- {$item->menu->name} x{$item->quantity}\n";
-            }
-
-            $message .= "\n💰 Total: Rp " . number_format($order->total_price, 0, ',', '.');
-            $message .= "\n\nPilih metode pembayaran 👇";
-
-            Http::post("https://api.telegram.org/bot".env('8699640620:AAEElsnAHuwK8fh7G1oKLz37WEGy56UJTA8')."/sendMessage", [
-                'chat_id' => $chatId,
-                'text' => $message,
-                'reply_markup' => json_encode([
-                    'inline_keyboard' => [
-                        [
-                            ['text' => 'QRIS', 'callback_data' => 'pay_qris'],
-                            ['text' => 'BCA', 'callback_data' => 'pay_bca'],
-                            ['text' => 'BRI', 'callback_data' => 'pay_bri'],
-                        ]
-                    ]
-                ])
-            ]);
+        if ($redirectTo === 'telegram') {
+            return redirect("https://t.me/KantinCerdasBot");
         }
 
-        return redirect("https://t.me/KantinCerdasBot");
+        if ($redirectTo === 'payment') {
+            return redirect()->route('customer.payment', ['order' => $order->order_number]);
+        }
+
+        // fallback jika redirect_to tidak diisi
+        return redirect()->route('customer.history')
+                        ->with('success', 'Pesanan berhasil dikonfirmasi!');
     }
 
     public function invoice(string $orderNumber): View

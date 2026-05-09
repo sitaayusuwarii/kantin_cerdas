@@ -122,6 +122,28 @@
                 @endif
             </a>
 
+            <a href="{{ route('admin.unpaid-orders') }}"
+                class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                        {{ request()->routeIs('admin.unpaid-orders') ? 'active text-white' : 'text-slate-400' }}">
+                    <span class="w-8 h-8 rounded-lg flex items-center justify-center
+                                {{ request()->routeIs('admin.unpaid-orders') ? 'bg-white/20' : 'bg-slate-700/50' }}">
+                        <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                    </span>
+                    Pesanan Belum Bayar
+                    @php
+                        $unpaidCount = \App\Models\Order::where('status', 'baru')
+                            ->where('payment_status', 'pending')
+                            ->whereNull('payment_proof')
+                            ->whereDate('created_at', today())
+                            ->count();
+                    @endphp
+                    @if($unpaidCount > 0)
+                    <span class="ml-auto notif-badge text-white font-bold px-1.5">
+                        {{ $unpaidCount > 99 ? '99+' : $unpaidCount }}
+                    </span>
+                    @endif
+                </a>
+
             <a href="{{ route('admin.transactions') }}"
                class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                       {{ request()->routeIs('admin.transactions') ? 'active text-white' : 'text-slate-400' }}">
@@ -132,11 +154,21 @@
                 Monitoring Transaksi
             </a>
 
-            <a href="{{ route('admin.report') }}"
-               class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                      {{ request()->routeIs('admin.report') ? 'active text-white' : 'text-slate-400' }}">
+            <a href="{{ route('admin.payment-methods') }}"
+            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                    {{ request()->routeIs('admin.payment-methods') ? 'active text-white' : 'text-slate-400' }}">
                 <span class="w-8 h-8 rounded-lg flex items-center justify-center
-                             {{ request()->routeIs('admin.report') ? 'bg-white/20' : 'bg-slate-700/50' }}">
+                            {{ request()->routeIs('admin.payment-methods') ? 'bg-white/20' : 'bg-slate-700/50' }}">
+                    <i class="fa-solid fa-credit-card text-xs"></i>
+                </span>
+                Metode Pembayaran
+            </a>
+
+            <a href="{{ route('admin.laporan-keuangan') }}"
+               class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+                      {{ request()->routeIs('admin.laporan-keuangan') ? 'active text-white' : 'text-slate-400' }}">
+                <span class="w-8 h-8 rounded-lg flex items-center justify-center
+                             {{ request()->routeIs('admin.laporan-keuangan') ? 'bg-white/20' : 'bg-slate-700/50' }}">
                     <i class="fa-solid fa-chart-line text-xs"></i>
                 </span>
                 Laporan Keuangan
@@ -204,17 +236,20 @@
                 </div>
 
                 {{-- ↓ Bell notif juga dari database --}}
-                <a href="{{ route('admin.verification') }}"
-                   class="relative w-9 h-9 rounded-xl bg-slate-800 border border-border flex items-center justify-center text-slate-400 hover:text-white hover:border-primary-500 transition-all">
+                <a href="{{ route('admin.notifications') }}"
+                class="relative w-9 h-9 rounded-xl bg-slate-800 border border-border flex items-center justify-center text-slate-400 hover:text-white hover:border-primary-500 transition-all"
+                id="notif-bell">
                     <i class="fa-solid fa-bell text-sm"></i>
-                    @if($pendingPaymentCount > 0)
-                    <span class="notif-badge absolute -top-1 -right-1 text-white text-xs font-bold px-1">
-                        {{ $pendingPaymentCount > 99 ? '99+' : $pendingPaymentCount }}
+                    @if($adminUnreadCount > 0)
+                    <span class="notif-badge absolute -top-1 -right-1 text-white text-xs font-bold px-1" id="notif-badge">
+                        {{ $adminUnreadCount > 99 ? '99+' : $adminUnreadCount }}
                     </span>
                     @endif
                 </a>
 
-                <div class="flex items-center gap-2 bg-slate-800 border border-border rounded-xl px-3 py-1.5">
+                <div class="relative" id="admin-profile-wrap">
+                <button onclick="toggleAdminDropdown()"
+                        class="flex items-center gap-2 bg-slate-800 border border-border rounded-xl px-3 py-1.5 hover:border-primary-500 transition-all">
                     <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600
                                 flex items-center justify-center text-white font-bold text-xs">
                         {{ strtoupper(substr(Auth::user()->name ?? Auth::user()->full_name ?? 'A', 0, 1)) }}
@@ -223,7 +258,73 @@
                         {{ Auth::user()->name ?? Auth::user()->full_name ?? 'Admin' }}
                     </span>
                     <i class="fa-solid fa-chevron-down text-slate-500 text-xs hidden sm:inline"></i>
+                </button>
+
+                {{-- Dropdown --}}
+                <div id="admin-profile-dropdown"
+                    class="hidden absolute right-0 top-12 w-56 bg-slate-900 border border-border rounded-2xl shadow-2xl overflow-hidden z-50">
+
+                    {{-- User Info --}}
+                    <div class="px-4 py-3.5 bg-slate-800 border-b border-border">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600
+                                        flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                {{ strtoupper(substr(Auth::user()->name ?? Auth::user()->full_name ?? 'A', 0, 1)) }}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-white text-sm font-semibold truncate">
+                                    {{ Auth::user()->name ?? Auth::user()->full_name ?? 'Admin' }}
+                                </p>
+                                <p class="text-slate-500 text-xs truncate">{{ Auth::user()->email }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-[10px] bg-primary-500/20 text-primary-400 font-semibold px-2.5 py-0.5 rounded-full border border-primary-500/20">
+                                Administrator
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- Menu Items --}}
+                    <div class="py-1.5">
+                        <a href="{{ route('admin.dashboard') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400
+                                hover:bg-slate-800 hover:text-white transition-colors group">
+                            <div class="w-7 h-7 rounded-lg bg-slate-700 group-hover:bg-slate-600
+                                        flex items-center justify-center transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-gauge-high text-slate-500 group-hover:text-slate-300 text-xs"></i>
+                            </div>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+
+                        <a href="{{ route('profile.edit') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400
+                                hover:bg-slate-800 hover:text-white transition-colors group">
+                            <div class="w-7 h-7 rounded-lg bg-slate-700 group-hover:bg-slate-600
+                                        flex items-center justify-center transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-user-pen text-slate-500 group-hover:text-slate-300 text-xs"></i>
+                            </div>
+                            <span class="font-medium">Edit Profil</span>
+                        </a>
+                    </div>
+
+                    {{-- Logout --}}
+                    <div class="border-t border-border py-1.5">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                                        text-red-400 hover:bg-red-500/10 transition-colors group text-left">
+                                <div class="w-7 h-7 rounded-lg bg-slate-700 group-hover:bg-red-500/20
+                                            flex items-center justify-center transition-colors flex-shrink-0">
+                                    <i class="fa-solid fa-right-from-bracket text-slate-500 group-hover:text-red-400 text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Logout</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
+            </div>
             </div>
         </header>
 
@@ -264,6 +365,52 @@ window.addEventListener('resize', () => {
         overlay.classList.remove('opacity-100', 'pointer-events-auto');
     }
 });
+
+
+
+{{-- Auto-refresh unread count setiap 30 detik --}}
+
+function refreshNotifCount() {
+    fetch('{{ route('admin.notifications.count') }}')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('notif-badge');
+            const bell  = document.getElementById('notif-bell');
+            if (data.count > 0) {
+                if (!badge) {
+                    const span = document.createElement('span');
+                    span.id = 'notif-badge';
+                    span.className = 'notif-badge absolute -top-1 -right-1 text-white text-xs font-bold px-1';
+                    span.textContent = data.count > 99 ? '99+' : data.count;
+                    bell.appendChild(span);
+                } else {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+}
+setInterval(refreshNotifCount, 30000);
+
+
+function toggleAdminDropdown() {
+    document.getElementById('admin-profile-dropdown').classList.toggle('hidden');
+}
+
+document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('admin-profile-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('admin-profile-dropdown').classList.add('hidden');
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('admin-profile-dropdown').classList.add('hidden');
+    }
+});
+
 </script>
 @stack('scripts')
 </body>

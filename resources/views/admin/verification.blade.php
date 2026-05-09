@@ -41,7 +41,7 @@
         </div>
         <div class="min-w-0">
             <p class="text-white font-bold text-lg leading-none">
-                Rp {{ number_format($summary['total_verified_amount'] / 1_000_000, 1, ',', '.') }}jt
+                Rp {{ number_format($summary['total_verified_amount'], 0, ',', '.') }}
             </p>
             <p class="text-slate-500 text-xs mt-0.5 truncate">Total Terverifikasi</p>
         </div>
@@ -140,13 +140,13 @@
                         {{ $methodLabels[$payment->method] ?? $payment->method }}
                     </td>
                     <td class="px-5 py-4 text-slate-400 text-sm">
-                        {{ $payment->created_at->format('H:i') }} WIB
+                        {{ $payment->created_at->format('H:i') }} 
                     </td>
                     <td class="px-5 py-4">
                         @if($payment->proof_path)
-                        <button onclick="openProof('{{ Storage::url($payment->proof_path) }}', '{{ $payment->order->order_number ?? $payment->id }}')"
+                        <button onclick="openProof('{{ Str::startsWith($payment->proof_path, 'http') ? $payment->proof_path : Storage::url($payment->proof_path) }}', '{{ $payment->order->order_number ?? $payment->id }}')"
                             class="group relative overflow-hidden rounded-lg border border-border hover:border-primary-500 transition-all">
-                            <img src="{{ Storage::url($payment->proof_path) }}"
+                            <img src="{{ Str::startsWith($payment->proof_path, 'http') ? $payment->proof_path : Storage::url($payment->proof_path) }}"
                                  alt="Bukti Transfer"
                                  class="w-16 h-12 object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                             <div class="absolute inset-0 bg-primary-500/0 group-hover:bg-primary-500/20 transition-all flex items-center justify-center">
@@ -272,12 +272,12 @@
             </div>
             <div class="bg-slate-800/60 rounded-lg p-2.5">
                 <p class="text-slate-600 text-xs mb-0.5">Waktu</p>
-                <p class="text-slate-300 text-xs">{{ $payment->created_at->format('H:i') }} WIB</p>
+                <p class="text-slate-300 text-xs">{{ $payment->created_at->format('H:i') }} </p>
             </div>
             <div class="bg-slate-800/60 rounded-lg p-2.5">
                 <p class="text-slate-600 text-xs mb-0.5">Bukti Transfer</p>
                 @if($payment->proof_path)
-                <button onclick="openProof('{{ Storage::url($payment->proof_path) }}', '{{ $payment->order->order_number ?? $payment->id }}')"
+                <button onclick="openProof('{{ Str::startsWith($payment->proof_path, 'http') ? $payment->proof_path : Storage::url($payment->proof_path) }}', '{{ $payment->order->order_number ?? $payment->id }}')"
                         class="text-primary-400 text-xs font-semibold flex items-center gap-1">
                     <i class="fa-solid fa-image text-xs"></i> Lihat
                 </button>
@@ -335,28 +335,27 @@
 </div>
 
 {{-- ===== PROOF IMAGE MODAL ===== --}}
-<div id="proof-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
-    <div class="glass-card rounded-2xl p-5 max-w-sm w-full mx-4 border border-border shadow-2xl">
-        <div class="flex items-center justify-between mb-4">
+<div id="proof-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
+    <div class="relative max-w-3xl w-full mx-4">
+        {{-- Header --}}
+        <div class="flex items-center justify-between mb-3">
             <div>
                 <h3 class="text-white font-bold">Bukti Transfer</h3>
-                <p class="text-slate-500 text-xs" id="proof-order-id">-</p>
+                <p class="text-slate-400 text-xs" id="proof-order-id">-</p>
             </div>
-            <button onclick="closeProof()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
-                <i class="fa-solid fa-xmark text-sm"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <a id="proof-download" href="#" target="_blank"
+                   class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30 text-primary-300 text-xs font-semibold hover:bg-primary-500/40 transition-all">
+                    <i class="fa-solid fa-download text-xs"></i> Unduh
+                </a>
+                <button onclick="closeProof()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
         </div>
-        <div class="rounded-xl overflow-hidden border border-border mb-4 bg-slate-900 flex items-center justify-center min-h-40">
-            <img id="proof-img" src="" alt="Bukti Transfer" class="w-full object-contain max-h-80">
-        </div>
-        <div class="flex gap-2">
-            <button onclick="closeProof()" class="flex-1 py-2.5 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-600 transition-all">
-                Tutup
-            </button>
-            <a id="proof-download" href="#" download
-               class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary-500/20 border border-primary-500/30 text-primary-300 text-sm font-semibold hover:bg-primary-500/40 transition-all">
-                <i class="fa-solid fa-download text-xs"></i> Unduh
-            </a>
+        {{-- Gambar fullscreen --}}
+        <div class="rounded-2xl overflow-hidden border border-border bg-slate-900 flex items-center justify-center" style="max-height:80vh">
+            <img id="proof-img" src="" alt="Bukti Transfer" class="w-full h-full object-contain" style="max-height:80vh">
         </div>
     </div>
 </div>
@@ -462,7 +461,7 @@ let currentPaymentId = null;
 // ── Proof Modal ──────────────────────────────────────────────────────────────
 function openProof(src, orderId) {
     document.getElementById('proof-img').src = src;
-    document.getElementById('proof-order-id').textContent = orderId;
+    document.getElementById('proof-order-id').textContent = 'No. Pesanan: ' + orderId;
     document.getElementById('proof-download').href = src;
     showModal('proof-modal');
 }
@@ -521,14 +520,17 @@ function submitVerify() {
     .then(res => {
         if (res.success) {
             closeActionModal();
-            updateRowStatus(currentPaymentId, 'terverifikasi');
             showToast(res.message, 'emerald');
+            setTimeout(() => window.location.reload(), 1500); // ← tambahkan ini
         } else {
             showToast(res.message || 'Gagal memverifikasi.', 'red');
+            setLoading(btn, false, '<i class="fa-solid fa-check"></i> Ya, Verifikasi');
         }
     })
-    .catch(() => showToast('Terjadi kesalahan. Coba lagi.', 'red'))
-    .finally(() => setLoading(btn, false, '<i class="fa-solid fa-check"></i> Ya, Verifikasi'));
+    .catch(() => {
+        showToast('Terjadi kesalahan. Coba lagi.', 'red');
+        setLoading(btn, false, '<i class="fa-solid fa-check"></i> Ya, Verifikasi');
+    });
 }
 
 // ── Submit Tolak ─────────────────────────────────────────────────────────────
@@ -555,14 +557,15 @@ function submitReject() {
     })
     .then(r => r.json())
     .then(res => {
-        if (res.success) {
-            closeActionModal();
-            updateRowStatus(currentPaymentId, 'ditolak', reason);
-            showToast(res.message, 'red');
-        } else {
-            showToast(res.message || 'Gagal menolak pembayaran.', 'red');
-        }
-    })
+    if (res.success) {
+        closeActionModal();
+        showToast(res.message, 'red');
+        setTimeout(() => window.location.reload(), 1500); // ← tambahkan ini
+    } else {
+        showToast(res.message || 'Gagal menolak pembayaran.', 'red');
+        setLoading(btn, false, '<i class="fa-solid fa-xmark"></i> Tolak Pembayaran');
+    }
+})
     .catch(() => showToast('Terjadi kesalahan. Coba lagi.', 'red'))
     .finally(() => setLoading(btn, false, '<i class="fa-solid fa-xmark"></i> Tolak Pembayaran'));
 }

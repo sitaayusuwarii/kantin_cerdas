@@ -186,35 +186,35 @@ function addToCart(menuId, name, price, image) {
     btn.innerHTML = '<i class="fa-solid fa-check text-xs"></i><span>Ditambah!</span>';
     btn.classList.add('opacity-75');
 
-    // Update badge optimistic dari localStorage
     const oldQty   = parseInt(localStorage.getItem('cart_count')) || 0;
     const oldPrice = parseInt(localStorage.getItem('cart_price')) || 0;
     updateBadge(oldQty + 1, oldPrice + price);
-    localStorage.setItem('cart_count', oldQty + 1);
-    localStorage.setItem('cart_price', oldPrice + price);
 
     fetch('/cart/add', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
-        body: JSON.stringify({ menu_id: menuId, quantity: 1 })
+        body: JSON.stringify({ menu_id: menuId, quantity: 1 }),
+        redirect: 'follow'  // ← tambah ini
     })
-    .then(r => r.json())
     .then(res => {
+        // Kalau di-redirect ke login, ikuti redirect-nya
+        if (res.redirected) {
+            window.location.href = res.url;
+            return null;
+        }
+        return res.json();
+    })
+    .then(res => {
+        if (!res) return;
         if (res.success) {
-            // Refresh badge akurat dari server
             loadCartBadge();
         } else {
-            // Rollback badge
             updateBadge(oldQty, oldPrice);
-            localStorage.setItem('cart_count', oldQty);
-            localStorage.setItem('cart_price', oldPrice);
             alert('Gagal menambahkan ke keranjang!');
         }
     })
     .catch(() => {
         updateBadge(oldQty, oldPrice);
-        localStorage.setItem('cart_count', oldQty);
-        localStorage.setItem('cart_price', oldPrice);
         alert('Gagal menambahkan ke keranjang!');
     })
     .finally(() => {

@@ -22,32 +22,55 @@ class DeliveryController extends Controller
     }
 
     public function send(Delivery $delivery)
-    {
-        abort_if($delivery->status !== 'diproses', 403, 'Status pengiriman tidak valid.');
+{
+    $delivery->load('order.user'); 
 
-        $delivery->update([
-            'status'  => 'dikirim',
-            'sent_at' => now(),
-        ]);
+    abort_if($delivery->status !== 'diproses', 403, 'Status pengiriman tidak valid.');
 
-        return back()->with('success', 'Pesanan sedang dikirim.');
+    $delivery->update([
+        'status'  => 'dikirim',
+        'sent_at' => now(),
+    ]);
+
+    // Notifikasi Telegram
+    $chatId = $delivery->order->user->telegram_chat_id ?? null;
+    if ($chatId) {
+        (new \App\Http\Controllers\TelegramController)->sendMessage(
+            $chatId,
+            "🛵 *Pesanan kamu sedang diantar!*\n\nPesanan #{$delivery->order->order_number} sedang dalam perjalanan.\nSiapkan diri untuk menerima pesanan ya! 😊"
+        );
     }
 
-    public function complete(Delivery $delivery)
-    {
-        abort_if($delivery->status !== 'dikirim', 403, 'Pesanan belum dikirim.');
+    return back()->with('success', 'Pesanan sedang dikirim.');
+}
 
-        $delivery->update([
-            'status'       => 'selesai',
-            'completed_at' => now(),
-        ]);
+public function complete(Delivery $delivery)
+{
+    $delivery->load('order.user');
+    
+    abort_if($delivery->status !== 'dikirim', 403, 'Pesanan belum dikirim.');
 
-        // ↓ Sinkronkan status order juga
-        $delivery->order->update([
-            'status'       => 'selesai',
-            'completed_at' => now(),
-        ]);
+    $delivery->update([
+        'status'       => 'selesai',
+        'completed_at' => now(),
+    ]);
 
-        return back()->with('success', 'Pesanan selesai.');
+    $delivery->order->update([
+        'status'       => 'selesai',
+        'completed_at' => now(),
+    ]);
+
+    // Notifikasi Telegram
+    $chatId = $delivery->order->user->telegram_chat_id ?? null;
+    if ($chatId) {
+        (new \App\Http\Controllers\TelegramController)->sendMessage(
+            $chatId,
+            "✅ *Pesanan kamu telah selesai!*\n\nPesanan #{$delivery->order->order_number} sudah diterima.\nTerima kasih sudah memesan di Kantin! 🍽"
+        );
     }
+
+    return back()->with('success', 'Pesanan selesai.');
+}
+
+    
 }

@@ -18,16 +18,17 @@ class HomeController extends Controller
             ->where('status', 'selesai')->count();
 
         $proses = Order::where('user_id', $userId)
-            ->whereIn('status', ['baru', 'diproses'])->count();
+    ->whereIn('status', ['pembayaran_terverifikasi', 'dikonfirmasi', 'diproses', 'dikirim'])
+    ->count();
 
         $tagihan = Order::where('user_id', $userId)
-            ->whereHas('payment', fn($q) => $q->where('status', 'pending'))
+            ->whereIn('payment_status', ['pending', 'rejected'])
+            ->whereNotIn('status', ['selesai', 'dibatalkan'])
             ->count();
 
-        // Tagihan pending terbaru
         $tagihanTerbaru = Order::where('user_id', $userId)
-            ->whereHas('payment', fn($q) => $q->where('status', 'pending'))
-            ->with('payment')
+            ->whereIn('payment_status', ['pending', 'rejected'])
+            ->whereNotIn('status', ['selesai', 'dibatalkan'])
             ->latest()
             ->first();
 

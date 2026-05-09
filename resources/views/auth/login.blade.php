@@ -226,17 +226,7 @@
                 </div>
 
                 {{-- Remember me --}}
-                <div class="flex items-center gap-2.5 animate-fade-up-4">
-                    <input
-                        type="checkbox"
-                        id="remember"
-                        name="remember"
-                        class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
-                    >
-                    <label for="remember" class="text-sm text-gray-600 cursor-pointer select-none">
-                        Ingat saya selama 30 hari
-                    </label>
-                </div>
+                <input type="hidden" name="remember" value="1">
 
                 {{-- Submit --}}
                 <div class="animate-fade-up-5">

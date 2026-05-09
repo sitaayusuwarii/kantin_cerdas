@@ -109,10 +109,10 @@
 
                 {{-- Right Actions --}}
                 <div class="hidden md:flex items-center gap-3">
-                    <a href="{{ url('/payment') }}" class="btn-primary text-white text-sm font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow-md">
+                    <!-- <a href="{{ url('/payment') }}" class="btn-primary text-white text-sm font-semibold px-4 py-2 rounded-xl flex items-center gap-2 shadow-md">
                         <i class="fa-solid fa-upload text-xs"></i>
                         Upload Bukti Bayar
-                    </a>
+                    </a> -->
 
                     {{-- Profile Dropdown --}}
                     <div class="relative" id="profile-dropdown-wrap">

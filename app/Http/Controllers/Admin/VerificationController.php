@@ -58,29 +58,39 @@ class VerificationController extends Controller
     /**
      * Verifikasi pembayaran → status: terverifikasi
      */
-    public function verify(Payment $payment)
-    {
-        if ($payment->status !== 'menunggu') {
-            return response()->json(['success' => false, 'message' => 'Pembayaran ini sudah diproses.'], 422);
+ public function verify(Payment $payment)
+{
+   $payment->update([
+        'status'      => 'terverifikasi',
+        'verified_at' => now(),
+        'verified_by' => Auth::id(),
+    ]);
+
+    $order = Order::find($payment->order_id);
+    
+    \Log::info('ORDER UPDATE', ['order_id' => $payment->order_id, 'order' => $order?->status]);
+    
+    if ($order) {
+        $order->update([
+            'status'         => 'pembayaran_terverifikasi',
+            'payment_status' => 'paid',
+        ]);
+    
+        // Kirim notif Telegram
+        $chatId = $order->user->telegram_chat_id ?? null;
+        if ($chatId) {
+            (new \App\Http\Controllers\TelegramController)->sendMessage(
+                $chatId,
+                "✅ *Pembayaran kamu telah diverifikasi!*\n\nPesanan #{$order->order_number} sedang diproses oleh kantin."
+            );
         }
-
-        $payment->update([
-            'status'      => 'terverifikasi',
-            'verified_at' => now(),
-            'verified_by' => Auth::id(),
-        ]);
-
-        // ↓ Admin hanya ubah status ke "pembayaran_terverifikasi"
-        //   Pengelola kantin yang nanti klik "Terima" untuk konfirmasi
-        $payment->order?->update([
-            'status' => 'pembayaran_terverifikasi',
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Pembayaran berhasil diverifikasi.',
-        ]);
     }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Pembayaran berhasil diverifikasi.',
+    ]);
+}
 
     /**
      * Tolak pembayaran → status: ditolak + simpan alasan
@@ -109,6 +119,15 @@ class VerificationController extends Controller
             'status'       => 'dibatalkan',
             'cancelled_at' => now(),
         ]);
+
+        $chatId = $payment->user->telegram_chat_id;
+        if ($chatId) {
+            (new \App\Http\Controllers\TelegramController)->sendMessage(
+                $chatId,
+                "❌ *Pembayaran kamu ditolak.*\n\nAlasan: {$request->rejection_reason}\n\nSilakan upload ulang bukti pembayaran yang benar."
+            );
+        }
+
 
         return response()->json([
             'success' => true,

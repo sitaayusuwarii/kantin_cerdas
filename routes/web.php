@@ -20,6 +20,14 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\VerificationController;
+use App\Http\Controllers\Admin\LaporanKeuanganController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\TelegramController;
+use App\Http\Controllers\Admin\UnpaidOrderController;
+use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Admin\PaymentMethodController;
+
 
 Route::get('/', function () {
     return view('auth/login');
@@ -30,27 +38,48 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-        Route::get('/admin/kelola-user', function () {
-            return view('admin.kelola-user');
-        })->name('admin.kelola-user');
+        Route::get('/admin/kelola-user', [UserController::class, 'index'])
+        ->name('admin.kelola-user');
 
-        Route::get('/admin/report', function () {
-            return view('admin.report');
-        })->name('admin.report');
+        Route::get('/admin/laporan-keuangan', [LaporanKeuanganController::class, 'index'])
+        ->name('admin.laporan-keuangan');
+
+        // placeholder untuk export (implement terpisah)
+       Route::get('/admin/laporan-keuangan/pdf', [LaporanKeuanganController::class, 'exportPdf'])
+            ->name('admin.laporan-keuangan.export-pdf');
+        Route::get('/admin/laporan-keuangan/excel', [LaporanKeuanganController::class, 'exportExcel'])
+            ->name('admin.laporan-keuangan.export-excel');
 
         Route::get('/transactions',              [TransactionController::class, 'index'])->name('admin.transactions');
         Route::get('/transactions/{payment}/detail', [TransactionController::class, 'detail'])->name('admin.transactions.detail');
         Route::get('/transactions/export',       [TransactionController::class, 'export'])->name('admin.transactions.export');
 
         Route::get('/admin/verification', [VerificationController::class, 'index'])->name('admin.verification');
+        Route::post('/admin/verification/{payment}/verify', [VerificationController::class, 'verify'])->name('admin.verification.verify');
+        Route::post('/admin/verification/{payment}/reject', [VerificationController::class, 'reject'])->name('admin.verification.reject');
 
-        // Kelola User
-        Route::get('/users',                  [UserController::class, 'index'])->name('users.index');
-        Route::post('/users',                 [UserController::class, 'store'])->name('users.store');
-        Route::put('/users/{user}',           [UserController::class, 'update'])->name('users.update');
-        Route::patch('/users/{user}/suspend', [UserController::class, 'toggleSuspend'])->name('users.suspend');
-        Route::delete('/users/{user}',        [UserController::class, 'destroy'])->name('users.destroy');
-});
+         // Kelola User
+        Route::get('/admin/users',                  [UserController::class, 'index'])         ->name('admin.users.index');
+        Route::post('/admin/users',                 [UserController::class, 'store'])         ->name('admin.users.store');
+        Route::put('/admin/users/{user}',           [UserController::class, 'update'])        ->name('admin.users.update');
+        Route::patch('/admin/users/{user}/suspend', [UserController::class, 'toggleSuspend'])->name('admin.users.toggle-suspend');
+        Route::delete('/admin/users/{user}',        [UserController::class, 'destroy'])       ->name('admin.users.destroy');
+    
+        Route::get('/admin/unpaid-orders',                        [UnpaidOrderController::class, 'index'])       ->name('admin.unpaid-orders');
+        Route::post('/admin/unpaid-orders/{order}/cancel',        [UnpaidOrderController::class, 'cancel'])       ->name('admin.unpaid-orders.cancel');
+        Route::post('/admin/unpaid-orders/{order}/send-reminder', [UnpaidOrderController::class, 'sendReminder'])->name('admin.unpaid-orders.reminder');
+   
+        Route::get('/admin/notifications',                              [AdminNotificationController::class, 'index'])      ->name('admin.notifications');
+        Route::post('/admin/notifications/{notification}/read',         [AdminNotificationController::class, 'markRead'])   ->name('admin.notifications.read');
+        Route::post('/admin/notifications/read-all',                    [AdminNotificationController::class, 'markAllRead'])->name('admin.notifications.read-all');
+        Route::get('/admin/notifications/unread-count',                 [AdminNotificationController::class, 'unreadCount'])->name('admin.notifications.count');
+    
+       Route::get('/admin/payment-methods',                          [PaymentMethodController::class, 'index'])       ->name('admin.payment-methods');
+        Route::post('/admin/payment-methods',                         [PaymentMethodController::class, 'store'])       ->name('admin.payment-methods.store');
+        Route::put('/admin/payment-methods/{paymentMethod}',          [PaymentMethodController::class, 'update'])      ->name('admin.payment-methods.update');
+        Route::patch('/admin/payment-methods/{paymentMethod}/toggle', [PaymentMethodController::class, 'toggleActive'])->name('admin.payment-methods.toggle');
+        Route::delete('/admin/payment-methods/{paymentMethod}',       [PaymentMethodController::class, 'destroy'])     ->name('admin.payment-methods.destroy');
+    });
 
 Route::middleware(['auth', 'role:pengelola'])
     ->group(function () {
@@ -132,6 +161,12 @@ Route::middleware(['auth', 'role:pengelola'])
             ->name('pengelola.notifications.count');
 });
 
+// ── PUBLIC (tanpa auth) ──────────────────────────────
+Route::get('/menu', [MenuController::class, 'customerMenu'])
+    ->name('customer.menu');
+Route::get('/cart/data', [CartController::class, 'data'])->name('cart.data');
+
+//CUSTOMER
 Route::middleware(['auth', 'role:customer'])
     ->group(function () {
 
@@ -141,15 +176,14 @@ Route::middleware(['auth', 'role:customer'])
         Route::get('/order',          [OrderController::class, 'index'])->name('customer.order');
         Route::post('/order/confirm', [OrderController::class, 'confirm'])->name('customer.order.confirm');
         
-        Route::get('/payment', function () {
-            return view('customer.payment');
-        })->name('customer.payment');
+        Route::get('/payment', [PaymentController::class, 'index'])->name('customer.payment');
+        Route::post('/payment/upload', [PaymentController::class, 'upload'])->name('customer.payment.upload');
 
         Route::get('/invoice',          [InvoiceController::class, 'latest'])->name('customer.invoice');
         Route::get('/invoice/{orderNumber}', [InvoiceController::class, 'show'])->name('customer.invoice.show');
 
-        Route::get('/menu', [MenuController::class, 'customerMenu'])
-        ->name('customer.menu');
+        // Route::get('/menu', [MenuController::class, 'customerMenu'])
+        // ->name('customer.menu');
 
         Route::get('/history', [HistoryController::class, 'index'])->name('customer.history');
 
@@ -157,7 +191,7 @@ Route::middleware(['auth', 'role:customer'])
         Route::post('/cart/add',                    [CartController::class, 'add'])->name('cart.add');
         Route::put('/cart/update/{cartItem}',       [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/remove/{cartItem}',    [CartController::class, 'remove'])->name('cart.remove');
-        Route::get('/cart/data',                    [CartController::class, 'data'])->name('cart.data');
+        // Route::get('/cart/data',                    [CartController::class, 'data'])->name('cart.data');
         Route::post('/cart/update-ajax/{cartItem}', [CartController::class, 'updateAjax'])->name('cart.update-ajax');
         Route::post('/cart/clear',                  [CartController::class, 'clear'])->name('cart.clear');
         Route::post('/cart/remove-ajax/{cartItem}', [CartController::class, 'removeAjax'])->name('cart.remove-ajax');
@@ -174,6 +208,7 @@ Route::middleware(['auth', 'role:customer'])
         ->name('profile.photo.delete');
 });
 
+Route::post('/telegram/webhook', [TelegramController::class, 'handle']);
 
 Route::post('/password/resend', [PasswordResetLinkController::class, 'resend'])
     ->name('password.resend');

@@ -5,160 +5,128 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    /**
-     * Tampilkan halaman kelola user
-     */
+    // ── Index ────────────────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        $query = User::query()->where('role', '!=', 'admin'); // semua non-admin, atau hapus baris ini jika mau tampil semua
+        $query = User::withCount('orders')
+            ->orderByDesc('created_at');
 
-        // Filter role
-        if ($request->filled('role') && $request->role !== 'semua') {
-            $query->where('role', $request->role);
-        }
-
-        // Search nama / email
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+        // Search
+        if ($s = $request->search) {
+            $query->where(function ($q) use ($s) {
+                $q->where('full_name', 'ilike', "%$s%")
+                ->orWhere('username', 'ilike', "%$s%")
+                ->orWhere('phone', 'ilike', "%$s%")
+                ->orWhere('kelas', 'ilike', "%$s%");
             });
         }
 
-        $users = $query->latest()->paginate(15)->withQueryString();
-
-        $stats = [
-            'total'    => User::count(),
-            'customer' => User::where('role', 'customer')->count(),
-            'admin'    => User::whereIn('role', ['admin', 'driver'])->count(),
-            'driver'   => User::where('role', 'driver')->count(),
-        ];
-
-        return view('admin.kelola-user', compact('users', 'stats'));
-    }
-
-    /**
-     * Simpan user baru
-     */
-    public function store(Request $request)
-    {
-        $rules = [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role'     => ['required', Rule::in(['admin', 'customer', 'driver'])],
-        ];
-
-        // Kelas hanya wajib jika role = customer
-        if ($request->role === 'customer') {
-            $rules['phone'] = 'nullable|string|max:20';
-            $rules['kelas'] = 'required|string|max:100'; // simpan di kolom phone sementara, atau buat kolom baru
+        // Filter status
+        if ($status = $request->status) {
+            $query->where('status', $status);
         }
 
-        $validated = $request->validate($rules, [
-            'name.required'     => 'Nama wajib diisi.',
-            'email.required'    => 'Email wajib diisi.',
-            'email.unique'      => 'Email sudah terdaftar.',
-            'password.min'      => 'Password minimal 6 karakter.',
-            'role.required'     => 'Role wajib dipilih.',
-            'kelas.required'    => 'Kelas wajib diisi untuk customer.',
+        // Filter role
+        if ($role = $request->role) {
+            $query->where('role', $role);
+        }
+
+        $users = $query->paginate(15)->withQueryString();
+
+        // Stats
+        $totalUsers     = User::count();
+        $totalSiswa     = User::where('role', 'customer')->count();
+        $totalStaff     = User::where('role', 'pengelola')->count();
+        $totalAdmin     = User::where('role', 'admin')->count();
+        $totalSuspended = User::where('status', 'suspended')->count();
+
+        return view('admin.kelola-user', compact(
+            'users',
+            'totalUsers',
+            'totalSiswa',
+            'totalStaff',
+            'totalAdmin',
+            'totalSuspended',
+        ));
+    }
+
+    // ── Store ────────────────────────────────────────────────────────────────
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'username'  => 'required|string|max:255|unique:users',
+            'phone'     => 'required|string|max:20',
+            'kelas'     => 'nullable|string|max:100',
+            'password'  => 'required|string|min:6',
+            'role'      => ['required', Rule::in(['customer', 'pengelola', 'admin'])],
         ]);
 
         User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role'     => $validated['role'],
-            'phone'    => $request->role === 'customer' ? ($request->kelas ?? null) : null,
-            'balance'  => 0,
+            'full_name' => $data['full_name'],
+            'username'  => $data['username'],
+            'phone'     => $data['phone'],
+            'kelas'     => $data['kelas'] ?? null,
+            'password'  => Hash::make($data['password']),
+            'role'      => $data['role'],
+            'status'    => 'active',
         ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('toast_success', 'User baru berhasil ditambahkan!');
+        return back()->with('toast', ['msg' => 'User baru berhasil ditambahkan!', 'color' => 'emerald']);
     }
 
-    /**
-     * Update data user
-     */
+    // ── Update ───────────────────────────────────────────────────────────────
     public function update(Request $request, User $user)
     {
-        $rules = [
-            'name'  => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'role'  => ['required', Rule::in(['admin', 'customer', 'driver'])],
-        ];
-
-        if ($request->role === 'customer') {
-            $rules['kelas'] = 'required|string|max:100';
-        }
-
-        if ($request->filled('password')) {
-            $rules['password'] = 'string|min:6';
-        }
-
-        $validated = $request->validate($rules, [
-            'name.required'  => 'Nama wajib diisi.',
-            'email.unique'   => 'Email sudah digunakan akun lain.',
-            'kelas.required' => 'Kelas wajib diisi untuk customer.',
+        $data = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'username'  => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone'     => 'required|string|max:20',
+            'kelas'     => 'nullable|string|max:100',
+            'status'    => ['required', Rule::in(['active', 'suspended', 'inactive'])],
+            'password'  => 'nullable|string|min:6',
         ]);
 
-        $updateData = [
-            'name'  => $validated['name'],
-            'email' => $validated['email'],
-            'role'  => $validated['role'],
-            'phone' => $request->role === 'customer' ? ($request->kelas ?? $user->phone) : $user->phone,
-        ];
+        $user->full_name = $data['full_name'];
+        $user->username  = $data['username'];
+        $user->phone     = $data['phone'];
+        $user->kelas     = $data['kelas'] ?? null;
+        $user->status    = $data['status'];
 
-        if ($request->filled('password')) {
-            $updateData['password'] = Hash::make($request->password);
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
         }
 
-        $user->update($updateData);
+        $user->save();
 
-        return redirect()->route('admin.users.index')
-            ->with('toast_success', 'Data user berhasil diperbarui!');
+        return back()->with('toast', ['msg' => 'Data user berhasil diperbarui.', 'color' => 'emerald']);
     }
 
-    /**
-     * Toggle suspend / aktifkan — karena tidak ada kolom status,
-     * kita gunakan kolom photo sebagai flag "suspended" (atau tambah kolom baru).
-     * Rekomendasi: tambah kolom `status` enum('active','suspended') ke tabel.
-     * Untuk sekarang kita pakai workaround dengan prefix pada photo.
-     *
-     * LEBIH BAIK: jalankan migration tambah kolom status lalu hapus workaround ini.
-     */
+    // ── Toggle Suspend ───────────────────────────────────────────────────────
     public function toggleSuspend(User $user)
     {
-        // Jika sudah ada kolom status di DB, ganti dengan:
-        // $user->update(['status' => $user->status === 'suspended' ? 'active' : 'suspended']);
+        $user->status = $user->status === 'suspended' ? 'active' : 'suspended';
+        $user->save();
 
-        // Workaround sementara pakai prefix di kolom photo:
-        if (str_starts_with($user->photo ?? '', 'SUSPENDED|')) {
-            $user->update(['photo' => ltrim(substr($user->photo, 10), '')]);
-            $msg = "{$user->name} berhasil diaktifkan.";
-        } else {
-            $user->update(['photo' => 'SUSPENDED|' . ($user->photo ?? '')]);
-            $msg = "{$user->name} berhasil disuspend.";
-        }
+        $msg = $user->status === 'suspended'
+            ? "{$user->full_name} berhasil disuspend."
+            : "{$user->full_name} berhasil diaktifkan.";
 
-        return redirect()->route('admin.users.index')->with('toast_success', $msg);
+        return back()->with('toast', ['msg' => $msg, 'color' => $user->status === 'suspended' ? 'amber' : 'emerald']);
     }
 
-    /**
-     * Hapus user
-     */
+    // ── Destroy ──────────────────────────────────────────────────────────────
     public function destroy(User $user)
     {
-        $name = $user->name;
+        $name = $user->full_name;
         $user->delete();
 
-        return redirect()->route('admin.users.index')
-            ->with('toast_success', "Akun {$name} berhasil dihapus.");
+        return back()->with('toast', ['msg' => "Akun {$name} berhasil dihapus.", 'color' => 'red']);
     }
 }

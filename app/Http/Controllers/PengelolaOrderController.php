@@ -29,7 +29,7 @@ class PengelolaOrderController extends Controller
 
         // Stats hanya untuk order yang sudah masuk ke pengelola
         $totalOrders      = Order::whereIn('status', self::VISIBLE_STATUSES)->count();
-        $newOrders        = Order::where('status', 'pembayaran_terverifikasi')->count();
+        $newOrders = Order::where('status', 'pembayaran_terverifikasi')->count();
         $confirmedOrders  = Order::where('status', 'dikonfirmasi')->count();
         $processedOrders  = Order::where('status', 'diproses')->count();
         $completedOrders  = Order::where('status', 'selesai')->count();
@@ -45,7 +45,7 @@ class PengelolaOrderController extends Controller
     }
 
     // Pengelola konfirmasi → mulai diproses dapur
-    public function confirm(Order $order)
+   public function confirm(Order $order)
 {
     abort_if($order->status !== 'pembayaran_terverifikasi', 403, 'Pesanan tidak valid untuk dikonfirmasi.');
 
@@ -54,12 +54,20 @@ class PengelolaOrderController extends Controller
         'confirmed_at' => now(),
     ]);
 
-    // ↓ Otomatis buat record delivery saat pesanan diterima
     Delivery::create([
         'order_id'     => $order->id,
         'status'       => 'diproses',
         'processed_at' => now(),
     ]);
+
+    // Kirim notif ke customer via Telegram
+    $chatId = $order->user->telegram_chat_id;
+    if ($chatId) {
+        (new \App\Http\Controllers\TelegramController)->sendMessage(
+            $chatId,
+            "👨‍🍳 *Pesanan kamu sedang diproses!*\n\nPesanan #{$order->order_number} sudah diterima kantin dan sedang disiapkan."
+        );
+    }
 
     return back()->with('success', 'Pesanan dikonfirmasi dan masuk antrian pengiriman.');
 }

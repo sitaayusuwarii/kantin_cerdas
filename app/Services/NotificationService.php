@@ -16,11 +16,10 @@ class NotificationService
         }
     }
 
-    public static function orderBaru($order, $user)
+   public static function orderBaru($order, $user)
 {
     if (!$user->telegram_chat_id) return;
 
-    // Ambil item pesanan
     $order->load('items.menu');
 
     $text = "🧾 *Detail Pesanan*\n\n";
@@ -40,26 +39,34 @@ class NotificationService
 
     $text .= "Silakan pilih metode pembayaran 👇";
 
+    // Ambil dari database
+    $methods = \App\Models\PaymentMethod::where('is_active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $buttons = $methods->map(function ($method) {
+        $emoji = match($method->type) {
+            'bank_transfer' => '🏦',
+            'ewallet'       => '💸',
+            'qris'          => '💳',
+            'cash'          => '💵',
+            default         => '💰',
+        };
+        return ['text' => "{$emoji} {$method->name}", 'callback_data' => 'pay_' . $method->code];
+    })->chunk(2)->map(fn($chunk) => $chunk->values()->toArray())->values()->toArray();
+
     \Illuminate\Support\Facades\Http::post(
         "https://api.telegram.org/bot".env('TELEGRAM_BOT_TOKEN')."/sendMessage",
         [
-            'chat_id' => $user->telegram_chat_id,
-            'text' => $text,
-            'parse_mode' => 'Markdown',
-            'reply_markup' => json_encode([
-                'inline_keyboard' => [
-                    [
-                        ['text' => '💳 QRIS', 'callback_data' => 'pay_qris'],
-                        ['text' => '🏦 BCA', 'callback_data' => 'pay_bca'],
-                        ['text' => '🏦 BRI', 'callback_data' => 'pay_bri'],
-                    ]
-                ]
-            ])
+            'chat_id'      => $user->telegram_chat_id,
+            'text'         => $text,
+            'parse_mode'   => 'Markdown',
+            'reply_markup' => json_encode(['inline_keyboard' => $buttons]),
         ]
     );
 }
 
-    public static function pembayaranBaru(int $orderNumber): void
+    public static function pembayaranBaru(string $orderNumber): void
     {
         self::toAllPengelola([
             'type'    => 'payment_new',

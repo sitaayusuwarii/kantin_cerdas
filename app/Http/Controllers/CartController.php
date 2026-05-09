@@ -7,6 +7,7 @@ use App\Models\CartItem;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 
+
 class CartController extends Controller
 {
     // ─────────────────────────────────────────
@@ -45,10 +46,14 @@ class CartController extends Controller
     // ─────────────────────────────────────────
     public function add(Request $request)
     {
+         if (!auth()->check()) {
+        return redirect()->guest(route('login'));
+
         $request->validate([
             'menu_id'  => 'required|exists:menus,id',
             'quantity' => 'required|integer|min:1',
         ]);
+         }
 
         // Ambil price saja, tidak perlu load seluruh kolom
         $menu = Menu::select('id', 'price')->findOrFail($request->menu_id);
@@ -136,6 +141,14 @@ class CartController extends Controller
     // ─────────────────────────────────────────
     public function data()
     {
+        if (!auth()->check()) {
+        return response()->json([
+            'items'       => [],
+            'total_qty'   => 0,
+            'total_price' => 0,
+        ]);
+    }
+    
         $cart = $this->getActiveCart(withItems: true);
 
         if (!$cart || $cart->items->isEmpty()) {
