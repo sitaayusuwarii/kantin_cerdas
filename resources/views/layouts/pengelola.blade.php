@@ -196,14 +196,7 @@ tailwind.config = {
 <div class="px-5 py-4 border-b border-borderSoft flex items-center gap-3">
     <img src="{{ asset('images/canteen.png') }}"
          alt="Smart Canteen Logo"
-         class="w-11 h-11 object-contain rounded-xl flex-shrink-0">
-
-    <div>
-        <p class="font-semibold text-darkText text-sm">
-            Smart<span class="text-primary">Canteen</span>
-        </p>
-        <p class="text-xs text-gray-400">Panel Pengelola</p>
-    </div>
+         class="w-20 h-20 object-contain rounded-xl flex-shrink-0">
 </div>
 
     <nav class="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-2">
