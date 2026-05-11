@@ -11,7 +11,7 @@
 <div class="glass-card rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3">
     <div class="flex items-center gap-2">
         <i class="fa-solid fa-calendar-range text-primary-400 text-sm"></i>
-        <span class="text-slate-300 text-sm font-medium">Periode:</span>
+        <span class="text-stone-600 text-sm font-medium">Periode:</span>
     </div>
     <div class="flex flex-wrap gap-2">
         @foreach([
@@ -22,22 +22,22 @@
         ] as $key => $label)
         <button type="submit" name="period" value="{{ $key }}"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-            {{ $period === $key ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300' : 'bg-slate-800 border border-border text-slate-400 hover:text-white hover:border-slate-600' }}">
+            {{ $period === $key ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300' : 'bg-orange-50 border border-border text-slate-400 hover:text-stone-800 hover:border-slate-600' }}">
             {{ $label }}
         </button>
         @endforeach
 
         {{-- Custom Date Range --}}
-        <div class="flex items-center gap-2 bg-slate-800 border border-border rounded-lg px-3 py-1.5
+        <div class="flex items-center gap-2 bg-orange-50 border border-border rounded-lg px-3 py-1.5
             {{ $period === 'custom' ? 'border-primary-500/40' : '' }}">
             <input type="date" name="start_date"
                 value="{{ $period === 'custom' ? $startDate->toDateString() : now()->startOfMonth()->toDateString() }}"
-                class="bg-transparent text-slate-300 text-xs outline-none"
+                class="bg-transparent text-stone-600 text-xs outline-none"
                 onchange="document.getElementById('period-form').submit()">
-            <span class="text-slate-600">—</span>
+            <span class="text-stone-400">—</span>
             <input type="date" name="end_date"
                 value="{{ $period === 'custom' ? $endDate->toDateString() : now()->toDateString() }}"
-                class="bg-transparent text-slate-300 text-xs outline-none"
+                class="bg-transparent text-stone-600 text-xs outline-none"
                 onchange="document.getElementById('period-form').submit()">
         </div>
     </div>
@@ -48,7 +48,7 @@
             <i class="fa-solid fa-file-pdf"></i> Export PDF
         </a>
         <a href="{{ route('admin.laporan-keuangan.export-excel', request()->query()) }}"
-           class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 hover:border-primary-500 hover:text-primary-400 transition-all text-xs font-semibold">
+           class="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 border border-border text-slate-400 hover:border-primary-500 hover:text-primary-400 transition-all text-xs font-semibold">
             <i class="fa-solid fa-file-excel"></i> Export Excel
         </a>
     </div>
@@ -88,15 +88,15 @@
                 $incomeRibu = $totalIncome / 1000;
             @endphp
             @if($totalIncome >= 1000000)
-                <p class="text-white font-bold text-3xl leading-none">
-                    Rp {{ number_format($incomeJuta, 1, ',', '.') }}<span class="text-xl text-slate-300">jt</span>
+                <p class="text-stone-800 font-bold text-3xl leading-none">
+                    Rp {{ number_format($incomeJuta, 1, ',', '.') }}<span class="text-xl text-stone-600">jt</span>
                 </p>
             @else
-                <p class="text-white font-bold text-3xl leading-none">
-                    Rp {{ number_format($incomeRibu, 0, ',', '.') }}<span class="text-xl text-slate-300">rb</span>
+                <p class="text-stone-800 font-bold text-3xl leading-none">
+                    Rp {{ number_format($incomeRibu, 0, ',', '.') }}<span class="text-xl text-stone-600">rb</span>
                 </p>
             @endif
-            <p class="text-slate-500 text-xs mt-2">{{ $periodLabel }}</p>
+            <p class="text-stone-400 text-xs mt-2">{{ $periodLabel }}</p>
 
             @if($incomeGrowth !== null)
             <div class="mt-4 flex items-center gap-2">
@@ -119,8 +119,8 @@
                 </div>
                 <span class="text-slate-400 text-xs font-medium">Total Transaksi</span>
             </div>
-            <p class="text-white font-bold text-3xl leading-none">{{ number_format($totalTransactions) }}</p>
-            <p class="text-slate-500 text-xs mt-2">Transaksi berhasil</p>
+            <p class="text-stone-800 font-bold text-3xl leading-none">{{ number_format($totalTransactions) }}</p>
+            <p class="text-stone-400 text-xs mt-2">Transaksi berhasil</p>
             @if($trxGrowth !== null)
             <p class="{{ $trxGrowth >= 0 ? 'text-emerald-400' : 'text-red-400' }} text-xs font-semibold mt-4 flex items-center gap-1">
                 <i class="fa-solid fa-arrow-trend-{{ $trxGrowth >= 0 ? 'up' : 'down' }}"></i>
@@ -143,10 +143,10 @@
             @php
                 $avgRibu = $avgPerTransaction / 1000;
             @endphp
-            <p class="text-white font-bold text-3xl leading-none">
-                Rp {{ number_format($avgRibu, 1, ',', '.') }}<span class="text-xl text-slate-300">rb</span>
+            <p class="text-stone-800 font-bold text-3xl leading-none">
+                Rp {{ number_format($avgRibu, 1, ',', '.') }}<span class="text-xl text-stone-600">rb</span>
             </p>
-            <p class="text-slate-500 text-xs mt-2">Per transaksi periode ini</p>
+            <p class="text-stone-400 text-xs mt-2">Per transaksi periode ini</p>
             @if($avgGrowthAmount !== 0)
             <p class="{{ $avgGrowthAmount >= 0 ? 'text-violet-400' : 'text-red-400' }} text-xs font-semibold mt-4 flex items-center gap-1">
                 <i class="fa-solid fa-arrow-trend-{{ $avgGrowthAmount >= 0 ? 'up' : 'down' }}"></i>
@@ -164,17 +164,17 @@
     <div class="xl:col-span-2 glass-card rounded-2xl p-5">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h2 class="text-white font-bold text-base">Tren Pemasukan</h2>
-                <p class="text-slate-500 text-xs mt-0.5">Januari – {{ end($months) }} {{ $currentYear }} (dalam jutaan Rp)</p>
+                <h2 class="text-stone-800 font-bold text-base">Tren Pemasukan</h2>
+                <p class="text-stone-400 text-xs mt-0.5">Januari – {{ end($months) }} {{ $currentYear }} (dalam jutaan Rp)</p>
             </div>
             <div class="flex gap-3">
                 <div class="flex items-center gap-1.5">
                     <div class="w-2 h-2 rounded-full bg-primary-500"></div>
-                    <span class="text-slate-500 text-xs">Pemasukan</span>
+                    <span class="text-stone-400 text-xs">Pemasukan</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <div class="w-2 h-2 rounded-full bg-slate-600"></div>
-                    <span class="text-slate-500 text-xs">Transaksi</span>
+                    <span class="text-stone-400 text-xs">Transaksi</span>
                 </div>
             </div>
         </div>
@@ -193,12 +193,12 @@
                     {{-- Income bar --}}
                     <div class="flex-1 rounded-t-md bg-gradient-to-t from-primary-700 to-primary-400 relative group"
                          style="height: {{ $barHeight }}px">
-                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-border text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                        <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white border border-border text-stone-800 text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                             Rp {{ $incomeJutaDisplay }}jt
                         </div>
                     </div>
                 </div>
-                <span class="text-slate-500 text-xs font-medium">{{ $month }}</span>
+                <span class="text-stone-400 text-xs font-medium">{{ $month }}</span>
             </div>
             @endforeach
         </div>
@@ -206,8 +206,8 @@
         <div class="border-t border-border/50 pt-3 grid grid-cols-{{ count($months) }} gap-2">
             @foreach($months as $i => $month)
             <div class="text-center">
-                <p class="text-white font-bold text-sm font-mono">{{ number_format($incomeByMonth[$i] / 1000000, 1, ',', '.') }}jt</p>
-                <p class="text-slate-600 text-xs">{{ $month }}</p>
+                <p class="text-stone-800 font-bold text-sm font-mono">{{ number_format($incomeByMonth[$i] / 1000000, 1, ',', '.') }}jt</p>
+                <p class="text-stone-400 text-xs">{{ $month }}</p>
             </div>
             @endforeach
         </div>
@@ -215,8 +215,8 @@
 
     {{-- Breakdown by Payment Method --}}
     <div class="glass-card rounded-2xl p-5">
-        <h2 class="text-white font-bold text-base mb-1">Breakdown Metode</h2>
-        <p class="text-slate-500 text-xs mb-5">Distribusi metode pembayaran</p>
+        <h2 class="text-stone-800 font-bold text-base mb-1">Breakdown Metode</h2>
+        <p class="text-stone-400 text-xs mb-5">Distribusi metode pembayaran</p>
 
         <div class="space-y-4 mb-6">
             @foreach($methods as $m)
@@ -224,7 +224,7 @@
                 <div class="flex justify-between items-center mb-1.5">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-{{ $m['color'] }}-500"></div>
-                        <span class="text-slate-300 text-sm font-medium">{{ $m['label'] }}</span>
+                        <span class="text-stone-600 text-sm font-medium">{{ $m['label'] }}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         @php
@@ -239,7 +239,7 @@
                         <span class="text-{{ $m['color'] }}-400 font-mono font-semibold text-xs">{{ $m['pct'] }}%</span>
                     </div>
                 </div>
-                <div class="h-2.5 bg-slate-700/50 rounded-full overflow-hidden">
+                <div class="h-2.5 bg-orange-100/50 rounded-full overflow-hidden">
                     <div class="h-full bg-{{ $m['color'] }}-500 rounded-full transition-all" style="width: {{ $m['pct'] }}%"></div>
                 </div>
             </div>
@@ -268,8 +268,8 @@
                     @endforeach
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <p class="text-white font-bold text-base leading-none">{{ number_format($totalTransactions) }}</p>
-                    <p class="text-slate-500 text-xs">trx</p>
+                    <p class="text-stone-800 font-bold text-base leading-none">{{ number_format($totalTransactions) }}</p>
+                    <p class="text-stone-400 text-xs">trx</p>
                 </div>
             </div>
         </div>
@@ -279,8 +279,8 @@
 {{-- ===== MONTHLY TABLE ===== --}}
 <div class="glass-card rounded-2xl overflow-hidden mb-6">
     <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h2 class="text-white font-bold text-base">Ringkasan Bulanan</h2>
-        <span class="text-slate-500 text-xs">Tahun {{ $currentYear }}</span>
+        <h2 class="text-stone-800 font-bold text-base">Ringkasan Bulanan</h2>
+        <span class="text-stone-400 text-xs">Tahun {{ $currentYear }}</span>
     </div>
 
     {{-- Desktop table --}}
@@ -288,10 +288,10 @@
         <table class="w-full">
             <thead>
                 <tr class="border-b border-border">
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bulan</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Transaksi</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Pemasukan</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Growth</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Bulan</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Total Transaksi</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Pemasukan</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Growth</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-border/40">
@@ -302,18 +302,18 @@
                 <tr class="table-row {{ $isLast ? 'bg-primary-500/5' : '' }}">
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center">
+                            <div class="w-6 h-6 rounded-lg bg-orange-100 flex items-center justify-center">
                                 <i class="fa-solid fa-calendar text-slate-400 text-xs"></i>
                             </div>
-                            <span class="text-white font-semibold text-sm">{{ $row['month'] }}</span>
+                            <span class="text-stone-800 font-semibold text-sm">{{ $row['month'] }}</span>
                             @if($isLast)
                             <span class="text-xs font-semibold text-primary-400 bg-primary-500/10 border border-primary-500/20 px-1.5 py-0.5 rounded">Aktif</span>
                             @endif
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-slate-300 text-sm">{{ number_format($row['trx']) }}</td>
+                    <td class="px-5 py-4 text-stone-600 text-sm">{{ number_format($row['trx']) }}</td>
                     <td class="px-5 py-4">
-                        <span class="text-white font-bold font-mono text-sm">Rp {{ number_format($row['income'], 0, ',', '.') }}</span>
+                        <span class="text-stone-800 font-bold font-mono text-sm">Rp {{ number_format($row['income'], 0, ',', '.') }}</span>
                     </td>
                     <td class="px-5 py-4">
                         @if($row['growth'])
@@ -322,16 +322,16 @@
                             {{ $row['growth'] }}
                         </span>
                         @else
-                        <span class="text-slate-600 text-xs">—</span>
+                        <span class="text-stone-400 text-xs">—</span>
                         @endif
                     </td>
                 </tr>
                 @endforeach
             </tbody>
             <tfoot>
-                <tr class="border-t-2 border-border bg-slate-800/30">
-                    <td class="px-5 py-4 text-white font-bold text-sm">TOTAL YTD</td>
-                    <td class="px-5 py-4 text-white font-bold">{{ number_format($ytdTrx) }}</td>
+                <tr class="border-t-2 border-border bg-orange-50/30">
+                    <td class="px-5 py-4 text-stone-800 font-bold text-sm">TOTAL YTD</td>
+                    <td class="px-5 py-4 text-stone-800 font-bold">{{ number_format($ytdTrx) }}</td>
                     <td class="px-5 py-4 text-emerald-400 font-bold font-mono text-sm">Rp {{ number_format($ytdIncome, 0, ',', '.') }}</td>
                     <td class="px-5 py-4 text-slate-400 text-xs font-semibold font-mono">—</td>
                 </tr>
@@ -343,9 +343,9 @@
     <div class="sm:hidden p-4 space-y-3">
         @foreach($monthlyData as $i => $row)
         @php $isLast = $i === count($monthlyData) - 1; @endphp
-        <div class="p-4 rounded-xl bg-slate-800/40 border border-border {{ $isLast ? 'border-primary-500/30 bg-primary-500/5' : '' }}">
+        <div class="p-4 rounded-xl bg-orange-50/40 border border-border {{ $isLast ? 'border-primary-500/30 bg-primary-500/5' : '' }}">
             <div class="flex items-center justify-between mb-3">
-                <p class="text-white font-bold">{{ $row['month'] }}
+                <p class="text-stone-800 font-bold">{{ $row['month'] }}
                     @if($isLast)<span class="ml-2 text-xs text-primary-400 font-normal">Aktif</span>@endif
                 </p>
                 @if($row['growth'])
@@ -354,12 +354,12 @@
             </div>
             <div class="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                    <p class="text-slate-500">Transaksi</p>
-                    <p class="text-white font-semibold">{{ number_format($row['trx']) }}</p>
+                    <p class="text-stone-400">Transaksi</p>
+                    <p class="text-stone-800 font-semibold">{{ number_format($row['trx']) }}</p>
                 </div>
                 <div>
-                    <p class="text-slate-500">Pemasukan</p>
-                    <p class="text-white font-semibold font-mono">{{ number_format($row['income'] / 1000000, 1, ',', '.') }}jt</p>
+                    <p class="text-stone-400">Pemasukan</p>
+                    <p class="text-stone-800 font-semibold font-mono">{{ number_format($row['income'] / 1000000, 1, ',', '.') }}jt</p>
                 </div>
             </div>
         </div>
@@ -374,8 +374,8 @@
             <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
         </div>
         <div>
-            <h2 class="text-white font-bold text-base">Catatan Keuangan</h2>
-            <p class="text-slate-500 text-xs">Otomatis terdeteksi sistem</p>
+            <h2 class="text-stone-800 font-bold text-base">Catatan Keuangan</h2>
+            <p class="text-stone-400 text-xs">Otomatis terdeteksi sistem</p>
         </div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -383,12 +383,12 @@
         <div class="p-4 rounded-xl bg-{{ $n['color'] }}-500/5 border border-{{ $n['color'] }}-500/15">
             <div class="flex items-center gap-2 mb-2">
                 <i class="fa-solid {{ $n['icon'] }} text-{{ $n['color'] }}-400 text-sm"></i>
-                <p class="text-white text-sm font-semibold">{{ $n['title'] }}</p>
+                <p class="text-stone-800 text-sm font-semibold">{{ $n['title'] }}</p>
             </div>
             <p class="text-slate-400 text-xs leading-relaxed">{{ $n['desc'] }}</p>
         </div>
         @empty
-        <div class="col-span-3 text-center text-slate-500 text-sm py-4">Tidak ada catatan untuk periode ini.</div>
+        <div class="col-span-3 text-center text-stone-400 text-sm py-4">Tidak ada catatan untuk periode ini.</div>
         @endforelse
     </div>
 </div>

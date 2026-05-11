@@ -13,8 +13,8 @@
             <i class="fa-solid fa-receipt text-primary-400 text-sm"></i>
         </div>
         <div>
-            <p class="text-white font-bold text-xl leading-none">{{ $stats['total'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5">Total Transaksi</p>
+            <p class="text-stone-800 font-bold text-xl leading-none">{{ $stats['total'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5">Total Transaksi</p>
         </div>
     </div>
     <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
@@ -22,8 +22,8 @@
             <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
         </div>
         <div>
-            <p class="text-white font-bold text-xl leading-none">{{ $stats['terverifikasi'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5">Lunas</p>
+            <p class="text-stone-800 font-bold text-xl leading-none">{{ $stats['terverifikasi'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5">Lunas</p>
         </div>
     </div>
     <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
@@ -31,8 +31,8 @@
             <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
         </div>
         <div>
-            <p class="text-white font-bold text-xl leading-none">{{ $stats['menunggu'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5">Pending</p>
+            <p class="text-stone-800 font-bold text-xl leading-none">{{ $stats['menunggu'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5">Pending</p>
         </div>
     </div>
     <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
@@ -40,8 +40,8 @@
             <i class="fa-solid fa-circle-xmark text-red-400 text-sm"></i>
         </div>
         <div>
-            <p class="text-white font-bold text-xl leading-none">{{ $stats['ditolak'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5">Ditolak</p>
+            <p class="text-stone-800 font-bold text-xl leading-none">{{ $stats['ditolak'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5">Ditolak</p>
         </div>
     </div>
 </div>
@@ -57,7 +57,7 @@
                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                {{ request('status', '') === $val
                    ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300'
-                   : 'bg-slate-800 border border-border text-slate-400 hover:text-white hover:border-slate-600' }}">
+                   : 'bg-orange-50 border border-orange-100 text-stone-500 hover:text-white hover:border-slate-600' }}">
                 {{ $label }}
             </a>
             @endforeach
@@ -65,19 +65,19 @@
 
         <div class="flex gap-2 sm:ml-auto flex-wrap">
             {{-- Date Filter --}}
-            <div class="flex items-center gap-2 bg-slate-800 border border-border rounded-xl px-3 py-2">
-                <i class="fa-solid fa-calendar text-slate-500 text-xs"></i>
+            <div class="flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
+                <i class="fa-solid fa-calendar text-stone-400 text-xs"></i>
                 <input type="date" name="date" value="{{ request('date', date('Y-m-d')) }}"
                        onchange="document.getElementById('filter-form').submit()"
-                       class="bg-transparent text-slate-300 text-xs outline-none cursor-pointer">
+                       class="bg-transparent text-stone-600 text-xs outline-none cursor-pointer">
             </div>
             {{-- Search --}}
-            <div class="flex items-center gap-2 bg-slate-800 border border-border rounded-xl px-3 py-2">
-                <i class="fa-solid fa-search text-slate-500 text-xs"></i>
+            <div class="flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-xl px-3 py-2">
+                <i class="fa-solid fa-search text-stone-400 text-xs"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
                        placeholder="Cari No. Order / Nama..."
                        onchange="document.getElementById('filter-form').submit()"
-                       class="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none w-36">
+                       class="bg-transparent text-sm text-stone-600 placeholder-slate-600 outline-none w-36">
             </div>
             {{-- Export --}}
             <a href="{{ route('admin.transactions.export', request()->query()) }}"
@@ -101,23 +101,23 @@
 
 {{-- ===== DESKTOP TABLE ===== --}}
 <div class="hidden lg:block glass-card rounded-2xl overflow-hidden">
-    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h2 class="text-white font-bold text-base">Semua Transaksi</h2>
-        <span class="text-slate-500 text-xs">
+    <div class="px-5 py-4 border-b border-orange-100 flex items-center justify-between">
+        <h2 class="text-stone-800 font-bold text-base">Semua Transaksi</h2>
+        <span class="text-stone-400 text-xs">
             Menampilkan {{ $payments->firstItem() }}–{{ $payments->lastItem() }} dari {{ $payments->total() }} data
         </span>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead>
-                <tr class="border-b border-border">
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">No. Pesanan</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Pengguna</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Metode</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tanggal</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Detail</th>
+                <tr class="border-b border-orange-100">
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">No. Pesanan</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Pengguna</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Total</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Metode</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Status</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Tanggal</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Detail</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-border/40">
@@ -162,18 +162,18 @@
                             </div>
                             <div>
                                 <p class="text-white text-sm font-semibold">{{ $payment->user->full_name }}</p>
-                                <p class="text-slate-500 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
+                                <p class="text-stone-400 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-5 py-4">
-                        <span class="text-white font-bold font-mono text-sm">
+                        <span class="text-stone-800 font-bold font-mono text-sm">
                             Rp {{ number_format($payment->amount, 0, ',', '.') }}
                         </span>
                     </td>
                     <td class="px-5 py-4">
-                        <div class="flex items-center gap-1.5 text-slate-400 text-sm">
-                            <i class="fa-solid {{ $methodIcons[$payment->method] ?? 'fa-money-bill' }} text-xs text-slate-500"></i>
+                        <div class="flex items-center gap-1.5 text-stone-500 text-sm">
+                            <i class="fa-solid {{ $methodIcons[$payment->method] ?? 'fa-money-bill' }} text-xs text-stone-400"></i>
                             {{ $methodLabels[$payment->method] ?? $payment->method }}
                         </div>
                     </td>
@@ -182,12 +182,12 @@
                             {{ $sc['label'] }}
                         </span>
                     </td>
-                    <td class="px-5 py-4 text-slate-400 text-xs">
+                    <td class="px-5 py-4 text-stone-500 text-xs">
                         {{ $payment->created_at->format('d M Y, H:i') }}
                     </td>
                     <td class="px-5 py-4">
                         <button onclick="showDetail({{ $payment->id }})"
-                            class="w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-primary-500/20 border border-border hover:border-primary-500/30 text-slate-400 hover:text-primary-400 flex items-center justify-center transition-all">
+                            class="w-8 h-8 rounded-lg bg-orange-100/50 hover:bg-primary-500/20 border border-orange-100 hover:border-primary-500/30 text-stone-500 hover:text-primary-400 flex items-center justify-center transition-all">
                             <i class="fa-solid fa-eye text-xs"></i>
                         </button>
                     </td>
@@ -197,7 +197,7 @@
                     <td colspan="7" class="px-5 py-16 text-center">
                         <div class="flex flex-col items-center gap-2">
                             <i class="fa-solid fa-receipt text-slate-700 text-3xl"></i>
-                            <p class="text-slate-500 text-sm">Tidak ada transaksi ditemukan</p>
+                            <p class="text-stone-400 text-sm">Tidak ada transaksi ditemukan</p>
                         </div>
                     </td>
                 </tr>
@@ -207,18 +207,18 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="px-5 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p class="text-slate-500 text-xs">
+    <div class="px-5 py-4 border-t border-orange-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p class="text-stone-400 text-xs">
             Menampilkan {{ $payments->firstItem() }}–{{ $payments->lastItem() }} dari {{ $payments->total() }} transaksi
         </p>
         <div class="flex items-center gap-1">
             {{-- Prev --}}
             @if($payments->onFirstPage())
-            <span class="w-8 h-8 rounded-lg bg-slate-700/30 border border-border text-slate-600 flex items-center justify-center cursor-not-allowed">
+            <span class="w-8 h-8 rounded-lg bg-orange-100/30 border border-orange-100 text-stone-400 flex items-center justify-center cursor-not-allowed">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </span>
             @else
-            <a href="{{ $payments->previousPageUrl() }}" class="w-8 h-8 rounded-lg bg-slate-700/50 border border-border text-slate-400 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
+            <a href="{{ $payments->previousPageUrl() }}" class="w-8 h-8 rounded-lg bg-orange-100/50 border border-orange-100 text-stone-500 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </a>
             @endif
@@ -228,18 +228,18 @@
             <a href="{{ $url }}" class="w-8 h-8 rounded-lg text-xs font-semibold transition-all flex items-center justify-center
                 {{ $page === $payments->currentPage()
                     ? 'bg-primary-500 text-white border border-primary-500'
-                    : 'bg-slate-700/50 border border-border text-slate-400 hover:border-primary-500 hover:text-primary-400' }}">
+                    : 'bg-orange-100/50 border border-orange-100 text-stone-500 hover:border-primary-500 hover:text-primary-400' }}">
                 {{ $page }}
             </a>
             @endforeach
 
             {{-- Next --}}
             @if($payments->hasMorePages())
-            <a href="{{ $payments->nextPageUrl() }}" class="w-8 h-8 rounded-lg bg-slate-700/50 border border-border text-slate-400 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
+            <a href="{{ $payments->nextPageUrl() }}" class="w-8 h-8 rounded-lg bg-orange-100/50 border border-orange-100 text-stone-500 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </a>
             @else
-            <span class="w-8 h-8 rounded-lg bg-slate-700/30 border border-border text-slate-600 flex items-center justify-center cursor-not-allowed">
+            <span class="w-8 h-8 rounded-lg bg-orange-100/30 border border-orange-100 text-stone-400 flex items-center justify-center cursor-not-allowed">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </span>
             @endif
@@ -250,8 +250,8 @@
 {{-- ===== MOBILE CARD LIST ===== --}}
 <div class="lg:hidden space-y-3">
     <div class="flex items-center justify-between mb-2">
-        <h2 class="text-white font-bold">Semua Transaksi</h2>
-        <span class="text-slate-500 text-xs">{{ $payments->total() }} total</span>
+        <h2 class="text-stone-800 font-bold">Semua Transaksi</h2>
+        <span class="text-stone-400 text-xs">{{ $payments->total() }} total</span>
     </div>
 
     @forelse($payments as $payment)
@@ -262,36 +262,36 @@
         <div class="flex items-start justify-between mb-3">
             <div>
                 <p class="text-primary-400 font-mono font-semibold text-sm">{{ $payment->order->order_number }}</p>
-                <p class="text-white font-semibold mt-0.5">{{ $payment->user->full_name }}</p>
-                <p class="text-slate-500 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
+                <p class="text-stone-800 font-semibold mt-0.5">{{ $payment->user->full_name }}</p>
+                <p class="text-stone-400 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
             </div>
             <span class="badge px-2.5 py-1 rounded-lg {{ $sc['bg'] }} border {{ $sc['border'] }} {{ $sc['text'] }} text-xs font-semibold">
                 {{ $sc['label'] }}
             </span>
         </div>
         <div class="grid grid-cols-3 gap-2">
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">Total</p>
-                <p class="text-white font-bold font-mono text-xs">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">Total</p>
+                <p class="text-stone-800 font-bold font-mono text-xs">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
             </div>
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">Metode</p>
-                <p class="text-slate-300 text-xs">{{ $methodLabels[$payment->method] ?? $payment->method }}</p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">Metode</p>
+                <p class="text-stone-600 text-xs">{{ $methodLabels[$payment->method] ?? $payment->method }}</p>
             </div>
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">Tanggal</p>
-                <p class="text-slate-300 text-xs">{{ $payment->created_at->format('d M Y') }}</p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">Tanggal</p>
+                <p class="text-stone-600 text-xs">{{ $payment->created_at->format('d M Y') }}</p>
             </div>
         </div>
         <button onclick="showDetail({{ $payment->id }})"
-                class="mt-3 w-full py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs font-medium hover:border-primary-500 hover:text-primary-400 transition-all flex items-center justify-center gap-2">
+                class="mt-3 w-full py-2 rounded-xl bg-orange-50 border border-orange-100 text-stone-500 text-xs font-medium hover:border-primary-500 hover:text-primary-400 transition-all flex items-center justify-center gap-2">
             <i class="fa-solid fa-eye text-xs"></i> Lihat Detail
         </button>
     </div>
     @empty
     <div class="glass-card rounded-2xl p-8 text-center">
         <i class="fa-solid fa-receipt text-slate-700 text-3xl mb-2"></i>
-        <p class="text-slate-500 text-sm">Tidak ada transaksi ditemukan</p>
+        <p class="text-stone-400 text-sm">Tidak ada transaksi ditemukan</p>
     </div>
     @endforelse
 
@@ -299,23 +299,23 @@
     @if($payments->hasPages())
     <div class="flex items-center justify-center gap-2 pt-2">
         @if($payments->onFirstPage())
-        <span class="px-4 py-2 rounded-xl bg-slate-800/50 border border-border text-slate-600 text-xs cursor-not-allowed">
+        <span class="px-4 py-2 rounded-xl bg-orange-50/50 border border-orange-100 text-stone-400 text-xs cursor-not-allowed">
             <i class="fa-solid fa-chevron-left mr-1"></i> Prev
         </span>
         @else
-        <a href="{{ $payments->previousPageUrl() }}" class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">
+        <a href="{{ $payments->previousPageUrl() }}" class="px-4 py-2 rounded-xl bg-orange-50 border border-orange-100 text-stone-500 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">
             <i class="fa-solid fa-chevron-left mr-1"></i> Prev
         </a>
         @endif
 
-        <span class="text-slate-500 text-xs px-2">{{ $payments->currentPage() }} / {{ $payments->lastPage() }}</span>
+        <span class="text-stone-400 text-xs px-2">{{ $payments->currentPage() }} / {{ $payments->lastPage() }}</span>
 
         @if($payments->hasMorePages())
-        <a href="{{ $payments->nextPageUrl() }}" class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">
+        <a href="{{ $payments->nextPageUrl() }}" class="px-4 py-2 rounded-xl bg-orange-50 border border-orange-100 text-stone-500 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">
             Next <i class="fa-solid fa-chevron-right ml-1"></i>
         </a>
         @else
-        <span class="px-4 py-2 rounded-xl bg-slate-800/50 border border-border text-slate-600 text-xs cursor-not-allowed">
+        <span class="px-4 py-2 rounded-xl bg-orange-50/50 border border-orange-100 text-stone-400 text-xs cursor-not-allowed">
             Next <i class="fa-solid fa-chevron-right ml-1"></i>
         </span>
         @endif
@@ -325,10 +325,10 @@
 
 {{-- ===== DETAIL MODAL ===== --}}
 <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
-    <div class="glass-card rounded-2xl p-5 max-w-md w-full mx-4 border border-border shadow-2xl">
+    <div class="glass-card rounded-2xl p-5 max-w-md w-full mx-4 border border-orange-100 shadow-2xl">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-white font-bold">Detail Transaksi</h3>
-            <button onclick="closeDetail()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <h3 class="text-stone-800 font-bold">Detail Transaksi</h3>
+            <button onclick="closeDetail()" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
@@ -392,7 +392,7 @@ function showDetail(paymentId) {
             ['Nama Pengguna',  p.user_name],
             ['Kelas',          p.user_class ?? '-'],
             ['No. HP',         p.user_phone ?? '-'],
-            ['Total Bayar',   `<span class="font-mono text-white font-bold">Rp ${Number(p.amount).toLocaleString('id-ID')}</span>`],
+            ['Total Bayar',   `<span class="font-mono text-stone-800 font-bold">Rp ${Number(p.amount).toLocaleString('id-ID')}</span>`],
             ['Metode',         methodLabels[p.method] ?? p.method],
             ['Tanggal',        p.created_at],
         ];
@@ -404,22 +404,22 @@ function showDetail(paymentId) {
 
         // Bukti transfer
         const proofHtml = p.proof_path
-            ? `<div class="col-span-2 bg-slate-800/60 rounded-xl p-3">
-                <p class="text-slate-500 text-xs mb-2">Bukti Transfer</p>
+            ? `<div class="col-span-2 bg-orange-50/60 rounded-xl p-3">
+                <p class="text-stone-400 text-xs mb-2">Bukti Transfer</p>
                 <a href="${p.proof_url}" target="_blank">
-                    <img src="${p.proof_url}" alt="Bukti" class="w-full max-h-48 object-contain rounded-lg border border-border hover:opacity-80 transition-opacity">
+                    <img src="${p.proof_url}" alt="Bukti" class="w-full max-h-48 object-contain rounded-lg border border-orange-100 hover:opacity-80 transition-opacity">
                 </a>
                </div>`
             : '';
 
         // Items pesanan
         const itemsHtml = p.order_items && p.order_items.length
-            ? `<div class="col-span-2 bg-slate-800/60 rounded-xl p-3">
-                <p class="text-slate-500 text-xs mb-2">Item Pesanan</p>
+            ? `<div class="col-span-2 bg-orange-50/60 rounded-xl p-3">
+                <p class="text-stone-400 text-xs mb-2">Item Pesanan</p>
                 <div class="space-y-1.5">
                     ${p.order_items.map(item => `
                         <div class="flex justify-between text-xs">
-                            <span class="text-slate-300">${item.name} <span class="text-slate-600">x${item.quantity}</span></span>
+                            <span class="text-stone-600">${item.name} <span class="text-stone-400">x${item.quantity}</span></span>
                             <span class="text-white font-mono">Rp ${Number(item.subtotal).toLocaleString('id-ID')}</span>
                         </div>
                     `).join('')}
@@ -430,8 +430,8 @@ function showDetail(paymentId) {
         content.innerHTML = `
             <div class="grid grid-cols-2 gap-2">
                 ${rows.map(([k,v]) => `
-                    <div class="bg-slate-800/60 rounded-xl p-3">
-                        <p class="text-slate-500 text-xs mb-1">${k}</p>
+                    <div class="bg-orange-50/60 rounded-xl p-3">
+                        <p class="text-stone-400 text-xs mb-1">${k}</p>
                         <p class="text-white text-sm">${v}</p>
                     </div>
                 `).join('')}

@@ -17,13 +17,13 @@
 @if($methods->isEmpty())
 <div class="glass-card rounded-2xl p-16 text-center">
     <div class="text-5xl mb-3">💳</div>
-    <p class="text-white font-semibold">Belum Ada Metode Pembayaran</p>
-    <p class="text-slate-500 text-sm mt-1">Klik "Tambah Metode" untuk menambahkan.</p>
+    <p class="text-stone-800 font-semibold">Belum Ada Metode Pembayaran</p>
+    <p class="text-stone-400 text-sm mt-1">Klik "Tambah Metode" untuk menambahkan.</p>
 </div>
 @else
 <div class="space-y-4">
     @foreach($methods as $method)
-    <div class="glass-card rounded-2xl p-5 border {{ $method->is_active ? 'border-border' : 'border-slate-700/30 opacity-60' }}">
+    <div class="glass-card rounded-2xl p-5 border {{ $method->is_active ? 'border-orange-100' : 'border-slate-700/30 opacity-60' }}">
         <div class="flex items-start gap-4">
 
             {{-- Icon --}}
@@ -35,30 +35,30 @@
             {{-- Info --}}
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3 mb-1">
-                    <h3 class="text-white font-bold">{{ $method->name }}</h3>
+                    <h3 class="text-stone-800 font-bold">{{ $method->name }}</h3>
                     <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border
                         {{ $method->is_active
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            : 'bg-slate-700 text-slate-500 border-slate-600' }}">
+                            : 'bg-orange-100 text-stone-400 border-slate-600' }}">
                         {{ $method->is_active ? 'Aktif' : 'Nonaktif' }}
                     </span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-slate-700 text-slate-400 border border-slate-600">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-orange-100 text-slate-400 border border-slate-600">
                         {{ $method->code }}
                     </span>
                 </div>
 
                 @if($method->account_number)
-                <p class="text-slate-300 text-sm font-mono">{{ $method->account_number }}</p>
-                <p class="text-slate-500 text-xs">a/n {{ $method->account_name }}</p>
+                <p class="text-stone-600 text-sm font-mono">{{ $method->account_number }}</p>
+                <p class="text-stone-400 text-xs">a/n {{ $method->account_name }}</p>
                 @endif
 
                 @if($method->instructions)
-                <p class="text-slate-500 text-xs mt-1 italic">{{ $method->instructions }}</p>
+                <p class="text-stone-400 text-xs mt-1 italic">{{ $method->instructions }}</p>
                 @endif
 
                 @if($method->isQris() && $method->qris_image)
                 <img src="{{ Storage::url($method->qris_image) }}"
-                     alt="QRIS" class="w-24 h-24 object-contain mt-2 rounded-lg border border-border">
+                     alt="QRIS" class="w-24 h-24 object-contain mt-2 rounded-lg border border-orange-100">
                 @endif
             </div>
 
@@ -67,8 +67,8 @@
                 <button onclick="toggleMethod({{ $method->id }})"
                         class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                                {{ $method->is_active
-                                   ? 'bg-slate-700 border border-slate-600 text-slate-400 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400'
-                                   : 'bg-slate-700 border border-slate-600 text-slate-400 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-400' }}">
+                                   ? 'bg-orange-100 border border-slate-600 text-slate-400 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400'
+                                   : 'bg-orange-100 border border-slate-600 text-slate-400 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-400' }}">
                     {{ $method->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                 </button>
                 <button onclick="openEditModal({{ $method->id }}, @js($method))"
@@ -90,10 +90,10 @@
 
 {{-- ===== MODAL TAMBAH ===== --}}
 <div id="add-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
-    <div class="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 border border-border shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 border border-orange-100 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
-            <h3 class="text-white font-bold text-lg">Tambah Metode Pembayaran</h3>
-            <button onclick="closeModal('add-modal')" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <h3 class="text-stone-800 font-bold text-lg">Tambah Metode Pembayaran</h3>
+            <button onclick="closeModal('add-modal')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -103,14 +103,14 @@
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Kode Unik <span class="text-red-400">*</span></label>
                     <input type="text" name="code" placeholder="transfer_bca"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono"
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono"
                            required>
-                    <p class="text-slate-600 text-xs mt-1">Huruf, angka, underscore</p>
+                    <p class="text-stone-400 text-xs mt-1">Huruf, angka, underscore</p>
                 </div>
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nama Tampilan <span class="text-red-400">*</span></label>
                     <input type="text" name="name" placeholder="Transfer BCA"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500"
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500"
                            required>
                 </div>
             </div>
@@ -118,7 +118,7 @@
             <div>
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Tipe <span class="text-red-400">*</span></label>
                 <select name="type" id="add-type" onchange="toggleFields('add')"
-                        class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                        class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
                     <option value="bank_transfer">Transfer Bank</option>
                     <option value="ewallet">E-Wallet</option>
                     <option value="qris">QRIS</option>
@@ -131,12 +131,12 @@
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nomor Rekening</label>
                     <input type="text" name="account_number" placeholder="1234567890"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono">
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Atas Nama</label>
                     <input type="text" name="account_name" placeholder="Kantin PAUD"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
                 </div>
             </div>
 
@@ -144,24 +144,24 @@
             <div id="add-qris-field" class="hidden">
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Upload Gambar QRIS</label>
                 <input type="file" name="qris_image" accept="image/*"
-                       class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-slate-400">
+                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-slate-400">
             </div>
 
             <div>
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Instruksi Pembayaran</label>
                 <textarea name="instructions" rows="2" placeholder="Transfer ke rekening di atas, lalu upload bukti..."
-                          class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500 resize-none"></textarea>
+                          class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 resize-none"></textarea>
             </div>
 
             <div>
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Urutan Tampil</label>
                 <input type="number" name="sort_order" value="0" min="0"
-                       class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeModal('add-modal')"
-                        class="flex-1 py-3 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-600 transition-all">
+                        class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-600 text-sm font-semibold hover:bg-slate-600 transition-all">
                     Batal
                 </button>
                 <button type="submit"
@@ -175,10 +175,10 @@
 
 {{-- ===== MODAL EDIT ===== --}}
 <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
-    <div class="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 border border-border shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 border border-orange-100 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
-            <h3 class="text-white font-bold text-lg">Edit Metode Pembayaran</h3>
-            <button onclick="closeModal('edit-modal')" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <h3 class="text-stone-800 font-bold text-lg">Edit Metode Pembayaran</h3>
+            <button onclick="closeModal('edit-modal')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -190,13 +190,13 @@
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Kode</label>
                     <input type="text" id="edit-code"
-                           class="w-full px-4 py-2.5 bg-slate-700/50 border border-border rounded-xl text-sm text-slate-500 font-mono cursor-not-allowed"
+                           class="w-full px-4 py-2.5 bg-orange-100/50 border border-orange-100 rounded-xl text-sm text-stone-400 font-mono cursor-not-allowed"
                            disabled>
                 </div>
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nama Tampilan</label>
                     <input type="text" name="name" id="edit-name"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
                 </div>
             </div>
 
@@ -204,36 +204,36 @@
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nomor Rekening</label>
                     <input type="text" name="account_number" id="edit-account-number"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono">
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono">
                 </div>
                 <div>
                     <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Atas Nama</label>
                     <input type="text" name="account_name" id="edit-account-name"
-                           class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
                 </div>
             </div>
 
             <div id="edit-qris-field" class="hidden">
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Upload QRIS Baru</label>
                 <input type="file" name="qris_image" accept="image/*"
-                       class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-slate-400">
+                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-slate-400">
             </div>
 
             <div>
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Instruksi</label>
                 <textarea name="instructions" id="edit-instructions" rows="2"
-                          class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500 resize-none"></textarea>
+                          class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 resize-none"></textarea>
             </div>
 
             <div>
                 <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Urutan Tampil</label>
                 <input type="number" name="sort_order" id="edit-sort-order" min="0"
-                       class="w-full px-4 py-2.5 bg-slate-800 border border-border rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeModal('edit-modal')"
-                        class="flex-1 py-3 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-600 transition-all">
+                        class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-600 text-sm font-semibold hover:bg-slate-600 transition-all">
                     Batal
                 </button>
                 <button type="submit"

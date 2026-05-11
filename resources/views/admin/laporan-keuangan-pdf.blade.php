@@ -8,10 +8,10 @@
         p    { margin: 0 0 2px; color: #64748b; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th    { background: #4f46e5; color: white; padding: 8px 12px; text-align: left; font-size: 11px; }
+        th    { background: #ea580c; color: white; padding: 8px 12px; text-align: left; font-size: 11px; }
         td    { padding: 7px 12px; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
         tr:nth-child(even) td { background: #f8fafc; }
-        tfoot td { background: #e0e7ff; font-weight: bold; }
+        tfoot td { background: #ffedd5; font-weight: bold; }
 
         .header { margin-bottom: 20px; }
         .stats  { display: flex; gap: 16px; margin: 16px 0; }
