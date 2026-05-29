@@ -5,136 +5,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel Pengelola') — SmartCanteen</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        display: ['Fraunces', 'serif'],
-                        sans:    ['DM Sans', 'sans-serif'],
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    display: ['Outfit', 'serif'],
+                    sans: ['Plus Jakarta Sans', 'sans-serif'],
+                },
+                colors: {
+                    primary: '#F37021',
+                    cream: '#FEF8ED',
+                    softOrange: '#FFF3E8',
+                    borderSoft: '#F4E6D2',
+                    darkText: '#2D2A26',
+                    forest: {
+                        50: '#f0fdf4', 100: '#dcfce7', 200: '#bbf7d0',
+                        300: '#86efac', 400: '#4ade80', 500: '#22c55e',
+                        600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d'
                     },
-                    colors: {
-                        forest: {
-                            50:  '#f2f7f2',
-                            100: '#e0ece0',
-                            200: '#c2d9c3',
-                            300: '#96bc98',
-                            400: '#619863',
-                            500: '#3d7a40',
-                            600: '#2d6130',
-                            700: '#254e28',
-                            800: '#1e3f21',
-                            900: '#17311a',
-                            950: '#0d1f10',
-                        },
-                        cream: {
-                            50:  '#fdfcf8',
-                            100: '#faf7ef',
-                            200: '#f4edd8',
-                            300: '#ebdfc0',
-                        },
-                        amber: {
-                            warm: '#d4813a',
-                        }
+                    amber: {
+                        50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a',
+                        300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b',
+                        600: '#d97706', 700: '#b45309', 800: '#92400e', 900: '#78350f'
                     },
-                    keyframes: {
-                        fadeSlideUp: {
-                            '0%':   { opacity: '0', transform: 'translateY(14px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        slideInLeft: {
-                            '0%':   { opacity: '0', transform: 'translateX(-20px)' },
-                            '100%': { opacity: '1', transform: 'translateX(0)' },
-                        },
-                        fadeScale: {
-                            '0%':   { opacity: '0', transform: 'scale(0.95) translateY(-4px)' },
-                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
-                        },
+                    teal: {
+                        50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4',
+                        300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6',
+                        600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a'
                     },
-                    animation: {
-                        'fade-up':    'fadeSlideUp 0.45s ease both',
-                        'slide-left': 'slideInLeft 0.3s ease both',
-                        'fade-scale': 'fadeScale 0.15s ease-out',
+                    emerald: {
+                        50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0',
+                        300: '#6ee7b7', 400: '#34d399', 500: '#10b981',
+                        600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b'
                     },
-                }
+                    red: {
+                        50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca',
+                        300: '#fca5a5', 400: '#f87171', 500: '#ef4444',
+                        600: '#dc2626', 700: '#b91c1c', 800: '#991b1b', 900: '#7f1d1d'
+                    }
+                },
+                keyframes: {
+                    fadeScale: {
+                        '0%':   { opacity: '0', transform: 'scale(0.95) translateY(-4px)' },
+                        '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+                    },
+                },
+                animation: {
+                    'fade-scale': 'fadeScale 0.15s ease-out',
+                },
             }
         }
+    }
     </script>
 
     <style>
-        *, body { font-family: 'DM Sans', sans-serif; }
-        .font-display, h1, h2, h3 { font-family: 'Fraunces', serif; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #FEF8ED;
+            color: #2D2A26;
+        }
+        .font-display, h1, h2, h3 {
+            font-family: 'Outfit', serif;
+        }
 
-        /* ── Sidebar ─────────────────────────────────────── */
+        /* ── Sidebar ── */
         #sidebar {
-            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-            background: linear-gradient(175deg, #17311a 0%, #0d1f10 100%);
+            transition: transform .35s ease;
+            background: linear-gradient(180deg, #ffffff 0%, #fffaf3 100%);
+            border-right: 1px solid #F4E6D2;
+            box-shadow: 8px 0 24px rgba(243,112,33,.05);
         }
         #sidebar-overlay { display: none; }
         #sidebar-overlay.visible { display: block; }
 
-        /* Nav item */
         .nav-item {
+            transition: all .25s ease;
             position: relative;
-            transition: background 0.15s, color 0.15s;
         }
-        .nav-item::before {
+        .nav-item:hover {
+            background: #FFF7EF;
+            transform: translateX(4px);
+        }
+        .nav-item.active {
+            background: #FFF1E6;
+            color: #F37021;
+            box-shadow: 0 8px 20px rgba(243,112,33,.08);
+        }
+        .nav-item.active::before {
             content: '';
             position: absolute;
-            left: 0; top: 50%;
-            transform: translateY(-50%);
-            width: 3px; height: 0;
-            background: #96bc98;
-            border-radius: 0 3px 3px 0;
-            transition: height 0.2s ease;
+            left: 0; top: 16%;
+            width: 4px; height: 68%;
+            background: #F37021;
+            border-radius: 0 8px 8px 0;
         }
-        .nav-item.active::before { height: 65%; }
-        .nav-item.active {
-            background: rgba(150,188,152,0.12);
-            color: #c2d9c3;
-        }
-        .nav-item:not(.active):hover {
-            background: rgba(255,255,255,0.06);
-        }
-        .nav-icon-wrap {
-            width: 32px; height: 32px;
+        .nav-icon {
+            width: 34px; height: 34px;
+            border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 8px;
-            transition: background 0.15s;
+            background: #FFF4EA;
         }
-        .nav-item.active .nav-icon-wrap {
-            background: rgba(97,152,99,0.25);
+        .nav-item.active .nav-icon {
+            background: #F37021;
+            color: white;
         }
 
-        /* ── Cards & UI ───────────────────────────────────── */
-        .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.09); }
-
+        /* ── Buttons ── */
         .btn-primary {
-            background: linear-gradient(135deg, #3d7a40, #2d6130);
-            transition: filter 0.18s, transform 0.18s, box-shadow 0.18s;
+            background: linear-gradient(135deg, #F37021 0%, #E96315 100%);
+            color: white;
+            box-shadow: 0 8px 18px rgba(243,112,33,.18);
+            transition: .2s ease;
         }
-        .btn-primary:hover {
-            filter: brightness(1.1);
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(45,97,48,0.35);
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #e05252, #c0392b);
-            transition: filter 0.18s, transform 0.18s;
-        }
-        .btn-danger:hover { filter: brightness(1.08); transform: translateY(-1px); }
+        .btn-primary:hover { transform: translateY(-2px); }
 
-        /* ── Modal ────────────────────────────────────────── */
-        #menu-modal { display: none; }
-        #menu-modal.open { display: flex; }
+        /* ── Topbar ── */
+        .topbar {
+            background: rgba(255,255,255,.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #F4E6D2;
+        }
 
-        /* ── Profile Dropdown ─────────────────────────────── */
+        /* ── Profile Dropdown ── */
         #profile-dropdown-pengelola {
             display: none;
             animation: fadeScale 0.15s ease-out;
@@ -142,65 +142,78 @@
         }
         #profile-dropdown-pengelola.open { display: block; }
 
-        /* ── Misc ─────────────────────────────────────────── */
-        .badge-new  { animation: pulse-badge 2s infinite; }
-        @keyframes pulse-badge {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(61,122,64,0.5); }
-            50%       { box-shadow: 0 0 0 6px rgba(61,122,64,0); }
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(243,112,33,.25);
+            border-radius: 999px;
         }
 
-        .bar-anim { transition: width 1s cubic-bezier(0.4,0,0.2,1); }
-        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        /* ── Sidebar toggle button (fullscreen only) ── */
+        #sidebar-toggle-btn {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 256px;
+            transform: translateY(-50%);
+            z-index: 50;
+            transition: left .35s ease;
+        }
+        .fullscreen-mode #sidebar-toggle-btn {
+            display: flex;
+        }
+        .sidebar-hidden #sidebar-toggle-btn {
+            left: 0;
+        }
+        .sidebar-hidden #sidebar {
+            transform: translateX(-100%);
+        }
+        .sidebar-hidden .lg\:pl-64 {
+            padding-left: 0 !important;
+        }
     </style>
     @stack('styles')
 </head>
+<body class="h-full">
 
-<body class="h-full bg-cream-100 text-forest-950 antialiased">
+{{-- Tombol toggle sidebar — hanya muncul saat fullscreen --}}
+<button id="sidebar-toggle-btn"
+        onclick="toggleSidebar()"
+        class="w-6 h-14 bg-white border border-borderSoft rounded-r-xl
+               items-center justify-center shadow-md hover:bg-softOrange transition-colors">
+    <i class="fa-solid fa-chevron-left text-primary text-xs" id="icon-sidebar-toggle"></i>
+</button>
 
-{{-- ── Overlay (mobile) ───────────────────────────────── --}}
+{{-- Overlay mobile --}}
 <div id="sidebar-overlay"
-     class="fixed inset-0 bg-black/55 backdrop-blur-[2px] z-30 lg:hidden"
+     class="fixed inset-0 bg-black/30 z-30 lg:hidden"
      onclick="closeSidebar()"></div>
 
-{{-- ═══════════════════════════════════════════════════════
-     SIDEBAR
-═══════════════════════════════════════════════════════ --}}
+{{-- ═══════════ SIDEBAR ═══════════ --}}
 <aside id="sidebar"
-       class="fixed inset-y-0 left-0 w-64 z-40 flex flex-col
-              -translate-x-full lg:translate-x-0">
+       class="fixed inset-y-0 left-0 w-64 z-40 flex flex-col -translate-x-full lg:translate-x-0">
 
     {{-- Logo --}}
-    <div class="h-16 flex items-center gap-3 px-5 border-b border-white/8 flex-shrink-0">
-        <div class="w-8 h-8 rounded-lg btn-primary flex items-center justify-center shadow-lg flex-shrink-0">
-            <i class="fa-solid fa-bowl-food text-white text-sm"></i>
-        </div>
-        <div class="min-w-0">
-            <p class="font-display font-semibold text-white text-sm leading-none truncate">
-                Smart<span class="text-forest-300">Canteen</span>
-            </p>
-            <p class="text-forest-400 text-[10px] mt-0.5 truncate">Panel Pengelola</p>
-        </div>
-        <button onclick="closeSidebar()" class="ml-auto lg:hidden text-forest-400 hover:text-white transition-colors flex-shrink-0">
+    <div class="relative px-5 py-4 border-b border-borderSoft flex justify-center items-center">
+        <img src="{{ asset('images/canteen.png') }}"
+             alt="Smart Canteen Logo"
+             class="w-24 h-24 object-contain">
+        <button onclick="closeSidebar()"
+                class="absolute right-5 lg:hidden text-gray-400 hover:text-primary transition-colors">
             <i class="fa-solid fa-xmark text-base"></i>
         </button>
     </div>
 
     {{-- Nav --}}
-    <nav class="flex-1 overflow-y-auto scrollbar-thin py-5 px-3 space-y-0.5">
-        <p class="text-[9px] font-semibold tracking-[0.15em] text-forest-600 uppercase px-3 mb-3">
-            Navigasi
-        </p>
-
+    <nav class="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-2">
         @php
         $navLinks = [
             ['url' => '/pengelola/dashboard',       'icon' => 'fa-gauge',      'label' => 'Dashboard',        'match' => 'pengelola/dashboard'],
             ['url' => '/pengelola/menu-management', 'icon' => 'fa-utensils',   'label' => 'Kelola Menu',      'match' => 'pengelola/menu-management'],
             ['url' => '/pengelola/categories',      'icon' => 'fa-tags',       'label' => 'Kelola Kategori',  'match' => 'pengelola/categories'],
-            ['url' => '/pengelola/orders',          'icon' => 'fa-bell',       'label' => 'Pesanan Masuk',    'match' => 'pengelola/orders',  
+            ['url' => '/pengelola/orders',          'icon' => 'fa-bell',       'label' => 'Pesanan Masuk',    'match' => 'pengelola/orders',
                         'badge' => \App\Models\Order::where('status', 'baru')->count()],
             ['url' => '/pengelola/delivery',        'icon' => 'fa-truck-fast', 'label' => 'Proses Pengiriman','match' => 'pengelola/delivery'],
+            ['url' => '/pengelola/delivery/display','icon' => 'fa-tv',         'label' => 'Display Layar',    'match' => 'pengelola/delivery/display'],
             ['url' => '/pengelola/report',          'icon' => 'fa-chart-bar',  'label' => 'Laporan Favorit',  'match' => 'pengelola/report'],
         ];
         @endphp
@@ -208,21 +221,14 @@
         @foreach($navLinks as $link)
             @php $active = request()->is($link['match']); @endphp
             <a href="{{ url($link['url']) }}"
-               class="nav-item {{ $active ? 'active' : '' }} flex items-center gap-3 px-3 py-2.5 rounded-xl group"
+               class="nav-item {{ $active ? 'active' : '' }} flex items-center gap-3 px-4 py-3 rounded-2xl"
                onclick="if(window.innerWidth < 1024) closeSidebar()">
-                <div class="nav-icon-wrap flex-shrink-0">
-                    <i class="fa-solid {{ $link['icon'] }} text-xs
-                       {{ $active ? 'text-forest-300' : 'text-forest-500 group-hover:text-forest-300' }}
-                       transition-colors"></i>
+                <div class="nav-icon">
+                    <i class="fa-solid {{ $link['icon'] }} text-sm"></i>
                 </div>
-                <span class="text-sm font-medium flex-1 truncate
-                    {{ $active ? 'text-cream-200' : 'text-forest-400 group-hover:text-cream-200' }}
-                    transition-colors">
-                    {{ $link['label'] }}
-                </span>
+                <span class="text-sm font-medium flex-1">{{ $link['label'] }}</span>
                 @if(!empty($link['badge']))
-                    <span class="badge-new bg-forest-500 text-white text-[10px] font-bold
-                                 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span class="bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                         {{ $link['badge'] }}
                     </span>
                 @endif
@@ -230,35 +236,32 @@
         @endforeach
     </nav>
 
-    {{-- Sidebar User Section --}}
-    <div class="px-3 pb-4 flex-shrink-0 border-t border-white/8 pt-3">
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
-            <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+    {{-- Sidebar User --}}
+    <div class="p-4 border-t border-borderSoft">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
                 @auth
                     @if(auth()->user()->photo)
                         <img src="{{ asset('storage/' . auth()->user()->photo) }}"
-                            class="w-full h-full object-cover">
+                             class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-full bg-gradient-to-br from-forest-400 to-forest-600
-                                    flex items-center justify-center text-white font-display font-bold text-sm">
+                        <div class="w-full h-full btn-primary flex items-center justify-center font-display font-bold text-sm text-white">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
                     @endif
                 @endauth
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-cream-200 text-xs font-semibold truncate">
+                <p class="text-sm font-semibold text-darkText truncate">
                     @auth {{ auth()->user()->name }} @else Pengelola @endauth
                 </p>
-                <p class="text-forest-400 text-[10px] truncate">Pengelola Kantin</p>
+                <p class="text-xs text-gray-400">Pengelola Kantin</p>
             </div>
-            {{-- Logout langsung dari sidebar --}}
             <form method="POST" action="{{ route('logout') }}" class="flex-shrink-0">
                 @csrf
-                <button type="submit"
-                        title="Logout"
-                        class="w-7 h-7 flex items-center justify-center text-forest-500
-                               hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors">
+                <button type="submit" title="Logout"
+                        class="w-7 h-7 flex items-center justify-center text-gray-400
+                               hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i>
                 </button>
             </form>
@@ -266,55 +269,44 @@
     </div>
 </aside>
 
-{{-- ═══════════════════════════════════════════════════════
-     MAIN WRAPPER
-═══════════════════════════════════════════════════════ --}}
-<div class="lg:pl-64 min-h-screen flex flex-col">
+{{-- ═══════════ MAIN WRAPPER ═══════════ --}}
+<div class="lg:pl-64 min-h-screen flex flex-col" id="main-wrapper">
 
-    {{-- ── TOPBAR ──────────────────────────────────────── --}}
-    <header class="sticky top-0 z-20 h-16 bg-cream-50/95 backdrop-blur-md
-                   border-b border-cream-300 flex items-center px-4 sm:px-6 gap-4 shadow-sm">
+    {{-- ── TOPBAR ── --}}
+    <header class="topbar sticky top-0 z-20 h-16 flex items-center px-4 sm:px-6 gap-4">
 
         {{-- Hamburger --}}
         <button onclick="openSidebar()"
-                class="lg:hidden w-9 h-9 rounded-xl bg-cream-200 hover:bg-cream-300
+                class="lg:hidden w-9 h-9 rounded-xl bg-softOrange hover:bg-orange-100
                        flex items-center justify-center transition-colors flex-shrink-0">
-            <i class="fa-solid fa-bars text-forest-700 text-sm"></i>
+            <i class="fa-solid fa-bars text-primary text-sm"></i>
         </button>
 
         {{-- Title --}}
         <div class="flex-1 min-w-0">
-            <h1 class="font-display font-semibold text-forest-900 text-base sm:text-lg leading-none truncate">
+            <h1 class="font-display text-xl font-semibold text-darkText truncate">
                 @yield('page-title', 'Dashboard')
             </h1>
-            <p class="text-forest-500 text-xs mt-0.5 hidden sm:block truncate">
-                @yield('page-subtitle', 'Selamat datang kembali!')
+            <p class="text-sm text-gray-400 hidden sm:block truncate">
+                @yield('page-subtitle', 'Ringkasan operasional kantin hari ini')
             </p>
         </div>
 
-        {{-- Right --}}
+        {{-- Right side --}}
         <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-
-            {{-- Date chip --}}
-            <div class="hidden md:flex items-center gap-2 bg-cream-200 rounded-xl px-3 py-1.5">
-                <i class="fa-regular fa-calendar text-forest-500 text-xs"></i>
-                <span class="text-forest-700 text-xs font-medium">
-                    {{ now()->locale('id')->isoFormat('dddd, D MMM Y') }}
-                </span>
-            </div>
 
             {{-- Notif --}}
             <a href="{{ route('pengelola.notifications') }}"
-            class="relative w-9 h-9 rounded-xl bg-cream-200 hover:bg-cream-300
-                    flex items-center justify-center transition-colors">
-                <i class="fa-solid fa-bell text-forest-600 text-sm"></i>
+               class="relative w-9 h-9 rounded-xl bg-softOrange hover:bg-orange-100
+                      flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-bell text-primary text-sm"></i>
                 @php
                     $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
                                     ->whereNull('read_at')->count();
                 @endphp
                 @if($unreadCount > 0)
                 <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white
-                            text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                             text-[10px] font-bold rounded-full flex items-center justify-center px-1">
                     {{ $unreadCount > 99 ? '99+' : $unreadCount }}
                 </span>
                 @endif
@@ -322,65 +314,60 @@
 
             {{-- Profile Dropdown --}}
             <div class="relative" id="profile-dropdown-pengelola-wrap">
-
-                {{-- Avatar + Name Button --}}
                 <button onclick="togglePengelolaDropdown()"
                         class="flex items-center gap-2 cursor-pointer group select-none">
-                    <div class="w-9 h-9 rounded-xl overflow-hidden shadow">
+                    <div class="w-10 h-10 rounded-xl overflow-hidden shadow">
                         @auth
                             @if(auth()->user()->photo)
                                 <img src="{{ asset('storage/' . auth()->user()->photo) }}"
-                                    class="w-full h-full object-cover">
+                                     class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full bg-gradient-to-br from-forest-400 to-forest-700
-                                            flex items-center justify-center text-white font-display font-bold text-sm">
+                                <div class="w-full h-full btn-primary flex items-center justify-center font-display font-bold text-sm text-white">
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 </div>
                             @endif
                         @endauth
                     </div>
                     <div class="hidden sm:block text-left">
-                        <p class="text-forest-900 text-xs font-semibold leading-none">
+                        <p class="text-sm font-semibold text-darkText leading-none">
                             @auth {{ auth()->user()->name }} @else Pengelola @endauth
                         </p>
-                        <p class="text-forest-500 text-[10px] mt-0.5">Pengelola</p>
+                        <p class="text-xs text-gray-400 mt-0.5">Pengelola</p>
                     </div>
-                    <i class="fa-solid fa-chevron-down text-forest-400 text-xs hidden sm:block
-                              group-hover:text-forest-600 transition-colors"></i>
+                    <i class="fa-solid fa-chevron-down text-xs text-gray-400 group-hover:text-primary transition hidden sm:block"></i>
                 </button>
 
                 {{-- Dropdown Panel --}}
                 <div id="profile-dropdown-pengelola"
                      class="absolute right-0 top-12 w-56 bg-white rounded-2xl shadow-xl
-                            border border-cream-200 overflow-hidden z-50">
+                            border border-borderSoft overflow-hidden z-50">
 
                     {{-- User Info --}}
-                    <div class="px-4 py-3.5 bg-forest-50 border-b border-forest-100">
+                    <div class="px-4 py-3.5 bg-softOrange border-b border-borderSoft">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 shadow">
                                 @auth
                                     @if(auth()->user()->photo)
                                         <img src="{{ asset('storage/' . auth()->user()->photo) }}"
-                                            class="w-full h-full object-cover">
+                                             class="w-full h-full object-cover">
                                     @else
-                                        <div class="w-full h-full bg-gradient-to-br from-forest-400 to-forest-700
-                                                    flex items-center justify-center text-white font-display font-bold text-sm">
+                                        <div class="w-full h-full btn-primary flex items-center justify-center font-display font-bold text-sm text-white">
                                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                         </div>
                                     @endif
                                 @endauth
                             </div>
                             <div class="min-w-0">
-                                <p class="font-display font-semibold text-sm text-forest-900 truncate">
+                                <p class="font-display font-semibold text-sm text-darkText truncate">
                                     @auth {{ auth()->user()->name }} @else Pengelola @endauth
                                 </p>
-                                <p class="text-xs text-forest-500 truncate">
+                                <p class="text-xs text-gray-400 truncate">
                                     @auth {{ auth()->user()->email }} @endauth
                                 </p>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <span class="text-[10px] bg-forest-100 text-forest-700 font-semibold px-2.5 py-0.5 rounded-full">
+                            <span class="text-[10px] bg-orange-100 text-primary font-semibold px-2.5 py-0.5 rounded-full">
                                 Pengelola Kantin
                             </span>
                         </div>
@@ -389,28 +376,40 @@
                     {{-- Menu Items --}}
                     <div class="py-1.5">
                         <a href="{{ url('/pengelola/dashboard') }}"
-                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-forest-700
-                                  hover:bg-forest-50 hover:text-forest-900 transition-colors group">
-                            <div class="w-7 h-7 rounded-lg bg-cream-200 group-hover:bg-forest-100
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-darkText
+                                  hover:bg-softOrange transition-colors group">
+                            <div class="w-7 h-7 rounded-lg bg-orange-50 group-hover:bg-orange-100
                                         flex items-center justify-center transition-colors flex-shrink-0">
-                                <i class="fa-solid fa-gauge text-forest-500 group-hover:text-forest-600 text-xs"></i>
+                                <i class="fa-solid fa-gauge text-primary text-xs"></i>
                             </div>
                             <span class="font-medium">Dashboard</span>
                         </a>
-
                         <a href="{{ route('profile.edit') }}"
-                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-forest-700
-                                  hover:bg-forest-50 hover:text-forest-900 transition-colors group">
-                            <div class="w-7 h-7 rounded-lg bg-cream-200 group-hover:bg-forest-100
+                           class="flex items-center gap-3 px-4 py-2.5 text-sm text-darkText
+                                  hover:bg-softOrange transition-colors group">
+                            <div class="w-7 h-7 rounded-lg bg-orange-50 group-hover:bg-orange-100
                                         flex items-center justify-center transition-colors flex-shrink-0">
-                                <i class="fa-solid fa-user-pen text-forest-500 group-hover:text-forest-600 text-xs"></i>
+                                <i class="fa-solid fa-user-pen text-primary text-xs"></i>
                             </div>
                             <span class="font-medium">Edit Profil</span>
                         </a>
+
+                        {{-- Tombol fullscreen — hanya di halaman Display Layar --}}
+                        @if(request()->is('pengelola/delivery/display'))
+                        <button onclick="toggleFullscreen(); togglePengelolaDropdown();"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-darkText
+                                       hover:bg-softOrange transition-colors group text-left">
+                            <div class="w-7 h-7 rounded-lg bg-orange-50 group-hover:bg-orange-100
+                                        flex items-center justify-center transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-expand text-primary text-xs" id="icon-fullscreen"></i>
+                            </div>
+                            <span class="font-medium" id="label-fullscreen">Layar Penuh</span>
+                        </button>
+                        @endif
                     </div>
 
                     {{-- Logout --}}
-                    <div class="border-t border-cream-200 py-1.5">
+                    <div class="border-t border-borderSoft py-1.5">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
@@ -424,37 +423,19 @@
                             </button>
                         </form>
                     </div>
-
                 </div>
-                {{-- End Dropdown Panel --}}
-
             </div>
-            {{-- End Profile Dropdown --}}
 
         </div>
     </header>
 
-    {{-- ── CONTENT ─────────────────────────────────────── --}}
-    <main class="flex-1 p-4 sm:p-6 animate-fade-up">
+    {{-- ── CONTENT ── --}}
+    <main class="flex-1 p-6">
         @yield('content')
     </main>
-
-    {{-- ── FOOTER ──────────────────────────────────────── --}}
-    <footer class="bg-cream-50 border-t border-cream-300 px-6 py-4">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p class="text-forest-500 text-xs font-display italic">
-                © {{ date('Y') }} SmartCanteen · Panel Pengelola Kantin
-            </p>
-            <div class="flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-forest-400 inline-block"></span>
-                <p class="text-forest-500 text-xs font-medium">Sistem Aktif</p>
-            </div>
-        </div>
-    </footer>
 </div>
 
 <script>
-    // ── Sidebar ───────────────────────────────────────────
     function openSidebar() {
         document.getElementById('sidebar').classList.remove('-translate-x-full');
         document.getElementById('sidebar-overlay').classList.add('visible');
@@ -466,12 +447,10 @@
         document.body.style.overflow = '';
     }
 
-    // ── Profile Dropdown ──────────────────────────────────
     function togglePengelolaDropdown() {
         document.getElementById('profile-dropdown-pengelola').classList.toggle('open');
     }
 
-    // Tutup kalau klik di luar
     document.addEventListener('click', function (e) {
         const wrap = document.getElementById('profile-dropdown-pengelola-wrap');
         if (wrap && !wrap.contains(e.target)) {
@@ -479,11 +458,49 @@
         }
     });
 
-    // Tutup kalau tekan Escape
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             document.getElementById('profile-dropdown-pengelola').classList.remove('open');
         }
+    });
+
+    // ── Fullscreen & Sidebar Toggle ──
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            document.body.classList.add('fullscreen-mode');
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    function toggleSidebar() {
+        const hidden = document.body.classList.toggle('sidebar-hidden');
+        const btn = document.getElementById('sidebar-toggle-btn');
+        const icon = document.getElementById('icon-sidebar-toggle');
+        icon.className = hidden
+            ? 'fa-solid fa-chevron-right text-primary text-xs'
+            : 'fa-solid fa-chevron-left text-primary text-xs';
+        btn.style.left = hidden ? '0px' : '256px';
+    }
+
+    document.addEventListener('fullscreenchange', function () {
+        const isFullscreen = !!document.fullscreenElement;
+
+        if (!isFullscreen) {
+            // Keluar fullscreen — reset semua
+            document.body.classList.remove('fullscreen-mode', 'sidebar-hidden');
+            document.getElementById('sidebar-toggle-btn').style.left = '256px';
+            document.getElementById('icon-sidebar-toggle').className =
+                'fa-solid fa-chevron-left text-primary text-xs';
+        }
+
+        const iconFs = document.getElementById('icon-fullscreen');
+        const labelFs = document.getElementById('label-fullscreen');
+        if (iconFs) iconFs.className = isFullscreen
+            ? 'fa-solid fa-compress text-primary text-xs'
+            : 'fa-solid fa-expand text-primary text-xs';
+        if (labelFs) labelFs.textContent = isFullscreen ? 'Keluar Layar Penuh' : 'Layar Penuh';
     });
 </script>
 @stack('scripts')

@@ -285,16 +285,20 @@ class TelegramController extends Controller
 
                 $order->update(['payment_method' => $method->code]);
 
-                if ($method->isQris()) {
-                    $qrisUrl = $method->qris_image
-                        ? asset('storage/' . $method->qris_image)
-                        : env('QRIS_IMAGE_URL', 'https://via.placeholder.com/300x300.png?text=QRIS');
+               if ($method->isQris()) {
+    $imagePath = storage_path('app/public/' . $method->qris_image);
+    
+    if (file_exists($imagePath)) {
+        Http::attach('photo', file_get_contents($imagePath), 'qris.jpg')
+            ->post("https://api.telegram.org/bot{$this->botToken()}/sendPhoto", [
+                'chat_id' => $chatId,
+                'caption' => "Scan QRIS ini untuk membayar 💳\n\n📸 Setelah bayar, kirim foto bukti pembayaran di sini.",
+            ]);
+    } else {
+        $this->sendMessage($chatId, "💳 *Pembayaran QRIS*\n\nSilakan scan QRIS di kasir.\n\n📸 Setelah bayar, kirim foto bukti di sini.");
+    }
 
-                    Http::post("https://api.telegram.org/bot{$this->botToken()}/sendPhoto", [
-                        'chat_id' => $chatId,
-                        'photo'   => $qrisUrl,
-                        'caption' => "Scan QRIS ini untuk membayar 💳\n\n📸 Setelah bayar, kirim foto bukti pembayaran di sini.",
-                    ]);
+
 
                 } elseif ($method->isCash()) {
                     $this->sendMessage($chatId,

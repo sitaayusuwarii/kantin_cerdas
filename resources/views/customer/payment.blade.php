@@ -181,13 +181,7 @@
                 <i class="fa-solid fa-paper-plane"></i>Kirim Bukti Pembayaran
             </button>
 
-            <p class="text-center text-xs text-gray-400 mt-4">
-                Butuh bantuan?
-                <a href="https://telegram.me/{{ config('app.telegram_username', '6281234567890') }}"
-                   class="text-green-500 font-semibold hover:text-green-600 transition-colors">
-                    <i class="fa-brands fa-telegram mr-0.5"></i>Chat Telegram Kantin
-                </a>
-            </p>
+            
         </form>
     </div>
 </div>
@@ -242,24 +236,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ======= Payment method radio styling =======
 
-    document.querySelectorAll('.payment-method-radio').forEach(radio => {
-        radio.addEventListener('change', () => {
-            const method = methodData[radio.value];
-            const infoBox = document.getElementById('payment-info');
-            const infoText = document.getElementById('info-text');
+   document.querySelectorAll('.payment-method-radio').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const method = methodData[radio.value];
+        const infoBox = document.getElementById('payment-info');
+        const infoText = document.getElementById('info-text');
 
-            if (method && (method.account_number || method.instructions)) {
-                let text = method.instructions ?? '';
-                if (method.account_number) {
-                    text = `${method.name}: <strong class="font-mono">${method.account_number}</strong> a/n ${method.account_name}<br><span class="text-xs text-blue-600">${method.instructions ?? ''}</span>`;
-                }
-                infoText.innerHTML = text;
-                infoBox.classList.remove('hidden');
-            } else {
-                infoBox.classList.add('hidden');
+       if (method && method.type === 'qris' && method.qris_image) {
+    infoText.innerHTML = `
+        <p class="font-semibold mb-2">Scan QRIS di bawah untuk membayar:</p>
+        <a href="/storage/${method.qris_image}" target="_blank">
+            <img src="/storage/${method.qris_image}" 
+                 class="w-48 h-48 object-contain mx-auto rounded-xl border border-blue-200 cursor-zoom-in hover:opacity-90 transition-opacity"
+                 title="Klik untuk perbesar">
+        </a>
+        <p class="text-xs text-blue-500 text-center mt-1">🔍 Klik gambar untuk perbesar</p>
+        <div class="flex justify-center mt-2">
+            <a href="/storage/${method.qris_image}" download="QRIS.jpg"
+               class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-download text-xs"></i> Unduh QRIS
+            </a>
+        </div>
+        <p class="text-xs text-blue-600 mt-2 text-center">${method.instructions ?? ''}</p>
+    `;
+    infoBox.classList.remove('hidden');
+
+        } else if (method && (method.account_number || method.instructions)) {
+            let text = method.instructions ?? '';
+            if (method.account_number) {
+                text = `${method.name}: <strong class="font-mono">${method.account_number}</strong> a/n ${method.account_name}<br><span class="text-xs text-blue-600">${method.instructions ?? ''}</span>`;
             }
-        });
+            infoText.innerHTML = text;
+            infoBox.classList.remove('hidden');
+        } else {
+            infoBox.classList.add('hidden');
+        }
     });
+});
 
     // ======= Amount formatting (display vs raw) =======
     const amountDisplay = document.getElementById('amount-display');

@@ -4,29 +4,67 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    {{-- Greeting Banner --}}
-    <div class="relative overflow-hidden rounded-2xl mb-8 shadow-xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-orange-700"></div>
-        <div class="absolute inset-0 opacity-10"
-            style="background-image: url('data:image/svg+xml,<svg width=\"60\" height=\"60\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"none\" stroke=\"white\" stroke-width=\"1\"/></svg>'
-        </div>
-        <div class="relative px-6 py-8 md:px-10 md:py-10">
-            <p class="text-orange-100 text-sm font-medium mb-1">
-                <i class="fa-regular fa-sun mr-1"></i>
-                @php
-                    $hour = now()->format('H');
-                    if ($hour < 12) $greeting = 'Selamat Pagi';
-                    elseif ($hour < 15) $greeting = 'Selamat Siang';
-                    elseif ($hour < 18) $greeting = 'Selamat Sore';
-                    else $greeting = 'Selamat Malam';
-                @endphp
+{{-- ===== HERO / GREETING ===== --}}
+@php
+    $hour = now()->format('H');
+    if ($hour < 12) { $greeting = 'Selamat Pagi'; $icon = 'fa-sun'; }
+    elseif ($hour < 15) { $greeting = 'Selamat Siang'; $icon = 'fa-cloud-sun'; }
+    elseif ($hour < 18) { $greeting = 'Selamat Sore'; $icon = 'fa-cloud'; }
+    else { $greeting = 'Selamat Malam'; $icon = 'fa-moon'; }
+@endphp
+
+<div class="relative overflow-hidden rounded-3xl mb-8 shadow-xl">
+    <div class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-orange-700"></div>
+    <div class="absolute -top-10 -right-10 w-56 h-56 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-72 h-72 bg-orange-300/10 rounded-full blur-3xl"></div>
+
+    <div class="relative px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-orange-100 text-sm font-medium mb-5 border border-white/10">
+                <i class="fa-solid {{ $icon }}"></i>
                 {{ $greeting }} 👋
-            </p>
-            <h1 class="font-heading font-bold text-2xl md:text-3xl text-white mb-2">
+            </div>
+            <h1 class="font-heading font-extrabold text-3xl md:text-4xl text-white leading-tight">
                 {{ auth()->user()->full_name }}
             </h1>
+            <p class="text-orange-100 mt-3 text-sm md:text-base max-w-xl">
+                Selamat datang kembali di SmartCanteen.
+                Pesan makanan favoritmu dengan cepat dan praktis.
+            </p>
+            <div class="flex flex-wrap gap-3 mt-6">
+                @if(auth()->user()->student_id)
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white text-sm">
+                    <i class="fa-solid fa-id-card mr-2 text-orange-200"></i>
+                    {{ auth()->user()->student_id }}
+                </div>
+                @endif
+                @if(auth()->user()->class)
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white text-sm">
+                    <i class="fa-solid fa-graduation-cap mr-2 text-orange-200"></i>
+                    {{ auth()->user()->class }}
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-lg min-w-[260px]">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-regular fa-calendar text-white text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-orange-100 text-sm">Hari Ini</p>
+                    <p class="text-white font-heading font-bold text-lg leading-tight">
+                        {{ now()->translatedFormat('l') }}
+                    </p>
+                    <p class="text-orange-100 text-sm mt-1">
+                        {{ now()->translatedFormat('d F Y') }}
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
     {{-- Stat Cards --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -66,7 +104,6 @@
             <i class="fa-solid fa-file-invoice-dollar text-primary-500"></i>
             Status Pembayaran Terkini
         </h2>
-
         @if($tagihanTerbaru)
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-red-50 rounded-xl border border-red-100">
             <div class="flex items-center gap-3">
@@ -74,12 +111,8 @@
                     <i class="fa-solid fa-receipt text-red-500"></i>
                 </div>
                 <div>
-                    <p class="font-semibold text-sm text-gray-800">
-                        Order #{{ $tagihanTerbaru->order_number }}
-                    </p>
-                    <p class="text-xs text-gray-500">
-                        {{ $tagihanTerbaru->created_at->translatedFormat('d F Y') }}
-                    </p>
+                    <p class="font-semibold text-sm text-gray-800">Order #{{ $tagihanTerbaru->order_number }}</p>
+                    <p class="text-xs text-gray-500">{{ $tagihanTerbaru->created_at->translatedFormat('d F Y') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -112,8 +145,6 @@
 
     {{-- Quick Actions + Favorit --}}
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-        {{-- Quick Actions --}}
         <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-orange-50">
             <h2 class="font-heading font-bold text-base text-canteen-dark mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-bolt text-primary-500"></i>Aksi Cepat
@@ -146,7 +177,6 @@
             </div>
         </div>
 
-        {{-- Menu Favorit --}}
         <div class="lg:col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-orange-50">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="font-heading font-bold text-base text-canteen-dark flex items-center gap-2">
@@ -154,18 +184,14 @@
                 </h2>
                 <a href="{{ route('customer.menu') }}" class="text-xs text-primary-500 hover:text-primary-700 font-semibold transition-colors">Lihat Semua →</a>
             </div>
-
             @forelse($menuFavorit as $i => $menu)
             <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
                 <div class="w-8 h-8 flex-shrink-0 font-heading font-bold text-sm
                     {{ $i === 0 ? 'text-yellow-500' : ($i === 1 ? 'text-gray-400' : 'text-orange-400') }}
-                    flex items-center justify-center">
-                    #{{ $i + 1 }}
-                </div>
+                    flex items-center justify-center">#{{ $i + 1 }}</div>
                 <div class="w-10 h-10 bg-orange-50 rounded-xl overflow-hidden flex-shrink-0">
                     @if($menu->image)
-                        <img src="{{ asset('storage/' . $menu->image) }}"
-                             class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $menu->image) }}" class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center text-lg">🍽️</div>
                     @endif
@@ -185,9 +211,7 @@
                 </div>
             </div>
             @empty
-            <div class="text-center py-8 text-gray-400 text-sm">
-                Belum ada menu tersedia
-            </div>
+            <div class="text-center py-8 text-gray-400 text-sm">Belum ada menu tersedia</div>
             @endforelse
         </div>
     </div>
@@ -197,13 +221,10 @@
         <h2 class="font-heading font-bold text-base text-canteen-dark mb-4 flex items-center gap-2">
             <i class="fa-solid fa-spinner text-primary-500"></i>Pesanan Aktif
         </h2>
-
         @if($pesananAktif)
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center text-xl">
-                    🍽️
-                </div>
+                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center text-xl">🍽️</div>
                 <div>
                     <p class="font-semibold text-sm text-gray-800">
                         {{ $pesananAktif->items->take(2)->map(fn($i) => $i->menu->name)->join(', ') }}
@@ -212,30 +233,23 @@
                         @endif
                     </p>
                     <p class="text-xs text-gray-500">
-                        Order #{{ $pesananAktif->order_number }}
-                        · {{ $pesananAktif->created_at->diffForHumans() }}
+                        Order #{{ $pesananAktif->order_number }} · {{ $pesananAktif->created_at->diffForHumans() }}
                     </p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full
-                    {{ $pesananAktif->status === 'diproses'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-blue-100 text-blue-700' }}">
+                    {{ $pesananAktif->status === 'diproses' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700' }}">
                     <i class="fa-solid {{ $pesananAktif->status === 'diproses' ? 'fa-fire-burner' : 'fa-clock' }} text-xs"></i>
                     {{ $pesananAktif->status === 'diproses' ? 'Sedang Dimasak' : 'Menunggu Konfirmasi' }}
                 </span>
-                <a href="{{ url('/history') }}"
-                   class="text-xs text-primary-500 hover:text-primary-700 font-semibold">
-                    Detail →
-                </a>
+                <a href="{{ url('/history') }}" class="text-xs text-primary-500 hover:text-primary-700 font-semibold">Detail →</a>
             </div>
         </div>
         @else
         <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
             <p class="text-gray-400 text-sm">Tidak ada pesanan aktif saat ini</p>
-            <a href="{{ route('customer.menu') }}"
-               class="text-xs text-primary-500 font-semibold mt-1 inline-block">
+            <a href="{{ route('customer.menu') }}" class="text-xs text-primary-500 font-semibold mt-1 inline-block">
                 Yuk pesan sekarang →
             </a>
         </div>

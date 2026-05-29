@@ -16,8 +16,9 @@ class NotificationService
         }
     }
 
-   public static function orderBaru($order, $user)
+   public static function orderBaru($order, $user, bool $sendTelegram = false)
 {
+    if (!$sendTelegram) return;
     if (!$user->telegram_chat_id) return;
 
     $order->load('items.menu');

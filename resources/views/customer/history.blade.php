@@ -7,7 +7,7 @@
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="font-heading font-bold text-2xl md:text-3xl text-canteen-dark">Riwayat Pesanan 📋</h1>
+            <h1 class="font-heading font-bold text-2xl md:text-3xl text-canteen-dark">Riwayat Pesanan </h1>
             <p class="text-gray-400 text-sm mt-0.5">Semua histori transaksi kamu ada di sini</p>
         </div>
 

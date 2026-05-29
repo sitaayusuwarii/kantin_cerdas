@@ -45,15 +45,7 @@
         {{-- Divider --}}
         <div class="border-t border-dashed border-gray-200 pt-4 space-y-4">
 
-            {{-- Note --}}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <label class="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1.5">
-                    <i class="fa-solid fa-note-sticky text-primary-400"></i>Catatan Pesanan (opsional)
-                </label>
-                <input type="text" id="cart-note"
-                       placeholder="Contoh: tanpa sambal, extra nasi..."
-                       class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all">
-            </div>
+            
 
             {{-- Summary --}}
             <div class="bg-orange-50 rounded-2xl p-4 space-y-2">

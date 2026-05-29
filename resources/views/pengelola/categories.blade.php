@@ -23,7 +23,7 @@
 </div>
 
 {{-- TABLE --}}
-<div class="bg-cream-50 rounded-2xl shadow-sm border border-cream-200 overflow-hidden">
+<div class="bg-white rounded-2xl shadow-sm border border-cream-200 overflow-hidden">
     <table class="w-full text-sm">
         <thead>
             <tr class="bg-cream-100 border-b border-cream-200">
@@ -95,7 +95,7 @@
     <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
 
         {{-- HEADER --}}
-        <div class="flex items-center justify-between px-6 py-4 bg-forest-900">
+        <div class="flex items-center justify-between px-6 py-4 bg-orange-500">
             <h3 class="text-white font-semibold" id="modal-title">
                 Tambah Kategori
             </h3>

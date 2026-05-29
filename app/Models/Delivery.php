@@ -10,6 +10,7 @@ class Delivery extends Model
         'order_id',
         'status',
         'processed_at',
+        'cooked_at', 
         'sent_at',
         'completed_at',
     ];

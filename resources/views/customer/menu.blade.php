@@ -194,28 +194,36 @@ function addToCart(menuId, name, price, image) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF },
         body: JSON.stringify({ menu_id: menuId, quantity: 1 }),
-        redirect: 'follow'  // ← tambah ini
+        redirect: 'follow'
     })
     .then(res => {
-        // Kalau di-redirect ke login, ikuti redirect-nya
-        if (res.redirected) {
-            window.location.href = res.url;
-            return null;
-        }
-        return res.json();
-    })
+    if (res.redirected) {
+        window.location.href = '/login';
+        return null;
+    }
+    if (res.status === 401) {
+        window.location.href = '/login';
+        return null;
+    }
+    return res.json();
+})
     .then(res => {
         if (!res) return;
         if (res.success) {
             loadCartBadge();
         } else {
             updateBadge(oldQty, oldPrice);
+            // Kalau server return unauthenticated di JSON
+            if (res.message === 'Unauthenticated.' || res.redirect) {
+                window.location.href = '/login';
+                return;
+            }
             alert('Gagal menambahkan ke keranjang!');
         }
     })
     .catch(() => {
         updateBadge(oldQty, oldPrice);
-        alert('Gagal menambahkan ke keranjang!');
+        window.location.href = '/login';  // error network → arahkan login
     })
     .finally(() => {
         setTimeout(() => {

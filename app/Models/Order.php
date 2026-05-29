@@ -13,23 +13,27 @@ class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
-   protected $fillable = [
-    'user_id',
-    'order_number',
-    'status',
-    'pickup_schedule',
-    'note',
-    'total_price',
-    'confirmed_at',
-    'processed_at',
-    'shipped_at',
-    'completed_at',
-    'cancelled_at',
-    'confirmed_by',
-    'payment_method',   
-    'payment_proof',    
-    'payment_status',  
-];
+    protected $fillable = [
+        'user_id',
+        'order_number',
+        'status',
+        'order_type',        // dine_in | takeaway | delivery
+        'pickup_schedule',   // slot tetap: istirahat_1 | istirahat_2 | pulang (dine_in & delivery)
+        'pickup_time',       // jam bebas "HH:MM" (takeaway saja)
+        'classroom',         // kelas tujuan (delivery saja)
+        'table_number',      // kolom lama, tidak dipakai tapi dibiarkan
+        'note',
+        'total_price',
+        'confirmed_at',
+        'processed_at',
+        'shipped_at',
+        'completed_at',
+        'cancelled_at',
+        'confirmed_by',
+        'payment_method',
+        'payment_proof',
+        'payment_status',
+    ];
 
     protected function casts(): array
     {
@@ -43,43 +47,68 @@ class Order extends Model
         ];
     }
 
-    // ─── Konstanta ────────────────────────────────────────
+    // ─── Konstanta Status ─────────────────────────────────
 
-    const STATUS_BARU          = 'baru';
-    const STATUS_DIKONFIRMASI  = 'dikonfirmasi';
-    const STATUS_DIPROSES      = 'diproses';
-    const STATUS_DIKIRIM       = 'dikirim';
-    const STATUS_SELESAI       = 'selesai';
-    const STATUS_DIBATALKAN    = 'dibatalkan';
+    const STATUS_BARU         = 'baru';
+    const STATUS_DIKONFIRMASI = 'dikonfirmasi';
+    const STATUS_DIPROSES     = 'diproses';
+    const STATUS_DIKIRIM      = 'dikirim';
+    const STATUS_SELESAI      = 'selesai';
+    const STATUS_DIBATALKAN   = 'dibatalkan';
+    const STATUS_SELESAI_DIMASAK = 'selesai_dimasak';
 
-    const PICKUP_ISTIRAHAT_1   = 'istirahat_1';
-    const PICKUP_ISTIRAHAT_2   = 'istirahat_2';
-    const PICKUP_PULANG        = 'pulang';
+    // ─── Konstanta Pickup Slot ────────────────────────────
 
-    // ─── Label untuk tampilan Blade ───────────────────────
+    const PICKUP_ISTIRAHAT_1 = 'istirahat_1';
+    const PICKUP_ISTIRAHAT_2 = 'istirahat_2';
+    const PICKUP_PULANG      = 'pulang';
 
-    public static array $statusLabels = [
-        'baru'         => 'Baru',
-        'dikonfirmasi' => 'Dikonfirmasi',
-        'diproses'     => 'Diproses',
-        'dikirim'      => 'Dikirim',
-        'selesai'      => 'Selesai',
-        'dibatalkan'   => 'Dibatalkan',
-    ];
+    // ─── Konstanta Order Type ─────────────────────────────
+
+    const ORDER_TYPE_DINEIN   = 'dine_in';
+    const ORDER_TYPE_TAKEAWAY = 'takeaway';
+    const ORDER_TYPE_DELIVERY = 'delivery';  // antar ke kelas
+
+    // ─── Label & Warna ────────────────────────────────────
+
+   public static array $statusLabels = [
+    'baru'                     => 'Baru',
+    'pembayaran_terverifikasi' => 'Baru',
+    'dikonfirmasi'             => 'Dikonfirmasi',
+    'diproses'                 => 'Diproses',
+    'dikirim'                  => 'Dikirim',
+    'selesai'                  => 'Selesai',
+    'dibatalkan'               => 'Dibatalkan',
+    'selesai_dimasak' => 'Selesai Dimasak',
+];
 
     public static array $statusColors = [
-        'baru'         => 'bg-blue-100 text-blue-700',
-        'dikonfirmasi' => 'bg-amber-100 text-amber-700',
-        'diproses'     => 'bg-orange-100 text-orange-700',
-        'dikirim'      => 'bg-violet-100 text-violet-700',
-        'selesai'      => 'bg-emerald-100 text-emerald-700',
-        'dibatalkan'   => 'bg-red-100 text-red-600',
-    ];
+    'baru'                     => 'bg-blue-100 text-blue-700',
+    'pembayaran_terverifikasi' => 'bg-blue-100 text-blue-700',
+    'dikonfirmasi'             => 'bg-amber-100 text-amber-700',
+    'diproses'                 => 'bg-orange-100 text-orange-700',
+    'dikirim'                  => 'bg-violet-100 text-violet-700',
+    'selesai'                  => 'bg-emerald-100 text-emerald-700',
+    'dibatalkan'               => 'bg-red-100 text-red-600',
+    'selesai_dimasak' => 'bg-green-100 text-green-700',
+];
 
     public static array $pickupLabels = [
         'istirahat_1' => 'Istirahat 1 (09:30)',
         'istirahat_2' => 'Istirahat 2 (12:00)',
         'pulang'      => 'Pulang (14:30)',
+    ];
+
+    public static array $orderTypeLabels = [
+        'dine_in'  => 'Dine In',
+        'takeaway' => 'Take Away',
+        'delivery' => 'Antar ke Kelas',
+    ];
+
+    public static array $orderTypeColors = [
+        'dine_in'  => 'bg-teal-100 text-teal-700',
+        'takeaway' => 'bg-orange-100 text-orange-700',  // orange bukan purple
+        'delivery' => 'bg-purple-100 text-purple-700',
     ];
 
     // ─── Accessors ────────────────────────────────────────
@@ -96,7 +125,7 @@ class Order extends Model
 
     public function getPickupLabelAttribute(): string
     {
-        return self::$pickupLabels[$this->pickup_schedule] ?? $this->pickup_schedule;
+        return self::$pickupLabels[$this->pickup_schedule] ?? ($this->pickup_schedule ?? '—');
     }
 
     public function getFormattedTotalAttribute(): string
@@ -104,12 +133,32 @@ class Order extends Model
         return 'Rp ' . number_format($this->total_price, 0, ',', '.');
     }
 
-    // ─── Order Number Generator ───────────────────────────
+    public function getOrderTypeLabelAttribute(): string
+    {
+        return self::$orderTypeLabels[$this->order_type] ?? $this->order_type;
+    }
+
+    public function getOrderTypeColorAttribute(): string
+    {
+        return self::$orderTypeColors[$this->order_type] ?? 'bg-gray-100 text-gray-600';
+    }
 
     /**
-     * Generate nomor order unik: SC-001, SC-002, dst.
-     * Dipanggil dari OrderController saat create.
+     * Waktu pickup siap pakai untuk tampilan di history, invoice, dashboard.
+     * - takeaway  → "Jam 10:30"
+     * - dine_in   → "Istirahat 1 (09:30)"
+     * - delivery  → "Istirahat 2 (12:00)" + classroom
      */
+    public function getPickupDisplayAttribute(): string
+    {
+        if ($this->order_type === self::ORDER_TYPE_TAKEAWAY) {
+            return $this->pickup_time ? 'Jam ' . $this->pickup_time : '—';
+        }
+        return self::$pickupLabels[$this->pickup_schedule] ?? ($this->pickup_schedule ?? '—');
+    }
+
+    // ─── Order Number Generator ───────────────────────────
+
     public static function generateOrderNumber(): string
     {
         $latest = self::withTrashed()
@@ -120,7 +169,7 @@ class Order extends Model
             return 'SC-001';
         }
 
-        $number = (int) substr($latest, 3); // ambil angka dari "SC-001"
+        $number = (int) substr($latest, 3);
         return 'SC-' . str_pad($number + 1, 3, '0', STR_PAD_LEFT);
     }
 
@@ -148,26 +197,35 @@ class Order extends Model
 
     // ─── Status Helpers ───────────────────────────────────
 
-    public function isBaru(): bool         { return $this->status === self::STATUS_BARU; }
+   public function isBaru(): bool {
+    return in_array($this->status, [self::STATUS_BARU, 'pembayaran_terverifikasi']);}
     public function isDikonfirmasi(): bool { return $this->status === self::STATUS_DIKONFIRMASI; }
     public function isDiproses(): bool     { return $this->status === self::STATUS_DIPROSES; }
     public function isDikirim(): bool      { return $this->status === self::STATUS_DIKIRIM; }
     public function isSelesai(): bool      { return $this->status === self::STATUS_SELESAI; }
     public function isDibatalkan(): bool   { return $this->status === self::STATUS_DIBATALKAN; }
 
-    /**
-     * Status berikutnya dalam alur pengiriman
-     */
-    public function nextStatus(): ?string
-    {
-        return match ($this->status) {
-            self::STATUS_BARU         => self::STATUS_DIKONFIRMASI,
-            self::STATUS_DIKONFIRMASI => self::STATUS_DIPROSES,
-            self::STATUS_DIPROSES     => self::STATUS_DIKIRIM,
-            self::STATUS_DIKIRIM      => self::STATUS_SELESAI,
-            default                   => null,
-        };
-    }
+    // ─── Order Type Helpers ───────────────────────────────
+
+    public function isDineIn(): bool   { return $this->order_type === self::ORDER_TYPE_DINEIN; }
+    public function isTakeaway(): bool { return $this->order_type === self::ORDER_TYPE_TAKEAWAY; }
+    public function isDelivery(): bool { return $this->order_type === self::ORDER_TYPE_DELIVERY; }
+
+    // ─── Status Flow ─────────────────────────────────────
+
+   public function nextStatus(): ?string
+{
+    return match ($this->status) {
+        self::STATUS_BARU             => self::STATUS_DIKONFIRMASI,
+        self::STATUS_DIKONFIRMASI     => self::STATUS_DIPROSES,
+        self::STATUS_DIPROSES         => self::STATUS_SELESAI_DIMASAK,
+        self::STATUS_SELESAI_DIMASAK  => $this->isDelivery()
+                                            ? self::STATUS_DIKIRIM
+                                            : self::STATUS_SELESAI,
+        self::STATUS_DIKIRIM          => self::STATUS_SELESAI,
+        default                       => null,
+    };
+}
 
     // ─── Relasi ───────────────────────────────────────────
 
@@ -196,10 +254,8 @@ class Order extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public function delivery()
-{
-    return $this->hasOne(Delivery::class);
-}
-
-
+    public function delivery(): HasOne
+    {
+        return $this->hasOne(Delivery::class);
+    }
 }

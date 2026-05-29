@@ -9,29 +9,29 @@
 <form method="GET" class="glass-card rounded-2xl p-4 mb-6 flex items-center gap-3">
     <i class="fa-solid fa-calendar text-primary-400"></i>
     <input type="date" name="date" value="{{ $date }}"
-           class="bg-transparent text-slate-300 text-sm outline-none border border-border rounded-lg px-3 py-2"
+           class="bg-transparent text-stone-600 text-sm outline-none border border-orange-100 rounded-lg px-3 py-2"
            onchange="this.form.submit()">
-    <span class="text-slate-500 text-sm">{{ \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
+    <span class="text-stone-400 text-sm">{{ \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
 </form>
 
 {{-- Summary --}}
 <div class="grid grid-cols-2 gap-4 mb-6">
     <div class="glass-card rounded-2xl p-5">
-        <p class="text-slate-400 text-xs mb-1">Belum Bayar</p>
-        <p class="text-white font-bold text-3xl">{{ $summary['total'] }}</p>
-        <p class="text-slate-500 text-xs mt-1">pesanan hari ini</p>
+        <p class="text-stone-500 text-xs mb-1">Belum Bayar</p>
+        <p class="text-stone-800 font-bold text-3xl">{{ $summary['total'] }}</p>
+        <p class="text-stone-400 text-xs mt-1">pesanan hari ini</p>
     </div>
     <div class="glass-card rounded-2xl p-5">
-        <p class="text-slate-400 text-xs mb-1">Total Nilai</p>
-        <p class="text-white font-bold text-2xl">Rp {{ number_format($summary['total_nilai'], 0, ',', '.') }}</p>
-        <p class="text-slate-500 text-xs mt-1">potensi pemasukan</p>
+        <p class="text-stone-500 text-xs mb-1">Total Nilai</p>
+        <p class="text-stone-800 font-bold text-2xl">Rp {{ number_format($summary['total_nilai'], 0, ',', '.') }}</p>
+        <p class="text-stone-400 text-xs mt-1">potensi pemasukan</p>
     </div>
 </div>
 
 {{-- Tabel --}}
 <div class="glass-card rounded-2xl overflow-hidden">
-    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h2 class="text-white font-bold">Daftar Pesanan Belum Bayar</h2>
+    <div class="px-5 py-4 border-b border-orange-100 flex items-center justify-between">
+        <h2 class="text-stone-800 font-bold">Daftar Pesanan Belum Bayar</h2>
         <span class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full font-semibold">
             Kantin tutup 13:00
         </span>
@@ -40,28 +40,28 @@
     @if($unpaidOrders->isEmpty())
         <div class="text-center py-16">
             <div class="text-5xl mb-3">✅</div>
-            <p class="text-white font-semibold">Semua Sudah Bayar!</p>
-            <p class="text-slate-500 text-sm mt-1">Tidak ada pesanan yang belum dibayar.</p>
+            <p class="text-stone-800 font-semibold">Semua Sudah Bayar!</p>
+            <p class="text-stone-400 text-sm mt-1">Tidak ada pesanan yang belum dibayar.</p>
         </div>
     @else
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-border">
-                    <th class="text-left px-5 py-3 text-xs text-slate-500 uppercase">Customer</th>
-                    <th class="text-left px-5 py-3 text-xs text-slate-500 uppercase">Order</th>
-                    <th class="text-left px-5 py-3 text-xs text-slate-500 uppercase">Menu</th>
-                    <th class="text-right px-5 py-3 text-xs text-slate-500 uppercase">Total</th>
-                    <th class="text-center px-5 py-3 text-xs text-slate-500 uppercase">Waktu Order</th>
-                    <th class="text-center px-5 py-3 text-xs text-slate-500 uppercase">Aksi</th>
+                <tr class="border-b border-orange-100">
+                    <th class="text-left px-5 py-3 text-xs text-stone-400 uppercase">Customer</th>
+                    <th class="text-left px-5 py-3 text-xs text-stone-400 uppercase">Order</th>
+                    <th class="text-left px-5 py-3 text-xs text-stone-400 uppercase">Menu</th>
+                    <th class="text-right px-5 py-3 text-xs text-stone-400 uppercase">Total</th>
+                    <th class="text-center px-5 py-3 text-xs text-stone-400 uppercase">Waktu Order</th>
+                    <th class="text-center px-5 py-3 text-xs text-stone-400 uppercase">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-border/40">
                 @foreach($unpaidOrders as $order)
-                <tr class="hover:bg-slate-800/30 transition-colors">
+                <tr class="hover:bg-orange-50/30 transition-colors">
                     <td class="px-5 py-4">
-                        <p class="text-white font-semibold">{{ $order->user->username }}</p>
-                        <p class="text-slate-500 text-xs">{{ $order->user->class ?? '-' }}</p>
+                        <p class="text-stone-800 font-semibold">{{ $order->user->username }}</p>
+                        <p class="text-stone-400 text-xs">{{ $order->user->class ?? '-' }}</p>
                         @if(!$order->user->telegram_chat_id)
                             <span class="text-xs text-red-400">⚠ Telegram belum terhubung</span>
                         @endif
@@ -71,15 +71,15 @@
                     </td>
                     <td class="px-5 py-4">
                         @foreach($order->items as $item)
-                            <p class="text-slate-300 text-xs">{{ $item->menu->name }} ×{{ $item->quantity }}</p>
+                            <p class="text-stone-600 text-xs">{{ $item->menu->name }} ×{{ $item->quantity }}</p>
                         @endforeach
                     </td>
                     <td class="px-5 py-4 text-right">
-                        <p class="text-white font-bold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
+                        <p class="text-stone-800 font-bold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</p>
                     </td>
                     <td class="px-5 py-4 text-center">
-                        <p class="text-slate-300 text-xs">{{ $order->created_at->format('H:i') }} </p>
-                        <p class="text-slate-500 text-xs">{{ $order->created_at->diffForHumans() }}</p>
+                        <p class="text-stone-600 text-xs">{{ $order->created_at->format('H:i') }} </p>
+                        <p class="text-stone-400 text-xs">{{ $order->created_at->diffForHumans() }}</p>
                     </td>
                     <td class="px-5 py-4">
                         <div class="flex items-center justify-center gap-2">

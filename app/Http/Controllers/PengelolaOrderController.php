@@ -4,35 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
-use App\Models\Delivery; 
+use App\Models\Delivery;
 
 class PengelolaOrderController extends Controller
 {
-    // Status yang relevan untuk pengelola kantin
-    // (hanya setelah admin verifikasi pembayaran)
     const VISIBLE_STATUSES = [
-        'pembayaran_terverifikasi',
+        'baru',
+        'pembayaran_terverifikasi', // data lama
         'dikonfirmasi',
         'diproses',
+        'selesai_dimasak',
+        'dikirim',
         'selesai',
     ];
 
     public function index()
     {
-        $orders = Order::with([
-                'user',
-                'items.menu.category'
-            ])
-            ->whereIn('status', self::VISIBLE_STATUSES) // ← hanya order terverifikasi
+        $orders = Order::with(['user', 'items.menu.category'])
+            ->whereIn('status', self::VISIBLE_STATUSES)
+            ->today()
             ->latest()
             ->get();
 
-        // Stats hanya untuk order yang sudah masuk ke pengelola
-        $totalOrders      = Order::whereIn('status', self::VISIBLE_STATUSES)->count();
-        $newOrders = Order::where('status', 'pembayaran_terverifikasi')->count();
-        $confirmedOrders  = Order::where('status', 'dikonfirmasi')->count();
-        $processedOrders  = Order::where('status', 'diproses')->count();
-        $completedOrders  = Order::where('status', 'selesai')->count();
+        $totalOrders     = $orders->count();
+        $newOrders       = $orders->whereIn('status', ['baru', 'pembayaran_terverifikasi'])->count();
+        $confirmedOrders = $orders->where('status', 'dikonfirmasi')->count();
+        $processedOrders = $orders->where('status', 'diproses')->count();
+        $readyOrders     = $orders->where('status', 'selesai_dimasak')->count();
+        $completedOrders = $orders->where('status', 'selesai')->count();
 
         return view('pengelola.orders', compact(
             'orders',
@@ -40,39 +39,34 @@ class PengelolaOrderController extends Controller
             'newOrders',
             'confirmedOrders',
             'processedOrders',
+            'readyOrders',
             'completedOrders'
         ));
     }
 
-    // Pengelola konfirmasi → mulai diproses dapur
-   public function confirm(Order $order)
-{
-    abort_if($order->status !== 'pembayaran_terverifikasi', 403, 'Pesanan tidak valid untuk dikonfirmasi.');
-
-    $order->update([
-        'status'       => 'dikonfirmasi',
-        'confirmed_at' => now(),
-    ]);
-
-    Delivery::create([
-        'order_id'     => $order->id,
-        'status'       => 'diproses',
-        'processed_at' => now(),
-    ]);
-
-    // Kirim notif ke customer via Telegram
-    $chatId = $order->user->telegram_chat_id;
-    if ($chatId) {
-        (new \App\Http\Controllers\TelegramController)->sendMessage(
-            $chatId,
-            "👨‍🍳 *Pesanan kamu sedang diproses!*\n\nPesanan #{$order->order_number} sudah diterima kantin dan sedang disiapkan."
+    public function confirm(Order $order)
+    {
+        abort_if(
+            !in_array($order->status, ['baru', 'pembayaran_terverifikasi']),
+            403, 'Pesanan tidak valid untuk dikonfirmasi.'
         );
+
+        $order->update([
+            'status'       => 'dikonfirmasi',
+            'confirmed_at' => now(),
+        ]);
+
+        $chatId = $order->user->telegram_chat_id ?? null;
+        if ($chatId) {
+            (new TelegramController)->sendMessage(
+                $chatId,
+                "✅ *Pesanan dikonfirmasi!*\n\nPesanan #{$order->order_number} sudah diterima kantin."
+            );
+        }
+
+        return back()->with('success', 'Pesanan dikonfirmasi.');
     }
 
-    return back()->with('success', 'Pesanan dikonfirmasi dan masuk antrian pengiriman.');
-}
-
-    // Pengelola mulai memproses (masak/siapkan)
     public function process(Order $order)
     {
         abort_if($order->status !== 'dikonfirmasi', 403, 'Pesanan belum dikonfirmasi.');
@@ -82,10 +76,24 @@ class PengelolaOrderController extends Controller
             'processed_at' => now(),
         ]);
 
+        // Buat delivery record di sini — saat masuk dapur
+        Delivery::create([
+            'order_id'     => $order->id,
+            'status'       => 'diproses',
+            'processed_at' => now(),
+        ]);
+
+        $chatId = $order->user->telegram_chat_id ?? null;
+        if ($chatId) {
+            (new TelegramController)->sendMessage(
+                $chatId,
+                "👨‍🍳 *Pesanan sedang dimasak!*\n\nPesanan #{$order->order_number} sedang disiapkan dapur."
+            );
+        }
+
         return back()->with('success', 'Pesanan sedang diproses.');
     }
 
-    // Pengelola tandai selesai
     public function complete(Order $order)
     {
         abort_if($order->status !== 'diproses', 403, 'Pesanan belum diproses.');

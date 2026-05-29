@@ -44,54 +44,53 @@ class CartController extends Controller
     // ─────────────────────────────────────────
     // Tambah item ke cart
     // ─────────────────────────────────────────
-    public function add(Request $request)
-    {
-         if (!auth()->check()) {
-        return redirect()->guest(route('login'));
+  public function add(Request $request)
+{
+    if (!auth()->check()) {
+        return response()->json(['message' => 'Unauthenticated.'], 401);
+    }
 
-        $request->validate([
-            'menu_id'  => 'required|exists:menus,id',
-            'quantity' => 'required|integer|min:1',
+    $request->validate([
+        'menu_id'  => 'required|exists:menus,id',
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    // Ambil price saja, tidak perlu load seluruh kolom
+    $menu = Menu::select('id', 'price')->findOrFail($request->menu_id);
+
+    $cart = Cart::firstOrCreate([
+        'user_id' => auth()->id(),
+        'status'  => 'active',
+    ]);
+
+    $existing = CartItem::where('cart_id', $cart->id)
+        ->where('menu_id', $menu->id)
+        ->select('id', 'quantity')
+        ->first();
+
+    if ($existing) {
+        $newQty = $existing->quantity + $request->quantity;
+        $existing->update([
+            'quantity' => $newQty,
+            'subtotal' => $newQty * $menu->price,
         ]);
-         }
-
-        // Ambil price saja, tidak perlu load seluruh kolom
-        $menu = Menu::select('id', 'price')->findOrFail($request->menu_id);
-
-        $cart = Cart::firstOrCreate([
-            'user_id' => auth()->id(),
-            'status'  => 'active',
-        ]);
-
-        $existing = CartItem::where('cart_id', $cart->id)
-            ->where('menu_id', $menu->id)
-            ->select('id', 'quantity')
-            ->first();
-
-        if ($existing) {
-            $newQty = $existing->quantity + $request->quantity;
-            $existing->update([
-                'quantity' => $newQty,
-                'subtotal' => $newQty * $menu->price,
-            ]);
-        } else {
-            CartItem::create([
-                'cart_id'  => $cart->id,
-                'menu_id'  => $menu->id,
-                'quantity' => $request->quantity,
-                'subtotal' => $request->quantity * $menu->price,
-            ]);
-        }
-
-        // Agregat DB langsung — tidak load semua item
-        $count = CartItem::where('cart_id', $cart->id)->sum('quantity');
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Menu berhasil ditambahkan ke keranjang!',
-            'count'   => $count,
+    } else {
+        CartItem::create([
+            'cart_id'  => $cart->id,
+            'menu_id'  => $menu->id,
+            'quantity' => $request->quantity,
+            'subtotal' => $request->quantity * $menu->price,
         ]);
     }
+
+    $count = CartItem::where('cart_id', $cart->id)->sum('quantity');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Menu berhasil ditambahkan ke keranjang!',
+        'count'   => $count,
+    ]);
+}
 
     // ─────────────────────────────────────────
     // Update quantity — form submit (fallback)

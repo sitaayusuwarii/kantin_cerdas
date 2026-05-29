@@ -37,6 +37,8 @@ Route::middleware(['auth', 'role:admin'])
     ->group(function () {
 
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::patch('/admin/dashboard/target', [AdminDashboardController::class, 'setTarget'])
+        ->name('admin.dashboard.setTarget');
 
         Route::get('/admin/kelola-user', [UserController::class, 'index'])
         ->name('admin.kelola-user');
@@ -147,6 +149,12 @@ Route::middleware(['auth', 'role:pengelola'])
 
         Route::patch('/pengelola/delivery/{delivery}/complete', [DeliveryController::class, 'complete'])
             ->name('pengelola.delivery.complete');
+            
+        Route::patch('/pengelola/delivery/{delivery}/cooked', [DeliveryController::class, 'cooked'])
+        ->name('pengelola.delivery.cooked');
+
+        Route::get('/pengelola/delivery/display', [DeliveryController::class, 'display'])
+        ->name('pengelola.delivery.display');
 
         // NOTIFICATIONS
          Route::get('/pengelola/notifications', [NotificationController::class, 'index'])

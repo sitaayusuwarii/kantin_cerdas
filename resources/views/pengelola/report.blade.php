@@ -16,8 +16,8 @@
         <a href="{{ route('pengelola.report', ['period' => $key]) }}"
            class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
                {{ $period === $key
-                   ? 'bg-forest-800 text-cream-100 shadow-md'
-                   : 'bg-cream-50 border border-cream-300 text-forest-600 hover:border-forest-400' }}">
+                   ? 'bg-orange-500 text-cream-100 shadow-md'
+                   : 'bg-white border border-cream-300 text-forest-600 hover:border-forest-400' }}">
             {{ $label }}
         </a>
         @endforeach
@@ -75,7 +75,7 @@
     ];
     @endphp
     @foreach($summaries as $s)
-    <div class="bg-cream-50 rounded-2xl p-4 shadow-sm border border-cream-200">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-cream-200">
         <div class="w-9 h-9 {{ $s['bg'] }} rounded-xl flex items-center justify-center shadow mb-3">
             <i class="fa-solid {{ $s['icon'] }} text-white text-sm"></i>
         </div>
@@ -90,7 +90,7 @@
 <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
 
     {{-- Top 5 Bar Chart (xl: 3/5) --}}
-    <div class="xl:col-span-3 bg-cream-50 rounded-2xl shadow-sm border border-cream-200 p-6">
+    <div class="xl:col-span-3 bg-white rounded-2xl shadow-sm border border-cream-200 p-6">
         <div class="flex items-center justify-between mb-5">
             <div>
                 <h2 class="font-display font-semibold text-forest-900 text-base flex items-center gap-2">
@@ -136,7 +136,7 @@
     <div class="xl:col-span-2 space-y-5">
 
         {{-- Tren Harian --}}
-        <div class="bg-cream-50 rounded-2xl shadow-sm border border-cream-200 p-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-cream-200 p-5">
             <h3 class="font-display font-semibold text-sm text-forest-900 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-forest-500 text-xs"></i>
                Tren Harian ({{ Carbon\Carbon::now()->translatedFormat('M') }})</h3>
@@ -163,7 +163,7 @@
         </div>
 
         {{-- Kategori --}}
-        <div class="bg-cream-50 rounded-2xl shadow-sm border border-cream-200 p-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-cream-200 p-5">
             <h3 class="font-display font-semibold text-sm text-forest-900 mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie text-forest-500 text-xs"></i>
                 Distribusi Kategori
@@ -274,7 +274,7 @@
         </div>
 
 {{-- ── DETAIL TABLE ─────────────────────────────────────── --}}
-<div class="mt-6 bg-cream-50 rounded-2xl shadow-sm border border-cream-200 overflow-hidden">
+<div class="mt-6 bg-white rounded-2xl shadow-sm border border-cream-200 overflow-hidden">
     <div class="px-6 py-4 border-b border-cream-200 flex items-center justify-between">
         <h3 class="font-display font-semibold text-forest-900 text-sm flex items-center gap-2">
             <i class="fa-solid fa-table-list text-forest-500 text-xs"></i>Detail Semua Menu

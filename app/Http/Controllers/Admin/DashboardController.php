@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\DailyTarget;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
@@ -108,6 +110,13 @@ class DashboardController extends Controller
             ->distinct('user_id')
             ->count('user_id');
 
+         // ── Target Harian ────────────────────────────────────────────────
+        $dailyTarget  = DailyTarget::where('date', $today->toDateString())->first();
+        $targetAmount = $dailyTarget?->target_amount ?? 0;
+        $targetPct    = $targetAmount > 0
+            ? min(round(($incomeToday / $targetAmount) * 100), 100)
+            : 0;
+
         return view('admin.dashboard', compact(
             'incomeToday', 'incomeYesterday', 'incomePct',
             'totalThisMonth', 'newToday',
@@ -116,7 +125,22 @@ class DashboardController extends Controller
             'chartData', 'chartMax',
             'statusBreakdown', 'totalThisMonth', 'monthGrowthPct',
             'pendingList',
-            'incomeThisWeek', 'avgPerTrx', 'busiestDay', 'usersTransacted'
+            'incomeThisWeek', 'avgPerTrx', 'busiestDay', 'usersTransacted',
+            'targetAmount', 'targetPct'
         ));
+    }
+
+     public function setTarget(Request $request)
+    {
+        $request->validate([
+            'target_amount' => 'required|numeric|min:0',
+        ]);
+
+        DailyTarget::updateOrCreate(
+            ['date' => Carbon::today()->toDateString()],
+            ['target_amount' => $request->target_amount]
+        );
+
+        return back()->with('target_saved', true);
     }
 }

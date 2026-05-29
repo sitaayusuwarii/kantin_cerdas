@@ -2,7 +2,7 @@
 <style>
   /* Tombol utama — admin dark theme */
   .btn-primary {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, #f97316, #ea580c);
     color: #ffffff;
     padding: 0.65rem 1.25rem;
     border-radius: 0.75rem;
@@ -14,16 +14,16 @@
     border: none;
     cursor: pointer;
     transition: filter 0.2s, transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-  }
-  .btn-primary:hover {
+    box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+}
+.btn-primary:hover {
     filter: brightness(1.1);
     transform: translateY(-1px);
-    box-shadow: 0 8px 22px rgba(79, 70, 229, 0.5);
-  }
-  .btn-primary:active {
+    box-shadow: 0 8px 22px rgba(249, 115, 22, 0.5);
+}
+.btn-primary:active {
     transform: translateY(0);
-  }
+}
 </style>
 @endpush
 
@@ -223,7 +223,7 @@
                         <i class="fa-solid fa-graduation-cap absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
                         <input type="text" name="class"
                                value="{{ old('class', $user->class) }}"
-                               placeholder="XII IPA 2"
+                               placeholder="Kelas"
                                class="w-full pl-9 pr-4 py-3 bg-gray-50 border border-gray-200
                                       rounded-xl text-sm text-gray-700 focus:outline-none focus:border-primary-400
                                       focus:ring-2 focus:ring-primary-100 transition-all">

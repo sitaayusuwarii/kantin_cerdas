@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Delivery;
+use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 
 class DeliveryController extends Controller
 {
@@ -13,9 +15,9 @@ class DeliveryController extends Controller
                 'order.items.menu'
             ])
             // ↓ hanya tampilkan yang sudah masuk pipeline pengiriman
-            ->whereIn('status', ['diproses', 'dikirim', 'selesai'])
+            ->whereIn('status', ['diproses', 'selesai_dimasak', 'dikirim', 'selesai'])
             // ↓ yang paling lama menunggu muncul paling atas
-            ->oldest()
+            ->latest()
             ->get();
 
         return view('pengelola.delivery', compact('deliveries'));
@@ -25,12 +27,14 @@ class DeliveryController extends Controller
 {
     $delivery->load('order.user'); 
 
-    abort_if($delivery->status !== 'diproses', 403, 'Status pengiriman tidak valid.');
+    abort_if($delivery->status !== 'selesai_dimasak', 403, 'Status pengiriman tidak valid.');
 
     $delivery->update([
         'status'  => 'dikirim',
         'sent_at' => now(),
     ]);
+
+    $delivery->order->update(['status' => 'dikirim']);
 
     // Notifikasi Telegram
     $chatId = $delivery->order->user->telegram_chat_id ?? null;
@@ -72,5 +76,44 @@ public function complete(Delivery $delivery)
     return back()->with('success', 'Pesanan selesai.');
 }
 
+public function cooked(Delivery $delivery): RedirectResponse
+{
+    $delivery->load('order');
+    $order = $delivery->order;
+
+    // Pastikan order statusnya diproses dulu sebelum nextStatus() dipanggil
+    abort_if(
+    !in_array($order->status, [Order::STATUS_DIPROSES, Order::STATUS_DIKONFIRMASI]),
+    403, 'Status tidak valid.'
+);
+
+    $next = $order->nextStatus(); // 'selesai_dimasak'
+
+    $delivery->update([
+        'status'    => $next,
+        'cooked_at' => now(),   // pastikan kolom ini ada, atau hapus baris ini
+    ]);
+
+    $order->update([
+        'status'       => $next,
+        'completed_at' => $next === Order::STATUS_SELESAI ? now() : null,
+    ]);
+
+    $msg = $next === Order::STATUS_SELESAI
+        ? 'Pesanan langsung selesai!'
+        : 'Pesanan siap dikirim!';
+
+    return back()->with('success', $msg);
+}
+
+public function display()
+{
+    $deliveries = Delivery::with(['order.user', 'order.items.menu'])
+        ->whereIn('status', ['diproses', 'selesai_dimasak', 'dikirim', 'selesai'])
+        ->latest()
+        ->get();
+
+    return view('pengelola.delivery-display', compact('deliveries'));
+}
     
 }

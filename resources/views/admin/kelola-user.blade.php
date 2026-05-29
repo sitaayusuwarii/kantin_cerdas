@@ -15,8 +15,8 @@
 @endif
 
 {{-- ===== STATS ROW ===== --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-    @php
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6" style="position: relative; z-index: 1;">
+        @php
         $stats = [
             ['label' => 'Total User',    'val' => $totalUsers,     'icon' => 'fa-users',         'c' => 'primary'],
             ['label' => 'Siswa',         'val' => $totalSiswa,     'icon' => 'fa-graduation-cap', 'c' => 'emerald'],
@@ -30,8 +30,8 @@
             <i class="fa-solid {{ $s['icon'] }} text-{{ $s['c'] }}-400 text-sm"></i>
         </div>
         <div>
-            <p class="text-white font-bold text-xl leading-none">{{ number_format($s['val']) }}</p>
-            <p class="text-slate-500 text-xs mt-0.5">{{ $s['label'] }}</p>
+            <p class="text-stone-800 font-bold text-xl leading-none">{{ number_format($s['val']) }}</p>
+            <p class="text-stone-400 text-xs mt-0.5">{{ $s['label'] }}</p>
         </div>
     </div>
     @endforeach
@@ -39,61 +39,77 @@
 
 {{-- ===== FILTER / SEARCH BAR ===== --}}
 <form method="GET" action="{{ route('admin.kelola-user') }}" id="filter-form">
-<div class="glass-card rounded-2xl p-4 mb-4">
-    <div class="flex flex-col sm:flex-row gap-3">
-        {{-- Status Filter --}}
-        <div class="flex items-center gap-2 flex-wrap">
-            @foreach(['' => 'Semua', 'active' => 'Aktif', 'suspended' => 'Tersuspend', 'inactive' => 'Non-aktif'] as $val => $label)
-            <button type="submit" name="status" value="{{ $val }}"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                {{ request('status', '') === $val
-                    ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300'
-                    : 'bg-slate-800 border border-border text-slate-400 hover:text-white hover:border-slate-600' }}">
-                {{ $label }}
+<div class="glass-card rounded-2xl p-4 mb-4" style="overflow:visible; position:relative; z-index:10;">    <div class="flex flex-col sm:flex-row gap-3 overflow-visible">
+        {{-- Status Filter Dropdown --}}
+        <div class="relative" id="status-dropdown-wrap">
+            <button type="button" onclick="toggleDropdown('status-dropdown')"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-orange-200 text-stone-600 hover:border-orange-400 transition-all">
+                <i class="fa-solid fa-circle-half-stroke text-orange-400 text-xs"></i>
+                Status: {{ request('status') ? ucfirst(request('status')) : 'Semua' }}
+                <i class="fa-solid fa-chevron-down text-stone-400 text-xs"></i>
             </button>
-            @endforeach
+            <div id="status-dropdown"
+                class="hidden absolute left-0 mt-1 w-44 bg-white border border-orange-100 rounded-xl shadow-lg z-[999]">
+                @foreach(['' => 'Semua', 'active' => 'Aktif', 'suspended' => 'Tersuspend', 'inactive' => 'Non-aktif'] as $val => $label)
+                <button type="submit" name="status" value="{{ $val }}"
+                    class="w-full text-left px-4 py-2.5 text-xs font-semibold transition-all flex items-center gap-2
+                    {{ request('status', '') === $val ? 'bg-orange-50 text-orange-600' : 'text-stone-600 hover:bg-orange-50' }}">
+                    @if($val === '') <i class="fa-solid fa-list text-stone-400 text-xs"></i>
+                    @elseif($val === 'active') <i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i>
+                    @elseif($val === 'suspended') <i class="fa-solid fa-user-slash text-red-400 text-xs"></i>
+                    @else <i class="fa-solid fa-circle-minus text-stone-400 text-xs"></i>
+                    @endif
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
         </div>
 
-        {{-- Role Filter --}}
-        <div class="flex items-center gap-2 flex-wrap">
-            @foreach([
-                '' => 'Semua Role',
-                'customer' => 'Customer',
-                'pengelola' => 'Pengelola',
-                'admin' => 'Admin'
-            ] as $val => $label)
-
-            <button type="submit" name="role" value="{{ $val }}"
-                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                {{ request('role', '') === $val
-                    ? 'bg-blue-500/20 border border-blue-500/40 text-blue-300'
-                    : 'bg-slate-800 border border-border text-slate-400 hover:text-white hover:border-slate-600' }}">
-                {{ $label }}
+        {{-- Role Filter Dropdown --}}
+        <div class="relative" id="role-dropdown-wrap">
+            <button type="button" onclick="toggleDropdown('role-dropdown')"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-orange-200 text-stone-600 hover:border-orange-400 transition-all">
+                <i class="fa-solid fa-users text-orange-400 text-xs"></i>
+                Role: {{ request('role') ? ucfirst(request('role')) : 'Semua' }}
+                <i class="fa-solid fa-chevron-down text-stone-400 text-xs"></i>
             </button>
-
-            @endforeach
+            <div id="role-dropdown"
+                class="hidden absolute left-0 mt-1 w-44 bg-white border border-orange-100 rounded-xl shadow-lg z-[999]">
+                @foreach(['' => 'Semua Role', 'customer' => 'Customer', 'pengelola' => 'Pengelola', 'admin' => 'Admin'] as $val => $label)
+                <button type="submit" name="role" value="{{ $val }}"
+                    class="w-full text-left px-4 py-2.5 text-xs font-semibold transition-all flex items-center gap-2
+                    {{ request('role', '') === $val ? 'bg-orange-50 text-orange-600' : 'text-stone-600 hover:bg-orange-50' }}">
+                    @if($val === '') <i class="fa-solid fa-layer-group text-stone-400 text-xs"></i>
+                    @elseif($val === 'customer') <i class="fa-solid fa-graduation-cap text-emerald-400 text-xs"></i>
+                    @elseif($val === 'pengelola') <i class="fa-solid fa-id-badge text-amber-400 text-xs"></i>
+                    @else <i class="fa-solid fa-user-shield text-blue-400 text-xs"></i>
+                    @endif
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
         </div>
 
         <div class="flex gap-2 sm:ml-auto flex-wrap">
             {{-- Search --}}
-            <div class="flex items-center gap-2 bg-slate-800 border border-border rounded-xl px-3 py-2 {{ request('search') ? 'border-primary-500/40' : '' }}">
-                <i class="fa-solid fa-search text-slate-500 text-xs"></i>
+            <div class="flex items-center gap-2 bg-orange-50 border border-border rounded-xl px-3 py-2 {{ request('search') ? 'border-primary-500/40' : '' }}">
+                <i class="fa-solid fa-search text-stone-400 text-xs"></i>
                 <input
                     type="text"
                     name="search"
                     value="{{ request('search') }}"
                     placeholder="Cari nama / username..."
-                    class="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none w-44">
+                    class="bg-transparent text-sm text-stone-600 placeholder-slate-600 outline-none w-44">
             </div>
             {{-- Search submit --}}
-            <button type="submit" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-700 border border-border text-slate-300 hover:text-white text-xs font-semibold transition-all">
+            <button type="submit" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-100 border border-border text-stone-600 hover:text-white text-xs font-semibold transition-all">
                 <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 <span class="hidden sm:inline">Cari</span>
             </button>
             {{-- Reset --}}
             @if(request('search') || request('status'))
             <a href="{{ route('admin.kelola-user') }}"
-               class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-700 border border-border text-slate-400 hover:text-white text-xs font-semibold transition-all">
+               class="flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-100 border border-border text-stone-500 hover:text-white text-xs font-semibold transition-all">
                 <i class="fa-solid fa-xmark text-xs"></i>
             </a>
             @endif
@@ -110,10 +126,10 @@
 </form>
 
 {{-- ===== DESKTOP TABLE ===== --}}
-<div class="hidden lg:block glass-card rounded-2xl overflow-hidden">
+<div class="hidden lg:block glass-card rounded-2xl overflow-hidden" style="position:relative; z-index:1;">
     <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h2 class="text-white font-bold text-base">Daftar User</h2>
-        <span class="text-slate-500 text-xs">
+        <h2 class="text-stone-800 font-bold text-base">Daftar User</h2>
+        <span class="text-stone-400 text-xs">
             Menampilkan {{ $users->firstItem() }}–{{ $users->lastItem() }} dari {{ $users->total() }} data
         </span>
     </div>
@@ -121,13 +137,13 @@
         <table class="w-full">
             <thead>
                 <tr class="border-b border-border">
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Nama User</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Username</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Kelas</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Transaksi</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Terdaftar</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Aksi</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Nama User</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Username</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Kelas</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Transaksi</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Terdaftar</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Status</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-border/40">
@@ -136,7 +152,7 @@
                     $initials  = collect(explode(' ', $user->full_name))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
                     $statusCfg = match($user->status) {
                         'suspended' => ['bg-red-500/10',    'border-red-500/20',    'text-red-400',    'Tersuspend'],
-                        'inactive'  => ['bg-slate-500/10',  'border-slate-500/20',  'text-slate-400',  'Non-aktif'],
+                        'inactive'  => ['bg-slate-500/10',  'border-slate-500/20',  'text-stone-500',  'Non-aktif'],
                         default     => ['bg-emerald-500/10','border-emerald-500/20','text-emerald-400','Aktif'],
                     };
                     $isSuspended   = $user->status === 'suspended';
@@ -175,19 +191,19 @@
                             </div>
                             <div>
                                 <p class="text-white text-sm font-semibold">{{ $user->full_name }}</p>
-                                <p class="text-slate-500 text-xs">{{ $user->phone }}</p>
+                                <p class="text-stone-400 text-xs">{{ $user->phone }}</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-5 py-4">
-                        <span class="text-slate-300 text-sm font-mono">{{ $user->username }}</span>
+                        <span class="text-stone-600 text-sm font-mono">{{ $user->username }}</span>
                     </td>
-                    <td class="px-5 py-4 text-slate-300 text-sm">{{ $user->kelas ?? '—' }}</td>
+                    <td class="px-5 py-4 text-stone-600 text-sm">{{ $user->kelas ?? '—' }}</td>
                     <td class="px-5 py-4">
-                        <span class="text-white font-bold font-mono text-sm">{{ $user->orders_count }}</span>
-                        <span class="text-slate-500 text-xs ml-1">transaksi</span>
+                        <span class="text-stone-800 font-bold font-mono text-sm">{{ $user->orders_count }}</span>
+                        <span class="text-stone-400 text-xs ml-1">transaksi</span>
                     </td>
-                    <td class="px-5 py-4 text-slate-400 text-xs">
+                    <td class="px-5 py-4 text-stone-500 text-xs">
                         {{ $user->created_at->translatedFormat('d M Y') }}
                     </td>
                     <td class="px-5 py-4">
@@ -202,14 +218,14 @@
                             <button
                                 onclick="showDetail({{ $detailData }})"
                                 title="Detail"
-                                class="w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-primary-500/20 border border-border hover:border-primary-500/30 text-slate-400 hover:text-primary-400 flex items-center justify-center transition-all">
+                                class="w-8 h-8 rounded-lg bg-orange-100/50 hover:bg-primary-500/20 border border-border hover:border-primary-500/30 text-stone-500 hover:text-primary-400 flex items-center justify-center transition-all">
                                 <i class="fa-solid fa-eye text-xs"></i>
                             </button>
                             {{-- Edit --}}
                             <button
                                 onclick="openEditUser({{ $editData }})"
                                 title="Edit"
-                                class="w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-amber-500/20 border border-border hover:border-amber-500/30 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all">
+                                class="w-8 h-8 rounded-lg bg-orange-100/50 hover:bg-amber-500/20 border border-border hover:border-amber-500/30 text-stone-500 hover:text-amber-400 flex items-center justify-center transition-all">
                                 <i class="fa-solid fa-pen text-xs"></i>
                             </button>
                             {{-- Suspend / Aktifkan --}}
@@ -218,7 +234,7 @@
                                 <button type="submit"
                                     title="{{ $suspendLabel }}"
                                     onclick="return confirm('{{ $suspendConfirm }}')"
-                                    class="w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-amber-500/20 border border-border hover:border-amber-500/30 text-slate-400 hover:text-amber-400 flex items-center justify-center transition-all">
+                                    class="w-8 h-8 rounded-lg bg-orange-100/50 hover:bg-amber-500/20 border border-border hover:border-amber-500/30 text-stone-500 hover:text-amber-400 flex items-center justify-center transition-all">
                                     <i class="fa-solid {{ $suspendIcon }} text-xs"></i>
                                 </button>
                             </form>
@@ -226,7 +242,7 @@
                             <button
                                 onclick="openDelete({{ $user->id }}, '{{ addslashes($user->full_name) }}')"
                                 title="Hapus"
-                                class="w-8 h-8 rounded-lg bg-slate-700/50 hover:bg-red-500/20 border border-border hover:border-red-500/30 text-slate-400 hover:text-red-400 flex items-center justify-center transition-all">
+                                class="w-8 h-8 rounded-lg bg-orange-100/50 hover:bg-red-500/20 border border-border hover:border-red-500/30 text-stone-500 hover:text-red-400 flex items-center justify-center transition-all">
                                 <i class="fa-solid fa-trash text-xs"></i>
                             </button>
                         </div>
@@ -235,7 +251,7 @@
                 @empty
                 <tr>
                     <td colspan="7" class="px-5 py-14 text-center">
-                        <div class="flex flex-col items-center gap-3 text-slate-600">
+                        <div class="flex flex-col items-center gap-3 text-stone-400">
                             <i class="fa-solid fa-users-slash text-3xl"></i>
                             <p class="text-sm">Tidak ada user ditemukan</p>
                             @if(request('search') || request('status'))
@@ -252,18 +268,18 @@
     {{-- Pagination --}}
     @if($users->hasPages())
     <div class="px-5 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p class="text-slate-500 text-xs">
+        <p class="text-stone-400 text-xs">
             Menampilkan {{ $users->firstItem() }}–{{ $users->lastItem() }} dari {{ $users->total() }} user
         </p>
         <div class="flex items-center gap-1">
             {{-- Prev --}}
             @if($users->onFirstPage())
-            <span class="w-8 h-8 rounded-lg bg-slate-800 border border-border text-slate-600 flex items-center justify-center cursor-not-allowed">
+            <span class="w-8 h-8 rounded-lg bg-orange-50 border border-border text-stone-400 flex items-center justify-center cursor-not-allowed">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </span>
             @else
             <a href="{{ $users->previousPageUrl() }}"
-               class="w-8 h-8 rounded-lg bg-slate-700/50 border border-border text-slate-400 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
+               class="w-8 h-8 rounded-lg bg-orange-100/50 border border-border text-stone-500 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </a>
             @endif
@@ -274,7 +290,7 @@
                class="w-8 h-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all
                {{ $page == $users->currentPage()
                     ? 'bg-primary-500 text-white border border-primary-500'
-                    : 'bg-slate-700/50 border border-border text-slate-400 hover:border-primary-500 hover:text-primary-400' }}">
+                    : 'bg-orange-100/50 border border-border text-stone-500 hover:border-primary-500 hover:text-primary-400' }}">
                 {{ $page }}
             </a>
             @endforeach
@@ -282,11 +298,11 @@
             {{-- Next --}}
             @if($users->hasMorePages())
             <a href="{{ $users->nextPageUrl() }}"
-               class="w-8 h-8 rounded-lg bg-slate-700/50 border border-border text-slate-400 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
+               class="w-8 h-8 rounded-lg bg-orange-100/50 border border-border text-stone-500 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </a>
             @else
-            <span class="w-8 h-8 rounded-lg bg-slate-800 border border-border text-slate-600 flex items-center justify-center cursor-not-allowed">
+            <span class="w-8 h-8 rounded-lg bg-orange-50 border border-border text-stone-400 flex items-center justify-center cursor-not-allowed">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </span>
             @endif
@@ -298,8 +314,8 @@
 {{-- ===== MOBILE CARD LIST ===== --}}
 <div class="lg:hidden space-y-3">
     <div class="flex items-center justify-between mb-2">
-        <h2 class="text-white font-bold">Daftar User</h2>
-        <span class="text-slate-500 text-xs">{{ $users->total() }} total</span>
+        <h2 class="text-stone-800 font-bold">Daftar User</h2>
+        <span class="text-stone-400 text-xs">{{ $users->total() }} total</span>
     </div>
     <div class="space-y-3">
         @forelse($users as $user)
@@ -309,7 +325,7 @@
             $initials  = collect(explode(' ', $user->full_name))->map(fn($w) => strtoupper($w[0]))->take(2)->implode('');
             $statusCfg = match($user->status) {
                 'suspended' => ['bg-red-500/10',    'border-red-500/20',    'text-red-400',    'Tersuspend'],
-                'inactive'  => ['bg-slate-500/10',  'border-slate-500/20',  'text-slate-400',  'Non-aktif'],
+                'inactive'  => ['bg-slate-500/10',  'border-slate-500/20',  'text-stone-500',  'Non-aktif'],
                 default     => ['bg-emerald-500/10','border-emerald-500/20','text-emerald-400','Aktif'],
             };
             $isSuspended    = $user->status === 'suspended';
@@ -345,8 +361,8 @@
                         {{ $initials }}
                     </div>
                     <div>
-                        <p class="text-white font-semibold text-sm">{{ $user->full_name }}</p>
-                        <p class="text-slate-500 text-xs font-mono">{{ $user->username }}</p>
+                        <p class="text-stone-800 font-semibold text-sm">{{ $user->full_name }}</p>
+                        <p class="text-stone-400 text-xs font-mono">{{ $user->username }}</p>
                     </div>
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold {{ $statusCfg[0] }} border {{ $statusCfg[1] }} {{ $statusCfg[2] }}">
@@ -355,47 +371,47 @@
                 </span>
             </div>
             <div class="grid grid-cols-3 gap-2 mb-3">
-                <div class="bg-slate-800/60 rounded-lg p-2.5">
-                    <p class="text-slate-600 text-xs mb-0.5">Kelas</p>
-                    <p class="text-slate-300 text-xs truncate">{{ $user->kelas ?? '—' }}</p>
+                <div class="bg-orange-50/60 rounded-lg p-2.5">
+                    <p class="text-stone-400 text-xs mb-0.5">Kelas</p>
+                    <p class="text-stone-600 text-xs truncate">{{ $user->kelas ?? '—' }}</p>
                 </div>
-                <div class="bg-slate-800/60 rounded-lg p-2.5">
-                    <p class="text-slate-600 text-xs mb-0.5">Transaksi</p>
-                    <p class="text-white font-bold font-mono text-xs">{{ $user->orders_count }}x</p>
+                <div class="bg-orange-50/60 rounded-lg p-2.5">
+                    <p class="text-stone-400 text-xs mb-0.5">Transaksi</p>
+                    <p class="text-stone-800 font-bold font-mono text-xs">{{ $user->orders_count }}x</p>
                 </div>
-                <div class="bg-slate-800/60 rounded-lg p-2.5">
-                    <p class="text-slate-600 text-xs mb-0.5">Daftar</p>
-                    <p class="text-slate-300 text-xs">{{ $user->created_at->format('d M Y') }}</p>
+                <div class="bg-orange-50/60 rounded-lg p-2.5">
+                    <p class="text-stone-400 text-xs mb-0.5">Daftar</p>
+                    <p class="text-stone-600 text-xs">{{ $user->created_at->format('d M Y') }}</p>
                 </div>
             </div>
             <div class="flex gap-2">
                 <button
                     onclick="showDetail({{ $detailData }})"
-                    class="flex-1 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs font-medium hover:border-primary-500 hover:text-primary-400 transition-all flex items-center justify-center gap-1.5">
+                    class="flex-1 py-2 rounded-xl bg-orange-50 border border-border text-stone-500 text-xs font-medium hover:border-primary-500 hover:text-primary-400 transition-all flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-eye text-xs"></i> Detail
                 </button>
                 <button
                     onclick="openEditUser({{ $editData }})"
-                    class="flex-1 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs font-medium hover:border-amber-500 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5">
+                    class="flex-1 py-2 rounded-xl bg-orange-50 border border-border text-stone-500 text-xs font-medium hover:border-amber-500 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-pen text-xs"></i> Edit
                 </button>
                 <form method="POST" action="{{ route('admin.users.toggle-suspend', $user) }}" class="inline">
                     @csrf @method('PATCH')
                     <button type="submit"
                         onclick="return confirm('{{ $suspendConfirm }}')"
-                        class="py-2 px-3 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs hover:border-amber-500 hover:text-amber-400 transition-all flex items-center justify-center">
+                        class="py-2 px-3 rounded-xl bg-orange-50 border border-border text-stone-500 text-xs hover:border-amber-500 hover:text-amber-400 transition-all flex items-center justify-center">
                         <i class="fa-solid {{ $suspendIcon }} text-xs"></i>
                     </button>
                 </form>
                 <button
                     onclick="openDelete({{ $user->id }}, '{{ addslashes($user->full_name) }}')"
-                    class="py-2 px-3 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs hover:border-red-500 hover:text-red-400 transition-all flex items-center justify-center">
+                    class="py-2 px-3 rounded-xl bg-orange-50 border border-border text-stone-500 text-xs hover:border-red-500 hover:text-red-400 transition-all flex items-center justify-center">
                     <i class="fa-solid fa-trash text-xs"></i>
                 </button>
             </div>
         </div>
         @empty
-        <div class="text-center py-12 text-slate-600 text-sm">
+        <div class="text-center py-12 text-stone-400 text-sm">
             <i class="fa-solid fa-users-slash text-2xl block mb-3"></i>
             Tidak ada user ditemukan
         </div>
@@ -406,17 +422,17 @@
     @if($users->hasPages())
     <div class="flex justify-between items-center pt-2">
         @if($users->onFirstPage())
-        <span class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-600 text-xs cursor-not-allowed">← Sebelumnya</span>
+        <span class="px-4 py-2 rounded-xl bg-orange-50 border border-border text-stone-400 text-xs cursor-not-allowed">← Sebelumnya</span>
         @else
-        <a href="{{ $users->previousPageUrl() }}" class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-300 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">← Sebelumnya</a>
+        <a href="{{ $users->previousPageUrl() }}" class="px-4 py-2 rounded-xl bg-orange-50 border border-border text-stone-600 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">← Sebelumnya</a>
         @endif
 
-        <span class="text-slate-500 text-xs">{{ $users->currentPage() }} / {{ $users->lastPage() }}</span>
+        <span class="text-stone-400 text-xs">{{ $users->currentPage() }} / {{ $users->lastPage() }}</span>
 
         @if($users->hasMorePages())
-        <a href="{{ $users->nextPageUrl() }}" class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-300 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">Berikutnya →</a>
+        <a href="{{ $users->nextPageUrl() }}" class="px-4 py-2 rounded-xl bg-orange-50 border border-border text-stone-600 text-xs hover:border-primary-500 hover:text-primary-400 transition-all">Berikutnya →</a>
         @else
-        <span class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-600 text-xs cursor-not-allowed">Berikutnya →</span>
+        <span class="px-4 py-2 rounded-xl bg-orange-50 border border-border text-stone-400 text-xs cursor-not-allowed">Berikutnya →</span>
         @endif
     </div>
     @endif
@@ -426,10 +442,10 @@
 <div id="modal-add-user" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
     <div class="glass-card rounded-2xl p-5 max-w-md w-full mx-4 border border-border shadow-2xl">
         <div class="flex items-center justify-between mb-5">
-            <h3 class="text-white font-bold text-base flex items-center gap-2">
+            <h3 class="text-stone-800 font-bold text-base flex items-center gap-2">
                 <i class="fa-solid fa-user-plus text-primary-400"></i> Tambah User Baru
             </h3>
-            <button onclick="closeModal('modal-add-user')" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeModal('modal-add-user')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
@@ -437,20 +453,20 @@
             @csrf
             <div class="space-y-3">
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">Nama Lengkap <span class="text-red-400">*</span></label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">Nama Lengkap <span class="text-red-400">*</span></label>
                     <input name="full_name" type="text" placeholder="cth. Andi Pratama" required
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-slate-500 text-xs font-semibold block mb-1.5">Username <span class="text-red-400">*</span></label>
+                        <label class="text-stone-400 text-xs font-semibold block mb-1.5">Username <span class="text-red-400">*</span></label>
                         <input name="username" type="text" placeholder="cth. andi2025" required
-                            class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
+                            class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
                     </div>
                     <div>
-                        <label class="text-slate-500 text-xs font-semibold block mb-1.5">Role <span class="text-red-400">*</span></label>
+                        <label class="text-stone-400 text-xs font-semibold block mb-1.5">Role <span class="text-red-400">*</span></label>
                         <select name="role"
-                            class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors cursor-pointer">
+                            class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors cursor-pointer">
                             <option value="customer">Customer (Siswa)</option>
                             <option value="pengelola">Pengelola</option>
                             <option value="admin">Admin</option>
@@ -458,24 +474,24 @@
                     </div>
                 </div>
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">No. HP <span class="text-red-400">*</span></label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">No. HP <span class="text-red-400">*</span></label>
                     <input name="phone" type="text" placeholder="08xx-xxxx-xxxx" required
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
                 </div>
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">Kelas</label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">Kelas</label>
                     <input name="kelas" type="text" placeholder="cth. XII IPA 1"
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
                 </div>
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">Password Awal <span class="text-red-400">*</span></label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">Password Awal <span class="text-red-400">*</span></label>
                     <input name="password" type="password" placeholder="Min. 6 karakter" required minlength="6"
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
                 </div>
             </div>
             <div class="mt-5 flex gap-3 justify-end">
                 <button type="button" onclick="closeModal('modal-add-user')"
-                    class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-semibold transition-all">
+                    class="px-4 py-2 rounded-xl bg-orange-100 hover:bg-slate-600 text-stone-600 text-sm font-semibold transition-all">
                     Batal
                 </button>
                 <button type="submit"
@@ -491,10 +507,10 @@
 <div id="modal-edit-user" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
     <div class="glass-card rounded-2xl p-5 max-w-md w-full mx-4 border border-border shadow-2xl">
         <div class="flex items-center justify-between mb-5">
-            <h3 class="text-white font-bold text-base flex items-center gap-2">
+            <h3 class="text-stone-800 font-bold text-base flex items-center gap-2">
                 <i class="fa-solid fa-user-pen text-amber-400"></i> Edit User
             </h3>
-            <button onclick="closeModal('modal-edit-user')" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeModal('modal-edit-user')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
@@ -502,20 +518,20 @@
             @csrf @method('PUT')
             <div class="space-y-3">
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">Nama Lengkap</label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">Nama Lengkap</label>
                     <input id="edit-full_name" name="full_name" type="text" required
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-slate-500 text-xs font-semibold block mb-1.5">Username</label>
+                        <label class="text-stone-400 text-xs font-semibold block mb-1.5">Username</label>
                         <input id="edit-username" name="username" type="text" required
-                            class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
+                            class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
                     </div>
                     <div>
-                        <label class="text-slate-500 text-xs font-semibold block mb-1.5">Status</label>
+                        <label class="text-stone-400 text-xs font-semibold block mb-1.5">Status</label>
                         <select id="edit-status" name="status"
-                            class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors cursor-pointer">
+                            class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors cursor-pointer">
                             <option value="active">Aktif</option>
                             <option value="suspended">Tersuspend</option>
                             <option value="inactive">Non-aktif</option>
@@ -523,26 +539,26 @@
                     </div>
                 </div>
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">No. HP</label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">No. HP</label>
                     <input id="edit-phone" name="phone" type="text" required
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
                 </div>
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">Kelas</label>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">Kelas</label>
                     <input id="edit-kelas" name="kelas" type="text"
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm outline-none focus:border-primary-500 transition-colors">
                 </div>
                 <div>
-                    <label class="text-slate-500 text-xs font-semibold block mb-1.5">
-                        Password Baru <span class="text-slate-600 font-normal">(kosongkan jika tidak diganti)</span>
+                    <label class="text-stone-400 text-xs font-semibold block mb-1.5">
+                        Password Baru <span class="text-stone-400 font-normal">(kosongkan jika tidak diganti)</span>
                     </label>
                     <input id="edit-password" name="password" type="password" placeholder="Min. 6 karakter"
-                        class="w-full bg-slate-800 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
+                        class="w-full bg-orange-50 border border-border rounded-xl px-3 py-2.5 text-slate-200 text-sm placeholder-slate-600 outline-none focus:border-primary-500 transition-colors">
                 </div>
             </div>
             <div class="mt-5 flex gap-3 justify-end">
                 <button type="button" onclick="closeModal('modal-edit-user')"
-                    class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-semibold transition-all">
+                    class="px-4 py-2 rounded-xl bg-orange-100 hover:bg-slate-600 text-stone-600 text-sm font-semibold transition-all">
                     Batal
                 </button>
                 <button type="submit"
@@ -558,10 +574,10 @@
 <div id="modal-detail-user" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
     <div class="glass-card rounded-2xl p-5 max-w-md w-full mx-4 border border-border shadow-2xl">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-white font-bold flex items-center gap-2">
+            <h3 class="text-stone-800 font-bold flex items-center gap-2">
                 <i class="fa-solid fa-circle-info text-primary-400"></i> Detail User
             </h3>
-            <button onclick="closeModal('modal-detail-user')" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeModal('modal-detail-user')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
@@ -575,15 +591,15 @@
 <div id="modal-delete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
     <div class="glass-card rounded-2xl p-5 max-w-sm w-full mx-4 border border-border shadow-2xl">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-white font-bold flex items-center gap-2">
+            <h3 class="text-stone-800 font-bold flex items-center gap-2">
                 <i class="fa-solid fa-triangle-exclamation text-red-400"></i> Hapus User
             </h3>
-            <button onclick="closeModal('modal-delete')" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeModal('modal-delete')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
         <div class="p-3 rounded-xl bg-red-500/5 border border-red-500/15 mb-4">
-            <p class="text-slate-300 text-sm">
+            <p class="text-stone-600 text-sm">
                 Anda yakin ingin menghapus akun <strong id="delete-name" class="text-white"></strong>?
                 Semua data transaksi terkait akan ikut terhapus dan tindakan ini
                 <span class="text-red-400 font-semibold">tidak dapat dibatalkan</span>.
@@ -593,7 +609,7 @@
             @csrf @method('DELETE')
             <div class="flex gap-3 justify-end">
                 <button type="button" onclick="closeModal('modal-delete')"
-                    class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-semibold transition-all">
+                    class="px-4 py-2 rounded-xl bg-orange-100 hover:bg-slate-600 text-stone-600 text-sm font-semibold transition-all">
                     Batal
                 </button>
                 <button type="submit"
@@ -607,7 +623,7 @@
 
 {{-- ===== TOAST ===== --}}
 <div id="toast"
-    class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-800 border border-border shadow-2xl text-sm font-semibold text-white opacity-0 pointer-events-none transition-all duration-300 translate-y-3">
+    class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-2xl bg-orange-50 border border-border shadow-2xl text-sm font-semibold text-white opacity-0 pointer-events-none transition-all duration-300 translate-y-3">
     <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
     <span id="toast-msg">Berhasil</span>
 </div>
@@ -626,7 +642,7 @@ const ROUTES = {
 const statusConfig = {
     active    : { label: 'Aktif',      bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400' },
     suspended : { label: 'Tersuspend', bg: 'bg-red-500/10',     border: 'border-red-500/20',     text: 'text-red-400' },
-    inactive  : { label: 'Non-aktif',  bg: 'bg-slate-500/10',   border: 'border-slate-500/20',   text: 'text-slate-400' },
+    inactive  : { label: 'Non-aktif',  bg: 'bg-slate-500/10',   border: 'border-slate-500/20',   text: 'text-stone-500' },
 };
 
 const roleLabel = { customer: 'Customer', pengelola: 'Pengelola', admin: 'Admin' };
@@ -656,13 +672,13 @@ function showDetail(u) {
     const sc = statusConfig[u.status] || statusConfig.inactive;
 
     document.getElementById('detail-user-content').innerHTML = `
-        <div class="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl mb-1">
+        <div class="flex items-center gap-4 p-4 bg-orange-50/50 rounded-xl mb-1">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-500/30 to-primary-700/30 border border-primary-500/20 flex items-center justify-center text-primary-300 text-xl font-bold flex-shrink-0">
                 ${initials}
             </div>
             <div>
-                <p class="text-white font-bold text-base">${u.full_name}</p>
-                <p class="text-slate-400 text-xs mt-0.5 font-mono">${u.username}</p>
+                <p class="text-stone-800 font-bold text-base">${u.full_name}</p>
+                <p class="text-stone-500 text-xs mt-0.5 font-mono">${u.username}</p>
                 <div class="flex gap-2 mt-2">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-primary-500/10 border border-primary-500/20 text-primary-400">
                         ${roleLabel[u.role] || u.role}
@@ -681,8 +697,8 @@ function showDetail(u) {
                 ['Terdaftar Sejak', u.created_at],
                 ['ID User',        `<span class="font-mono text-primary-400">#USR-${String(u.id).padStart(4,'0')}</span>`],
             ].map(([k, v]) => `
-                <div class="bg-slate-800/60 rounded-xl p-3">
-                    <p class="text-slate-500 text-xs mb-1">${k}</p>
+                <div class="bg-orange-50/60 rounded-xl p-3">
+                    <p class="text-stone-400 text-xs mb-1">${k}</p>
                     <p class="text-slate-200 text-sm">${v}</p>
                 </div>
             `).join('')}
@@ -742,6 +758,30 @@ if (serverToast) {
 @if($errors->any())
 openModal('modal-add-user');
 showToast('{{ $errors->first() }}', 'red');
-@endif
+@endif  
+
+// ── Dropdown toggle ───────────────────────────────────────────────────────────
+function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const allDropdowns = ['status-dropdown', 'role-dropdown'];
+    allDropdowns.forEach(d => {
+        if (d !== id) document.getElementById(d).classList.add('hidden');
+    });
+    dropdown.classList.toggle('hidden');
+}
+
+// Tutup dropdown kalau klik di luar
+document.addEventListener('click', function(e) {
+    const wraps = ['status-dropdown-wrap', 'role-dropdown-wrap'];
+    wraps.forEach(wrapId => {
+        const wrap = document.getElementById(wrapId);
+        if (wrap && !wrap.contains(e.target)) {
+            const dropId = wrapId.replace('-wrap', '');
+            document.getElementById(dropId)?.classList.add('hidden');
+        }
+    });
+});
+
 </script>
+
 @endpush

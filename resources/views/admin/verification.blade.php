@@ -13,8 +13,8 @@
             <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
         </div>
         <div class="min-w-0">
-            <p class="text-white font-bold text-lg leading-none">{{ $summary['menunggu'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5 truncate">Menunggu Verifikasi</p>
+            <p class="text-stone-800 font-bold text-lg leading-none">{{ $summary['menunggu'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5 truncate">Menunggu Verifikasi</p>
         </div>
     </div>
     <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
@@ -22,8 +22,8 @@
             <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
         </div>
         <div class="min-w-0">
-            <p class="text-white font-bold text-lg leading-none">{{ $summary['verified_today'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5 truncate">Diverifikasi Hari Ini</p>
+            <p class="text-stone-800 font-bold text-lg leading-none">{{ $summary['verified_today'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5 truncate">Diverifikasi Hari Ini</p>
         </div>
     </div>
     <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
@@ -31,8 +31,8 @@
             <i class="fa-solid fa-circle-xmark text-red-400 text-sm"></i>
         </div>
         <div class="min-w-0">
-            <p class="text-white font-bold text-lg leading-none">{{ $summary['rejected_today'] }}</p>
-            <p class="text-slate-500 text-xs mt-0.5 truncate">Ditolak Hari Ini</p>
+            <p class="text-stone-800 font-bold text-lg leading-none">{{ $summary['rejected_today'] }}</p>
+            <p class="text-stone-400 text-xs mt-0.5 truncate">Ditolak Hari Ini</p>
         </div>
     </div>
     <div class="glass-card rounded-2xl p-4 flex items-center gap-3">
@@ -40,10 +40,10 @@
             <i class="fa-solid fa-money-bills text-primary-400 text-sm"></i>
         </div>
         <div class="min-w-0">
-            <p class="text-white font-bold text-lg leading-none">
+            <p class="text-stone-800 font-bold text-lg leading-none">
                 Rp {{ number_format($summary['total_verified_amount'], 0, ',', '.') }}
             </p>
-            <p class="text-slate-500 text-xs mt-0.5 truncate">Total Terverifikasi</p>
+            <p class="text-stone-400 text-xs mt-0.5 truncate">Total Terverifikasi</p>
         </div>
     </div>
 </div>
@@ -51,8 +51,8 @@
 {{-- ===== FILTER BAR ===== --}}
 <div class="glass-card rounded-2xl p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
     <div class="flex items-center gap-2 flex-1">
-        <i class="fa-solid fa-filter text-slate-500 text-sm"></i>
-        <span class="text-slate-400 text-sm font-medium">Filter:</span>
+        <i class="fa-solid fa-filter text-stone-400 text-sm"></i>
+        <span class="text-stone-500 text-sm font-medium">Filter:</span>
         <div class="flex gap-2 flex-wrap">
             @foreach(['menunggu' => 'Pending', 'semua' => 'Semua', 'terverifikasi' => 'Lunas', 'ditolak' => 'Ditolak'] as $val => $label)
             <a href="{{ request()->fullUrlWithQuery(['status' => $val, 'page' => 1]) }}"
@@ -62,25 +62,25 @@
                      : ($val === 'terverifikasi' ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
                      : ($val === 'ditolak' ? 'bg-red-500/20 border border-red-500/40 text-red-300'
                      : 'bg-primary-500/20 border border-primary-500/40 text-primary-300')))
-                   : 'bg-slate-800 border border-border text-slate-400 hover:text-white hover:border-slate-600' }}">
+                   : 'bg-orange-50 border border-orange-100 text-stone-500 hover:text-white hover:border-slate-600' }}">
                 {{ $label }}
             </a>
             @endforeach
         </div>
     </div>
-    <form method="GET" action="{{ request()->url() }}" class="flex items-center gap-2 bg-slate-800 border border-border rounded-xl px-3 py-2">
+    <form method="GET" action="{{ request()->url() }}" class="flex items-center gap-2 bg-orange-50 border border-border rounded-xl px-3 py-2">
         <input type="hidden" name="status" value="{{ $statusFilter }}">
-        <i class="fa-solid fa-search text-slate-500 text-xs"></i>
+        <i class="fa-solid fa-search text-stone-400 text-xs"></i>
         <input type="text" name="search" value="{{ request('search') }}"
                placeholder="Cari No. Order / Nama..."
-               class="bg-transparent text-sm text-slate-300 placeholder-slate-600 outline-none w-36 sm:w-48">
+               class="bg-transparent text-sm text-stone-600 placeholder-slate-600 outline-none w-36 sm:w-48">
     </form>
 </div>
 
 {{-- ===== DESKTOP TABLE ===== --}}
 <div class="hidden lg:block glass-card rounded-2xl overflow-hidden mb-4">
     <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h2 class="text-white font-bold text-base">Daftar Pembayaran</h2>
+        <h2 class="text-stone-800 font-bold text-base">Daftar Pembayaran</h2>
         @if($statusFilter === 'menunggu')
         <span class="badge px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs">
             {{ $summary['menunggu'] }} Perlu Verifikasi
@@ -91,14 +91,14 @@
         <table class="w-full">
             <thead>
                 <tr class="border-b border-border">
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">No. Pesanan</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Pengguna</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Metode</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Waktu</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bukti</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Aksi</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">No. Pesanan</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Pengguna</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Total</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Metode</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Waktu</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Bukti</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Status</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold text-stone-400 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-border/40" id="payments-table-body">
@@ -126,20 +126,20 @@
                                 {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
                             </div>
                             <div>
-                                <p class="text-white text-sm font-semibold">{{ $payment->user->full_name }}</p>
-                                <p class="text-slate-500 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
+                                <p class="text-stone-800 text-sm font-semibold">{{ $payment->user->full_name }}</p>
+                                <p class="text-stone-400 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-5 py-4">
-                        <span class="text-white font-bold font-mono text-sm">
+                        <span class="text-stone-800 font-bold font-mono text-sm">
                             Rp {{ number_format($payment->amount, 0, ',', '.') }}
                         </span>
                     </td>
-                    <td class="px-5 py-4 text-slate-400 text-sm">
+                    <td class="px-5 py-4 text-stone-500 text-sm">
                         {{ $methodLabels[$payment->method] ?? $payment->method }}
                     </td>
-                    <td class="px-5 py-4 text-slate-400 text-sm">
+                    <td class="px-5 py-4 text-stone-500 text-sm">
                         {{ $payment->created_at->format('H:i') }} 
                     </td>
                     <td class="px-5 py-4">
@@ -154,7 +154,7 @@
                             </div>
                         </button>
                         @else
-                        <span class="text-slate-600 text-xs italic">Tidak ada</span>
+                        <span class="text-stone-400 text-xs italic">Tidak ada</span>
                         @endif
                     </td>
                     <td class="px-5 py-4">
@@ -174,7 +174,7 @@
                             <i class="fa-solid fa-gavel text-xs"></i> Verifikasi
                         </button>
                         @else
-                        <span class="text-slate-600 text-xs italic">Selesai</span>
+                        <span class="text-stone-400 text-xs italic">Selesai</span>
                         @endif
                     </td>
                 </tr>
@@ -183,7 +183,7 @@
                     <td colspan="8" class="px-5 py-16 text-center">
                         <div class="flex flex-col items-center gap-2">
                             <i class="fa-solid fa-circle-check text-emerald-700 text-3xl"></i>
-                            <p class="text-slate-500 text-sm">Tidak ada pembayaran ditemukan</p>
+                            <p class="text-stone-400 text-sm">Tidak ada pembayaran ditemukan</p>
                         </div>
                     </td>
                 </tr>
@@ -195,33 +195,33 @@
     {{-- Pagination --}}
     @if($payments->hasPages())
     <div class="px-5 py-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p class="text-slate-500 text-xs">
+        <p class="text-stone-400 text-xs">
             Menampilkan {{ $payments->firstItem() }}–{{ $payments->lastItem() }} dari {{ $payments->total() }} data
         </p>
         <div class="flex items-center gap-1">
             @if($payments->onFirstPage())
-            <span class="w-8 h-8 rounded-lg bg-slate-700/30 border border-border text-slate-600 flex items-center justify-center cursor-not-allowed">
+            <span class="w-8 h-8 rounded-lg bg-orange-100/30 border border-border text-stone-400 flex items-center justify-center cursor-not-allowed">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </span>
             @else
-            <a href="{{ $payments->previousPageUrl() }}" class="w-8 h-8 rounded-lg bg-slate-700/50 border border-border text-slate-400 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
+            <a href="{{ $payments->previousPageUrl() }}" class="w-8 h-8 rounded-lg bg-orange-100/50 border border-border text-stone-500 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
                 <i class="fa-solid fa-chevron-left text-xs"></i>
             </a>
             @endif
 
             @foreach($payments->getUrlRange(max(1, $payments->currentPage()-2), min($payments->lastPage(), $payments->currentPage()+2)) as $page => $url)
             <a href="{{ $url }}" class="w-8 h-8 rounded-lg text-xs font-semibold transition-all flex items-center justify-center
-                {{ $page === $payments->currentPage() ? 'bg-primary-500 text-white border border-primary-500' : 'bg-slate-700/50 border border-border text-slate-400 hover:border-primary-500 hover:text-primary-400' }}">
+                {{ $page === $payments->currentPage() ? 'bg-primary-500 text-white border border-primary-500' : 'bg-orange-100/50 border border-border text-stone-500 hover:border-primary-500 hover:text-primary-400' }}">
                 {{ $page }}
             </a>
             @endforeach
 
             @if($payments->hasMorePages())
-            <a href="{{ $payments->nextPageUrl() }}" class="w-8 h-8 rounded-lg bg-slate-700/50 border border-border text-slate-400 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
+            <a href="{{ $payments->nextPageUrl() }}" class="w-8 h-8 rounded-lg bg-orange-100/50 border border-border text-stone-500 flex items-center justify-center hover:border-primary-500 hover:text-primary-400 transition-all">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </a>
             @else
-            <span class="w-8 h-8 rounded-lg bg-slate-700/30 border border-border text-slate-600 flex items-center justify-center cursor-not-allowed">
+            <span class="w-8 h-8 rounded-lg bg-orange-100/30 border border-border text-stone-400 flex items-center justify-center cursor-not-allowed">
                 <i class="fa-solid fa-chevron-right text-xs"></i>
             </span>
             @endif
@@ -233,8 +233,8 @@
 {{-- ===== MOBILE CARD LIST ===== --}}
 <div class="lg:hidden space-y-3 mb-4">
     <div class="flex items-center justify-between mb-2">
-        <h2 class="text-white font-bold">Daftar Pembayaran</h2>
-        <span class="text-slate-500 text-xs">{{ $payments->total() }} total</span>
+        <h2 class="text-stone-800 font-bold">Daftar Pembayaran</h2>
+        <span class="text-stone-400 text-xs">{{ $payments->total() }} total</span>
     </div>
 
     @forelse($payments as $payment)
@@ -248,12 +248,12 @@
     <div class="glass-card rounded-2xl p-4 border border-amber-500/10" id="card-{{ $payment->id }}">
         <div class="flex items-start justify-between mb-3">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-stone-800 font-bold text-sm flex-shrink-0">
                     {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
                 </div>
                 <div>
-                    <p class="text-white font-semibold text-sm">{{ $payment->user->full_name }}</p>
-                    <p class="text-slate-500 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
+                    <p class="text-stone-800 font-semibold text-sm">{{ $payment->user->full_name }}</p>
+                    <p class="text-stone-400 text-xs">{{ $payment->user->kelas ?? $payment->user->class ?? '-' }}</p>
                 </div>
             </div>
             <span class="badge-status-{{ $payment->id }} badge px-2.5 py-1 rounded-lg {{ $sc['bg'] }} border {{ $sc['border'] }} {{ $sc['text'] }} text-xs font-semibold">
@@ -262,27 +262,27 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2 mb-3">
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">No. Pesanan</p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">No. Pesanan</p>
                 <p class="text-primary-400 font-mono font-semibold text-xs">{{ $payment->order->order_number ?? '-' }}</p>
             </div>
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">Total</p>
-                <p class="text-white font-bold font-mono text-xs">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">Total</p>
+                <p class="text-stone-800 font-bold font-mono text-xs">Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
             </div>
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">Waktu</p>
-                <p class="text-slate-300 text-xs">{{ $payment->created_at->format('H:i') }} </p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">Waktu</p>
+                <p class="text-stone-600 text-xs">{{ $payment->created_at->format('H:i') }} </p>
             </div>
-            <div class="bg-slate-800/60 rounded-lg p-2.5">
-                <p class="text-slate-600 text-xs mb-0.5">Bukti Transfer</p>
+            <div class="bg-orange-50/60 rounded-lg p-2.5">
+                <p class="text-stone-400 text-xs mb-0.5">Bukti Transfer</p>
                 @if($payment->proof_path)
                 <button onclick="openProof('{{ Str::startsWith($payment->proof_path, 'http') ? $payment->proof_path : Storage::url($payment->proof_path) }}', '{{ $payment->order->order_number ?? $payment->id }}')"
                         class="text-primary-400 text-xs font-semibold flex items-center gap-1">
                     <i class="fa-solid fa-image text-xs"></i> Lihat
                 </button>
                 @else
-                <span class="text-slate-600 text-xs italic">Tidak ada</span>
+                <span class="text-stone-400 text-xs italic">Tidak ada</span>
                 @endif
             </div>
         </div>
@@ -299,34 +299,34 @@
             <i class="fa-solid fa-gavel"></i> Verifikasi
         </button>
         @else
-        <div class="w-full py-2.5 rounded-xl bg-slate-800/40 text-slate-500 text-sm text-center">Sudah diproses</div>
+        <div class="w-full py-2.5 rounded-xl bg-orange-50/40 text-stone-400 text-sm text-center">Sudah diproses</div>
         @endif
     </div>
     @empty
     <div class="glass-card rounded-2xl p-8 text-center">
         <i class="fa-solid fa-circle-check text-emerald-700 text-3xl mb-2"></i>
-        <p class="text-slate-500 text-sm">Tidak ada pembayaran ditemukan</p>
+        <p class="text-stone-400 text-sm">Tidak ada pembayaran ditemukan</p>
     </div>
     @endforelse
 
     @if($payments->hasPages())
     <div class="flex items-center justify-center gap-2 pt-2">
         @if($payments->onFirstPage())
-        <span class="px-4 py-2 rounded-xl bg-slate-800/50 border border-border text-slate-600 text-xs cursor-not-allowed">
+        <span class="px-4 py-2 rounded-xl bg-orange-50/50 border border-border text-stone-400 text-xs cursor-not-allowed">
             <i class="fa-solid fa-chevron-left mr-1"></i> Prev
         </span>
         @else
-        <a href="{{ $payments->previousPageUrl() }}" class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs hover:border-primary-500 transition-all">
+        <a href="{{ $payments->previousPageUrl() }}" class="px-4 py-2 rounded-xl bg-orange-50 border border-border text-stone-500 text-xs hover:border-primary-500 transition-all">
             <i class="fa-solid fa-chevron-left mr-1"></i> Prev
         </a>
         @endif
-        <span class="text-slate-500 text-xs px-2">{{ $payments->currentPage() }} / {{ $payments->lastPage() }}</span>
+        <span class="text-stone-400 text-xs px-2">{{ $payments->currentPage() }} / {{ $payments->lastPage() }}</span>
         @if($payments->hasMorePages())
-        <a href="{{ $payments->nextPageUrl() }}" class="px-4 py-2 rounded-xl bg-slate-800 border border-border text-slate-400 text-xs hover:border-primary-500 transition-all">
+        <a href="{{ $payments->nextPageUrl() }}" class="px-4 py-2 rounded-xl bg-orange-50 border border-border text-stone-500 text-xs hover:border-primary-500 transition-all">
             Next <i class="fa-solid fa-chevron-right ml-1"></i>
         </a>
         @else
-        <span class="px-4 py-2 rounded-xl bg-slate-800/50 border border-border text-slate-600 text-xs cursor-not-allowed">
+        <span class="px-4 py-2 rounded-xl bg-orange-50/50 border border-border text-stone-400 text-xs cursor-not-allowed">
             Next <i class="fa-solid fa-chevron-right ml-1"></i>
         </span>
         @endif
@@ -340,21 +340,21 @@
         {{-- Header --}}
         <div class="flex items-center justify-between mb-3">
             <div>
-                <h3 class="text-white font-bold">Bukti Transfer</h3>
-                <p class="text-slate-400 text-xs" id="proof-order-id">-</p>
+                <h3 class="text-stone-800 font-bold">Bukti Transfer</h3>
+                <p class="text-stone-500 text-xs" id="proof-order-id">-</p>
             </div>
             <div class="flex items-center gap-2">
                 <a id="proof-download" href="#" target="_blank"
                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-500/20 border border-primary-500/30 text-primary-300 text-xs font-semibold hover:bg-primary-500/40 transition-all">
                     <i class="fa-solid fa-download text-xs"></i> Unduh
                 </a>
-                <button onclick="closeProof()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+                <button onclick="closeProof()" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
         </div>
         {{-- Gambar fullscreen --}}
-        <div class="rounded-2xl overflow-hidden border border-border bg-slate-900 flex items-center justify-center" style="max-height:80vh">
+        <div class="rounded-2xl overflow-hidden border border-border bg-white flex items-center justify-center" style="max-height:80vh">
             <img id="proof-img" src="" alt="Bukti Transfer" class="w-full h-full object-contain" style="max-height:80vh">
         </div>
     </div>
@@ -367,17 +367,17 @@
         {{-- Header --}}
         <div class="flex items-center justify-between mb-5">
             <div>
-                <h3 class="text-white font-bold text-lg">Proses Pembayaran</h3>
-                <p class="text-slate-500 text-xs mt-0.5">No. Pesanan: <span id="action-order-id" class="text-primary-400 font-mono font-semibold">-</span></p>
+                <h3 class="text-stone-800 font-bold text-lg">Proses Pembayaran</h3>
+                <p class="text-stone-400 text-xs mt-0.5">No. Pesanan: <span id="action-order-id" class="text-primary-400 font-mono font-semibold">-</span></p>
             </div>
-            <button onclick="closeActionModal()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeActionModal()" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
         </div>
 
         {{-- Step 1: Pilih Aksi --}}
         <div id="step-choose">
-            <p class="text-slate-400 text-sm mb-4">Pilih tindakan untuk pembayaran ini:</p>
+            <p class="text-stone-500 text-sm mb-4">Pilih tindakan untuk pembayaran ini:</p>
             <div class="grid grid-cols-2 gap-3">
                 <button onclick="chooseVerify()"
                     class="flex flex-col items-center gap-3 p-5 rounded-2xl bg-emerald-500/10 border-2 border-emerald-500/20 hover:border-emerald-500 hover:bg-emerald-500/20 transition-all group">
@@ -386,7 +386,7 @@
                     </div>
                     <div class="text-center">
                         <p class="text-emerald-400 font-bold text-sm">Verifikasi</p>
-                        <p class="text-slate-500 text-xs mt-0.5">Pembayaran valid</p>
+                        <p class="text-stone-400 text-xs mt-0.5">Pembayaran valid</p>
                     </div>
                 </button>
                 <button onclick="chooseReject()"
@@ -396,7 +396,7 @@
                     </div>
                     <div class="text-center">
                         <p class="text-red-400 font-bold text-sm">Tolak</p>
-                        <p class="text-slate-500 text-xs mt-0.5">Bukti tidak valid</p>
+                        <p class="text-stone-400 text-xs mt-0.5">Bukti tidak valid</p>
                     </div>
                 </button>
             </div>
@@ -408,15 +408,15 @@
                 <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mb-4">
                     <i class="fa-solid fa-circle-check text-emerald-400 text-3xl"></i>
                 </div>
-                <h4 class="text-white font-bold text-base mb-1">Verifikasi Pembayaran?</h4>
-                <p class="text-slate-400 text-sm">Pembayaran akan ditandai <span class="text-emerald-400 font-semibold">LUNAS</span> dan pesanan akan dikonfirmasi. Tindakan ini tidak dapat dibatalkan.</p>
+                <h4 class="text-stone-800 font-bold text-base mb-1">Verifikasi Pembayaran?</h4>
+                <p class="text-stone-500 text-sm">Pembayaran akan ditandai <span class="text-emerald-400 font-semibold">LUNAS</span> dan pesanan akan dikonfirmasi. Tindakan ini tidak dapat dibatalkan.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="backToChoose()" class="flex-1 py-3 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-600 transition-all">
+                <button onclick="backToChoose()" class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-600 text-sm font-semibold hover:bg-slate-600 transition-all">
                     <i class="fa-solid fa-arrow-left mr-1 text-xs"></i> Kembali
                 </button>
                 <button onclick="submitVerify()" id="btn-submit-verify"
-                    class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                    class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-stone-800 text-sm font-semibold transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-check"></i> Ya, Verifikasi
                 </button>
             </div>
@@ -429,21 +429,21 @@
                 <p class="text-red-300 text-xs">Pembayaran akan ditolak dan pesanan akan dibatalkan. Pengguna perlu melakukan pembayaran ulang.</p>
             </div>
             <div class="mb-4">
-                <label class="block text-slate-300 text-sm font-semibold mb-2">
+                <label class="block text-stone-600 text-sm font-semibold mb-2">
                     Alasan Penolakan <span class="text-red-400">*</span>
                 </label>
                 <textarea id="rejection-reason"
                     rows="3"
                     placeholder="Contoh: Bukti transfer tidak jelas, nominal tidak sesuai, nama pengirim berbeda..."
-                    class="w-full px-4 py-3 bg-slate-800 border border-border rounded-xl text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-none transition-all"></textarea>
+                    class="w-full px-4 py-3 bg-orange-50 border border-border rounded-xl text-sm text-stone-600 placeholder-slate-600 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 resize-none transition-all"></textarea>
                 <p id="reason-error" class="text-red-400 text-xs mt-1 hidden">Alasan penolakan wajib diisi minimal 5 karakter.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="backToChoose()" class="flex-1 py-3 rounded-xl bg-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-600 transition-all">
+                <button onclick="backToChoose()" class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-600 text-sm font-semibold hover:bg-slate-600 transition-all">
                     <i class="fa-solid fa-arrow-left mr-1 text-xs"></i> Kembali
                 </button>
                 <button onclick="submitReject()" id="btn-submit-reject"
-                    class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                    class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-stone-800 text-sm font-semibold transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-xmark"></i> Tolak Pembayaran
                 </button>
             </div>
@@ -587,7 +587,7 @@ function updateRowStatus(paymentId, status, reason = '') {
 
     // Hapus/disable tombol aksi
     document.querySelectorAll(`.action-btn-${paymentId}`).forEach(el => {
-        el.outerHTML = '<span class="text-slate-600 text-xs italic">Selesai</span>';
+        el.outerHTML = '<span class="text-stone-400 text-xs italic">Selesai</span>';
     });
 }
 
@@ -612,7 +612,7 @@ function showToast(message, color) {
     const colorMap = { emerald: 'bg-emerald-600', red: 'bg-red-600' };
     const iconMap  = { emerald: 'fa-circle-check', red: 'fa-circle-xmark' };
     const toast = document.createElement('div');
-    toast.className = `fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-xl ${colorMap[color] || 'bg-primary-500'} text-white text-sm font-semibold shadow-2xl transform translate-y-2 opacity-0 transition-all duration-300`;
+    toast.className = `fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-4 py-3 rounded-xl ${colorMap[color] || 'bg-primary-500'} text-stone-800 text-sm font-semibold shadow-2xl transform translate-y-2 opacity-0 transition-all duration-300`;
     toast.innerHTML = `<i class="fa-solid ${iconMap[color] || 'fa-bell'}"></i> ${message}`;
     document.body.appendChild(toast);
     setTimeout(() => toast.classList.replace('translate-y-2', 'translate-y-0') || toast.classList.replace('opacity-0', 'opacity-100'), 10);

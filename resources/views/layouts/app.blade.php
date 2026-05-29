@@ -77,21 +77,20 @@
 </head>
 <body class="min-h-screen flex flex-col text-canteen-dark">
 
-    {{-- ===== NAVBAR ===== --}}
-    <nav class="glass sticky top-0 z-50 border-b border-orange-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+   {{-- ===== NAVBAR ===== --}}
+<nav class="glass sticky top-0 z-50 border-b border-orange-100 shadow-sm">
 
-                {{-- Logo --}}
-                <a href="{{ url('/') }}" class="flex items-center gap-2.5 group">
-                    <div class="w-9 h-9 rounded-xl btn-primary flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-bowl-food text-white text-sm"></i>
-                    </div>
-                    <div>
-                        <span class="font-heading font-800 text-lg text-canteen-dark leading-none block">Smart<span class="text-primary-500">Canteen</span></span>
-                        <span class="text-[10px] text-gray-400 leading-none font-medium tracking-wide">Kantin Digital</span>
-                    </div>
-                </a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="flex items-center justify-between h-16">
+
+            {{-- LOGO ONLY --}}
+            <a href="{{ url('/') }}" class="group">
+
+                <img src="{{ asset('images/canteen.png') }}"
+                alt="Logo"
+                class="w-14 h-14 object-contain group-hover:scale-105 transition-transform"
+            </a>
 
                 {{-- Desktop Menu --}}
                 <div class="hidden md:flex items-center gap-8">
@@ -301,95 +300,227 @@
         @yield('content')
     </main>
 
-    {{-- ===== FOOTER ===== --}}
-    <footer class="bg-canteen-dark text-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+{{-- ===== FOOTER ===== --}}
+<footer class="relative mt-16 overflow-hidden border-t border-orange-200">
 
-                <div>
-                    <div class="flex items-center gap-2.5 mb-4">
-                        <div class="w-9 h-9 rounded-xl btn-primary flex items-center justify-center">
-                            <i class="fa-solid fa-bowl-food text-white text-sm"></i>
-                        </div>
-                        <div>
-                            <span class="font-heading font-bold text-lg">Smart<span class="text-primary-400">Canteen</span></span>
-                        </div>
+    {{-- Background --}}
+    <div class="absolute inset-0 bg-gradient-to-br from-[#c2410c] via-[#ea580c] to-[#f97316]"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+
+        <div class="py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+            {{-- Brand --}}
+            <div class="lg:col-span-2">
+
+                <div class="flex items-center mb-5">
+
+                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white/90 p-2 shadow-lg">
+                        <img src="{{ asset('images/canteen.png') }}"
+                             alt="Logo"
+                             class="w-full h-full object-contain">
                     </div>
-                    <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
-                        Platform kantin digital modern untuk siswa dan orang tua. Pesan makanan, bayar tagihan, semua dalam satu genggaman.
-                    </p>
+
                 </div>
 
-                <div>
-                    <h4 class="font-heading font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">Navigasi</h4>
-                    <ul class="space-y-2.5">
-                        <li><a href="{{ url('/home') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Home</a></li>
-                        <li><a href="{{ url('/menu') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Menu Kantin</a></li>
-                        <li><a href="{{ url('/history') }}" class="text-sm text-gray-300 hover:text-primary-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-xs text-primary-500"></i>Riwayat Pesanan</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-heading font-semibold text-sm uppercase tracking-widest text-gray-400 mb-4">Bantuan</h4>
-                    <ul class="space-y-2.5 mb-5">
-                        <!-- <li class="flex items-center gap-2 text-sm text-gray-300">
-                            <i class="fa-solid fa-school text-primary-400 w-4"></i>
-                            SMA Negeri 1 Contoh
-                        </li> -->
-                        <li class="flex items-center gap-2 text-sm text-gray-300">
-                            <i class="fa-brands fa-whatsapp text-green-400 w-4"></i>
-                            +62 812-3456-7890
-                        </li>
-                        <li class="flex items-center gap-2 text-sm text-gray-300">
-                            <i class="fa-solid fa-envelope text-primary-400 w-4"></i>
-                            kantin@sekolah.sch.id
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-white/10 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p class="text-gray-500 text-xs">© {{ date('Y') }} SmartCanteen. Hak cipta dilindungi.</p>
-                <p class="text-gray-500 text-xs flex items-center gap-1.5">
-                    Dibuat dengan <i class="fa-solid fa-heart text-primary-400 text-xs"></i> untuk pendidikan
+                <p class="text-orange-50 text-sm leading-relaxed max-w-md">
+                    Platform kantin digital modern untuk membantu siswa memesan makanan,
+                    melihat riwayat transaksi, dan melakukan pembayaran dengan cepat dan praktis.
                 </p>
+
+                {{-- Social --}}
+                <div class="flex items-center gap-3 mt-6">
+
+                    <a href="https://instagram.com/username"
+                       target="_blank"
+                       class="w-10 h-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center text-pink-500 hover:bg-pink-500 hover:text-white transition-all">
+
+                        <i class="fa-brands fa-instagram"></i>
+
+                    </a>
+
+                    <a href="https://facebook.com/username"
+                       target="_blank"
+                       class="w-10 h-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
+
+                        <i class="fa-brands fa-facebook-f"></i>
+
+                    </a>
+
+                    <a href="https://wa.me/6281234567890"
+                       target="_blank"
+                       class="w-10 h-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center text-green-500 hover:bg-green-500 hover:text-white transition-all">
+
+                        <i class="fa-brands fa-whatsapp"></i>
+
+                    </a>
+
+                </div>
+
             </div>
+
+            {{-- Navigation --}}
+            <div>
+
+                <h3 class="font-heading font-bold text-white mb-5">
+                    Navigasi
+                </h3>
+
+                <ul class="space-y-3">
+
+                    <li>
+                        <a href="{{ url('/home') }}"
+                           class="text-sm text-orange-100 hover:text-white transition">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/menu') }}"
+                           class="text-sm text-orange-100 hover:text-white transition">
+                            Menu Kantin
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/history') }}"
+                           class="text-sm text-orange-100 hover:text-white transition">
+                            Riwayat
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+            {{-- Contact --}}
+            <div>
+
+                <h3 class="font-heading font-bold text-white mb-5">
+                    Bantuan
+                </h3>
+
+                <div class="space-y-4">
+
+                    {{-- WhatsApp --}}
+                    <a href="https://wa.me/6281234567890"
+                    target="_blank"
+                    class="flex items-start gap-3 group transition-all">
+
+                        <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:bg-green-500 transition-all">
+                            <i class="fa-brands fa-whatsapp text-green-300 group-hover:text-white"></i>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-orange-100/80 mb-1">
+                                WhatsApp
+                            </p>
+
+                            <p class="text-sm text-white group-hover:text-green-100 transition">
+                                +62 812-3456-7890
+                            </p>
+                        </div>
+
+                    </a>
+
+                    {{-- Email --}}
+                    <a href="mailto:kantin@sekolah.sch.id"
+                    class="flex items-start gap-3 group transition-all">
+
+                        <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500 transition-all">
+                            <i class="fa-solid fa-envelope text-blue-200 group-hover:text-white"></i>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-orange-100/80 mb-1">
+                                Email
+                            </p>
+
+                            <p class="text-sm text-white group-hover:text-blue-100 transition">
+                                kantin@sekolah.sch.id
+                            </p>
+                        </div>
+
+                    </a>
+
+                    {{-- Lokasi --}}
+                    <a href="https://share.google/qr7crJrj6nqOjRS3q"
+                    target="_blank"
+                    class="flex items-start gap-3 group transition-all">
+
+                        <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:bg-red-500 transition-all">
+                            <i class="fa-solid fa-location-dot text-red-200 group-hover:text-white"></i>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-orange-100/80 mb-1">
+                                Lokasi Sekolah
+                            </p>
+
+                            <p class="text-sm text-white group-hover:text-red-100 transition">
+                                Buka Google Maps
+                            </p>
+                        </div>
+
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
-    </footer>
 
-    <script>
-        // ── Hamburger ─────────────────────────────────────
-        const btn  = document.getElementById('hamburger-btn');
-        const menu = document.getElementById('mobile-menu');
-        const icon = document.getElementById('hamburger-icon');
+            {{-- Bottom --}}
+            <div class="mt-8 pt-5 pb-24 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-3">
 
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('open');
-            icon.className = menu.classList.contains('open')
-                ? 'fa-solid fa-xmark text-primary-500 text-base'
-                : 'fa-solid fa-bars text-primary-500 text-base';
-        });
+                <p class="text-sm text-white/95 font-medium tracking-wide">
+                    © {{ date('Y') }} SmartCanteen. All rights reserved.
+                </p>
 
-        // ── Profile Dropdown ──────────────────────────────
-        function toggleProfileDropdown() {
-            document.getElementById('profile-dropdown').classList.toggle('open');
+                <div class="flex items-center gap-2 text-sm text-white/95 font-medium">
+
+                    <span>Dibuat dengan</span>
+
+                    <i class="fa-solid fa-heart text-red-400 animate-pulse"></i>
+
+                    <span>untuk digitalisasi kantin sekolah</span>
+
+                </div>
+
+            </div>
+    </div>
+
+</footer>
+
+<script>
+    // Hamburger
+    const btn = document.getElementById('hamburger-btn');
+    const menu = document.getElementById('mobile-menu');
+    const icon = document.getElementById('hamburger-icon');
+
+    btn.addEventListener('click', () => {
+        menu.classList.toggle('open');
+
+        icon.className = menu.classList.contains('open')
+            ? 'fa-solid fa-xmark text-primary-500'
+            : 'fa-solid fa-bars text-primary-500';
+    });
+
+    // Profile dropdown
+    function toggleProfileDropdown() {
+        document.getElementById('profile-dropdown').classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(e) {
+        const wrap = document.getElementById('profile-dropdown-wrap');
+
+        if (wrap && !wrap.contains(e.target)) {
+            document.getElementById('profile-dropdown').classList.remove('open');
         }
+    });
+</script>
 
-        // Tutup kalau klik di luar
-        document.addEventListener('click', function (e) {
-            const wrap = document.getElementById('profile-dropdown-wrap');
-            if (wrap && !wrap.contains(e.target)) {
-                document.getElementById('profile-dropdown').classList.remove('open');
-            }
-        });
+@stack('scripts')
 
-        // Tutup kalau tekan Escape
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                document.getElementById('profile-dropdown').classList.remove('open');
-            }
-        });
-    </script>
-    @stack('scripts')
 </body>
 </html>
