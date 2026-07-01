@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,13 +13,25 @@ use App\Services\NotificationService;
 
 class MenuController extends Controller
 {
-  public function index()
+    // Ambil tenant milik pengelola yang login
+    private function getTenant()
     {
-        $menus = Menu::with('category')->latest()->get();
+        return Tenant::where('user_id', Auth::id())->firstOrFail();
+    }
+
+    public function index()
+    {
+        $tenant = $this->getTenant();
+
+        // Hanya menu milik tenant ini
+        $menus = Menu::with('category')
+                    ->where('tenant_id', $tenant->id)
+                    ->latest()
+                    ->get();
 
         $categories = Category::all();
 
-        return view('pengelola.menu-management', compact('menus', 'categories'));
+        return view('pengelola.menu-management', compact('menus', 'categories', 'tenant'));
     }
 
     public function store(Request $request)
@@ -28,9 +41,11 @@ class MenuController extends Controller
             'description' => 'nullable',
             'price'       => 'required|numeric',
             'stock'       => 'required|integer',
-            'category_id'    => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        $tenant = $this->getTenant();
 
         $image = null;
         if ($request->hasFile('image')) {
@@ -43,31 +58,35 @@ class MenuController extends Controller
             'description'  => $request->description,
             'price'        => $request->price,
             'stock'        => $request->stock,
-            'category_id'     => $request->category_id,
+            'category_id'  => $request->category_id,
             'image'        => $image,
             'seller_id'    => Auth::id(),
+            'tenant_id'    => $tenant->id, // tambah ini
             'is_available' => $request->is_available ?? true,
         ]);
 
         return redirect()
-            ->route('pengelola.menu-management') // ✅ fix
+            ->route('pengelola.menu-management')
             ->with('success', 'Menu berhasil ditambahkan');
     }
 
     public function update(Request $request, Menu $menu)
     {
+        // Pastikan menu ini milik tenant yang login
+        $tenant = $this->getTenant();
+        abort_if($menu->tenant_id !== $tenant->id, 403);
+
         $request->validate([
             'name'        => 'required',
             'description' => 'nullable',
             'price'       => 'required|numeric',
             'stock'       => 'required|integer',
-            'category_id'    => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $image = $menu->image;
         if ($request->hasFile('image')) {
-            // hapus gambar lama
             if ($image) Storage::disk('public')->delete($image);
             $image = $request->file('image')->store('menus', 'public');
         }
@@ -78,55 +97,62 @@ class MenuController extends Controller
             'description'  => $request->description,
             'price'        => $request->price,
             'stock'        => $request->stock,
-            'category_id'     => $request->category_id,
+            'category_id'  => $request->category_id,
             'image'        => $image,
             'is_available' => $request->is_available,
         ]);
 
         if ($menu->stock <= 5) {
-        NotificationService::stokHabis($menu->name);
+            NotificationService::stokHabis($menu->name);
         }
 
         return redirect()
-            ->route('pengelola.menu-management') // ✅ fix
+            ->route('pengelola.menu-management')
             ->with('success', 'Menu berhasil diupdate');
     }
 
     public function destroy(Menu $menu)
     {
-        // hapus gambar saat delete
+        // Pastikan menu ini milik tenant yang login
+        $tenant = $this->getTenant();
+        abort_if($menu->tenant_id !== $tenant->id, 403);
+
         if ($menu->image) Storage::disk('public')->delete($menu->image);
-        
         $menu->delete();
 
         return redirect()
-            ->route('pengelola.menu-management') // ✅ fix
+            ->route('pengelola.menu-management')
             ->with('success', 'Menu berhasil dihapus');
     }
 
     public function toggle(Menu $menu)
-{
-    $menu->update([
-        'is_available' => !$menu->is_available
-    ]);
+    {
+        // Pastikan menu ini milik tenant yang login
+        $tenant = $this->getTenant();
+        abort_if($menu->tenant_id !== $tenant->id, 403);
 
-    return response()->json([
-        'success'      => true,
-        'is_available' => $menu->is_available
-    ]);
-}
+        $menu->update(['is_available' => !$menu->is_available]);
 
-// --- UNTUK HALAMAN CUSTOMER (TAMPILKAN HANYA YANG TERSEDIA) ---
-public function customerMenu()
-{
-    $menus = Menu::with('category')
-        ->where('is_available', true)
-        ->where('stock', '>', 0)
-        ->latest()
-        ->get();
+        return response()->json([
+            'success'      => true,
+            'is_available' => $menu->is_available,
+        ]);
+    }
 
-    $categories = Category::all();
+    // Customer menu — tampilkan semua tenant, dengan info tenant
+    public function customerMenu()
+    {
+        $menus = Menu::with(['category', 'tenant'])
+            ->where('is_available', true)
+            ->where('stock', '>', 0)
+            ->latest()
+            ->get();
 
-    return view('customer.menu', compact('menus', 'categories'));
-}
+        $categories = Category::all();
+
+        // Untuk filter by tenant di halaman customer
+        $tenants = Tenant::where('is_active', true)->get();
+
+        return view('customer.menu', compact('menus', 'categories', 'tenants'));
+    }
 }

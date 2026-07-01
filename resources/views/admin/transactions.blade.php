@@ -57,7 +57,7 @@
                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                {{ request('status', '') === $val
                    ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300'
-                   : 'bg-orange-50 border border-orange-100 text-stone-500 hover:text-white hover:border-slate-600' }}">
+                   : 'bg-orange-50 border border-orange-100 text-stone-600 hover:text-primary-600 hover:border-primary-200 hover:bg-orange-100' }}">
                 {{ $label }}
             </a>
             @endforeach
@@ -157,8 +157,16 @@
                     </td>
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
+                            <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                @if($payment->user->photo)
+                                    <img src="{{ asset('storage/' . $payment->user->photo) }}"
+                                        class="w-full h-full object-cover" alt="foto">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-slate-600 to-slate-700
+                                                flex items-center justify-center text-white text-xs font-bold">
+                                        {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
+                                    </div>
+                                @endif
                             </div>
                             <div>
                                 <p class="text-white text-sm font-semibold">{{ $payment->user->full_name }}</p>

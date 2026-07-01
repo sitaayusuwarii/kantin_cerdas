@@ -103,7 +103,8 @@ $cols = [
                         <p class="text-[10px] text-forest-400">{{ $d->order->user->class }}</p>
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <p class="font-display font-bold text-sm text-forest-700">Rp {{ number_format($d->order->total_price, 0, ',', '.') }}</p>
+                    @php $tenantTotal = $d->order->items->where('tenant_id', auth()->user()->tenant->id)->sum('subtotal'); @endphp
+                    <p class="font-display font-bold text-sm text-forest-700">Rp {{ number_format($tenantTotal, 0, ',', '.') }}</p>
                         <p class="text-[10px] text-forest-400 flex items-center gap-0.5 justify-end mt-0.5">
                             <i class="fa-solid fa-clock text-forest-300 text-[9px]"></i>{{ $d->created_at->diffForHumans() }}
                         </p>
@@ -111,11 +112,11 @@ $cols = [
                 </div>
                 <div class="bg-cream-100 rounded-lg px-3 py-2">
                     <div class="space-y-1 mb-2">
-                        @foreach($d->order->items as $item)
-                            <p class="text-[11px] text-forest-700 font-medium">
-                                {{ $item->menu->name }} ×{{ $item->quantity }}
-                            </p>
-                        @endforeach
+                        @foreach($d->order->items->where('tenant_id', auth()->user()->tenant->id) as $item)
+                        <p class="text-[11px] text-forest-700 font-medium">
+                            {{ $item->menu->name }} ×{{ $item->quantity }}
+                        </p>
+                    @endforeach
                     </div>
                     <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                         <span class="inline-flex items-center text-[10px] font-semibold px-2 py-1 rounded-full {{ $d->order->order_type_color }}">
@@ -196,7 +197,7 @@ $cols = [
                 <span class="{{ $stBg }} text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ $col['label'] }}</span>
             </div>
             <div class="space-y-1 mb-1">
-                @foreach($d->order->items as $item)
+                @foreach($d->order->items->where('tenant_id', auth()->user()->tenant->id) as $item)
                     <p class="text-[11px] text-forest-700 font-medium">
                         {{ $item->menu->name }} ×{{ $item->quantity }}
                     </p>
@@ -215,8 +216,7 @@ $cols = [
             @if($d->order->note)
                 <p class="text-[10px] text-gray-400 italic mb-0.5">📝 {{ $d->order->note }}</p>
             @endif
-            <p class="text-[10px] text-forest-400 mt-0.5">{{ $d->order->pickup_display }} · Rp {{ number_format($d->order->total_price, 0, ',', '.') }}</p>
-        </div>
+        <p class="text-[10px] text-forest-400 mt-0.5">{{ $d->order->pickup_display }} · Rp {{ number_format($d->order->items->where('tenant_id', auth()->user()->tenant->id)->sum('subtotal'),0,',','.') }}</p>        </div>
     </div>
     @endforeach
 </div>

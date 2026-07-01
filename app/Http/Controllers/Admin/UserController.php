@@ -65,21 +65,47 @@ class UserController extends Controller
             'phone'     => 'required|string|max:20',
             'kelas'     => 'nullable|string|max:100',
             'password'  => 'required|string|min:6',
-            'role'      => ['required', Rule::in(['customer', 'pengelola', 'admin'])],
+            'role'      => ['required', Rule::in(['customer', 'kasir', 'pengelola', 'admin'])],
         ]);
 
-        User::create([
-            'full_name' => $data['full_name'],
-            'username'  => $data['username'],
-            'phone'     => $data['phone'],
-            'kelas'     => $data['kelas'] ?? null,
-            'password'  => Hash::make($data['password']),
-            'role'      => $data['role'],
-            'status'    => 'active',
+        $request->validate([
+            'tenant_name' => $data['role'] === 'pengelola' ? 'required|string|max:255' : 'nullable',
         ]);
 
-        return back()->with('toast', ['msg' => 'User baru berhasil ditambahkan!', 'color' => 'emerald']);
-    }
+        try {
+        DB::transaction(function () use ($request, $data) {
+            $user = User::create([
+                'full_name' => $data['full_name'],
+                'username'  => $data['username'],
+                'phone'     => $data['phone'],
+                'kelas'     => $data['kelas'] ?? null,
+                'password'  => Hash::make($data['password']),
+                'role'      => $data['role'],
+                'status'    => 'active',
+            ]);
+            
+
+            // Kalau pengelola, buat record tenant sekaligus
+            if ($data['role'] === 'pengelola') {
+                $logoPath = null;
+                if ($request->hasFile('tenant_logo')) {
+                    $logoPath = $request->file('tenant_logo')->store('tenants', 'public');
+                }
+
+                \App\Models\Tenant::create([
+                    'user_id'     => $user->id,
+                    'name'        => $request->tenant_name,
+                    'description' => $request->tenant_description,
+                    'logo'        => $logoPath,
+                    'is_active'   => true,
+                ]);
+            }
+        });
+        } catch (\Exception $e) {
+            return back()->with('toast', ['msg' => 'Gagal menambahkan user: ' . $e->getMessage(), 'color' => 'red']);
+        }
+
+        return back()->with('toast', ['msg' => 'User baru berhasil ditambahkan!', 'color' => 'emerald']);    }
 
     // ── Update ───────────────────────────────────────────────────────────────
     public function update(Request $request, User $user)

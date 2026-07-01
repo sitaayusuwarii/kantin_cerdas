@@ -28,9 +28,16 @@ class PaymentController extends Controller
                       ->first();
     }
 
-    $paymentMethods = PaymentMethod::where('is_active', true)->get(); // ← add this
+    $paymentMethods = PaymentMethod::where('is_active', true)
+    ->whereNotIn('code', ['cash', 'tunai'])
+    ->where(function ($query) {
+        $query->whereNull('type')
+              ->orWhere('type', '!=', 'cash');
+    })
+    ->orderBy('sort_order')
+    ->get();
 
-    return view('customer.payment', compact('order', 'paymentMethods')); // ← add to compact
+    return view('customer.payment', compact('order', 'paymentMethods')); 
 }
 
     /**
@@ -39,10 +46,19 @@ class PaymentController extends Controller
      */
     public function upload(Request $request): RedirectResponse
     {
+        $allowedMethods = PaymentMethod::where('is_active', true)
+        ->whereNotIn('code', ['cash', 'tunai'])
+        ->where(function ($query) {
+            $query->whereNull('type')
+                ->orWhere('type', '!=', 'cash');
+        })
+        ->pluck('code')
+        ->toArray();
+
         $request->validate([
             'order_number' => ['required', 'string', 'exists:orders,order_number'],
             'amount'       => ['required', 'numeric', 'min:1000'],
-            'method'       => ['required', 'in:transfer_bri,transfer_bca,transfer_mandiri,gopay,ovo,dana,tunai'],
+            'method' => ['required', \Illuminate\Validation\Rule::in($allowedMethods)],
             'proof'        => ['required', 'file', 'image', 'max:5120'], // max 5MB
             'note'         => ['nullable', 'string', 'max:300'],
         ], [

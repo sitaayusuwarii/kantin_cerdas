@@ -11,13 +11,13 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!$request->user()) {
             return redirect('/login');
         }
 
-        if ($request->user()->role !== $role) {
+        if (!in_array($request->user()->role, $roles)) {
             abort(403);
         }
 

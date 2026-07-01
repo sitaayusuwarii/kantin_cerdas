@@ -304,8 +304,16 @@
         <div class="space-y-3">
             @foreach($pendingList as $payment)
             <div class="flex items-center gap-3 p-3 rounded-xl bg-orange-50/40 border border-amber-500/10 hover:border-amber-500/30 transition-all">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-stone-800 font-bold text-sm flex-shrink-0">
-                    {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
+                <div class="w-9 h-9 rounded-xl flex-shrink-0 overflow-hidden">
+                    @if($payment->user->photo)
+                        <img src="{{ asset('storage/' . $payment->user->photo) }}"
+                            alt="{{ $payment->user->full_name }}"
+                            class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
+                            {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
+                        </div>
+                    @endif
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-stone-800 text-sm font-semibold truncate">{{ $payment->user->full_name }}</p>

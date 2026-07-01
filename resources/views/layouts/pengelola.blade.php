@@ -205,35 +205,55 @@
 
     {{-- Nav --}}
     <nav class="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-2">
-        @php
-        $navLinks = [
-            ['url' => '/pengelola/dashboard',       'icon' => 'fa-gauge',      'label' => 'Dashboard',        'match' => 'pengelola/dashboard'],
-            ['url' => '/pengelola/menu-management', 'icon' => 'fa-utensils',   'label' => 'Kelola Menu',      'match' => 'pengelola/menu-management'],
-            ['url' => '/pengelola/categories',      'icon' => 'fa-tags',       'label' => 'Kelola Kategori',  'match' => 'pengelola/categories'],
-            ['url' => '/pengelola/orders',          'icon' => 'fa-bell',       'label' => 'Pesanan Masuk',    'match' => 'pengelola/orders',
-                        'badge' => \App\Models\Order::where('status', 'baru')->count()],
-            ['url' => '/pengelola/delivery',        'icon' => 'fa-truck-fast', 'label' => 'Proses Pengiriman','match' => 'pengelola/delivery'],
-            ['url' => '/pengelola/delivery/display','icon' => 'fa-tv',         'label' => 'Display Layar',    'match' => 'pengelola/delivery/display'],
-            ['url' => '/pengelola/report',          'icon' => 'fa-chart-bar',  'label' => 'Laporan Favorit',  'match' => 'pengelola/report'],
-        ];
-        @endphp
+       @php
+            $tenantId = \App\Models\Tenant::where('user_id', auth()->id())->value('id');
 
-        @foreach($navLinks as $link)
-            @php $active = request()->is($link['match']); @endphp
-            <a href="{{ url($link['url']) }}"
-               class="nav-item {{ $active ? 'active' : '' }} flex items-center gap-3 px-4 py-3 rounded-2xl"
-               onclick="if(window.innerWidth < 1024) closeSidebar()">
-                <div class="nav-icon">
-                    <i class="fa-solid {{ $link['icon'] }} text-sm"></i>
-                </div>
-                <span class="text-sm font-medium flex-1">{{ $link['label'] }}</span>
-                @if(!empty($link['badge']))
-                    <span class="bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                        {{ $link['badge'] }}
-                    </span>
-                @endif
-            </a>
-        @endforeach
+            $incomingOrderCount = 0;
+
+            if ($tenantId) {
+                $incomingOrderCount = \App\Models\Order::whereHas('items', function ($query) use ($tenantId) {
+                        $query->where('tenant_id', $tenantId);
+                    })
+                    ->whereIn('status', ['baru', 'pembayaran_terverifikasi'])
+                    ->whereDate('created_at', today())
+                    ->count();
+            }
+
+            $navLinks = [
+                ['url' => '/pengelola/dashboard',       'icon' => 'fa-gauge',      'label' => 'Dashboard',        'match' => 'pengelola/dashboard'],
+                ['url' => '/pengelola/menu-management', 'icon' => 'fa-utensils',   'label' => 'Kelola Menu',      'match' => 'pengelola/menu-management'],
+                ['url' => '/pengelola/categories',      'icon' => 'fa-tags',       'label' => 'Kelola Kategori',  'match' => 'pengelola/categories'],
+                ['url' => '/pengelola/orders',          'icon' => 'fa-bell',       'label' => 'Pesanan Masuk',    'match' => 'pengelola/orders', 'badge' => $incomingOrderCount],
+                ['url' => '/pengelola/delivery',        'icon' => 'fa-truck-fast', 'label' => 'Proses Pengiriman','match' => 'pengelola/delivery'],
+                ['url' => '/pengelola/delivery/display','icon' => 'fa-tv',         'label' => 'Display Layar',    'match' => 'pengelola/delivery/display'],
+                ['url' => '/pengelola/report',          'icon' => 'fa-chart-bar',  'label' => 'Laporan Favorit',  'match' => 'pengelola/report'],
+            ];
+        @endphp
+       
+
+       @foreach($navLinks as $link)
+        @php $active = request()->is($link['match']); @endphp
+        <a href="{{ url($link['url']) }}"
+        class="nav-item {{ $active ? 'active' : '' }} flex items-center gap-3 px-4 py-3 rounded-2xl"
+        onclick="if(window.innerWidth < 1024) closeSidebar()">
+            <div class="nav-icon">
+                <i class="fa-solid {{ $link['icon'] }} text-sm"></i>
+            </div>
+            <span class="text-sm font-medium flex-1">{{ $link['label'] }}</span>
+
+            {{--  Badge dengan id khusus untuk pesanan masuk --}}
+            @if($link['match'] === 'pengelola/orders')
+                <span id="nav-order-badge"
+                    class="bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center {{ empty($link['badge']) ? 'hidden' : '' }}">
+                    {{ $link['badge'] ?? 0 }}
+                </span>
+            @elseif(!empty($link['badge']))
+                <span class="bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {{ $link['badge'] }}
+                </span>
+            @endif
+        </a>
+    @endforeach
     </nav>
 
     {{-- Sidebar User --}}
@@ -246,24 +266,22 @@
                              class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full btn-primary flex items-center justify-center font-display font-bold text-sm text-white">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            {{ strtoupper(substr(auth()->user()->full_name, 0, 1)) }}
                         </div>
                     @endif
                 @endauth
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-darkText truncate">
-                    @auth {{ auth()->user()->name }} @else Pengelola @endauth
+                    @auth {{ auth()->user()->full_name }} @else Pengelola @endauth
                 </p>
                 <p class="text-xs text-gray-400">Pengelola Kantin</p>
             </div>
-            <form method="POST" action="{{ route('logout') }}" class="flex-shrink-0">
-                @csrf
-                <button type="submit" title="Logout"
-                        class="w-7 h-7 flex items-center justify-center text-gray-400
-                               hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                </button>
+            <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="button" onclick="openLogoutModal()">
+                        <i class="fa-solid fa-right-from-bracket text-sm text-stone-400 hover:text-red-400 transition-colors"></i>
+                    </button>
             </form>
         </div>
     </div>
@@ -323,14 +341,14 @@
                                      class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full btn-primary flex items-center justify-center font-display font-bold text-sm text-white">
-                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                    {{ strtoupper(substr(auth()->user()->full_name, 0, 1)) }}
                                 </div>
                             @endif
                         @endauth
                     </div>
                     <div class="hidden sm:block text-left">
                         <p class="text-sm font-semibold text-darkText leading-none">
-                            @auth {{ auth()->user()->name }} @else Pengelola @endauth
+                            @auth {{ auth()->user()->full_name }} @else Pengelola @endauth
                         </p>
                         <p class="text-xs text-gray-400 mt-0.5">Pengelola</p>
                     </div>
@@ -352,25 +370,21 @@
                                              class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full btn-primary flex items-center justify-center font-display font-bold text-sm text-white">
-                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                            {{ strtoupper(substr(auth()->user()->full_name, 0, 1)) }}
                                         </div>
                                     @endif
                                 @endauth
                             </div>
                             <div class="min-w-0">
                                 <p class="font-display font-semibold text-sm text-darkText truncate">
-                                    @auth {{ auth()->user()->name }} @else Pengelola @endauth
+                                    @auth {{ auth()->user()->full_name }} @else Pengelola @endauth
                                 </p>
                                 <p class="text-xs text-gray-400 truncate">
                                     @auth {{ auth()->user()->email }} @endauth
                                 </p>
                             </div>
                         </div>
-                        <div class="mt-2">
-                            <span class="text-[10px] bg-orange-100 text-primary font-semibold px-2.5 py-0.5 rounded-full">
-                                Pengelola Kantin
-                            </span>
-                        </div>
+                        
                     </div>
 
                     {{-- Menu Items --}}
@@ -410,18 +424,15 @@
 
                     {{-- Logout --}}
                     <div class="border-t border-borderSoft py-1.5">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit"
-                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
-                                           text-red-500 hover:bg-red-50 transition-colors group text-left">
-                                <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
-                                            flex items-center justify-center transition-colors flex-shrink-0">
-                                    <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
-                                </div>
-                                <span class="font-semibold">Logout</span>
-                            </button>
-                        </form>
+                        {{-- Logout button - trigger modal --}}
+                    <button type="button" onclick="openLogoutModal()"
+                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors group text-left">
+                        <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
+                                    flex items-center justify-center transition-colors flex-shrink-0">
+                            <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
+                        </div>
+                        <span class="font-semibold">Logout</span>
+                    </button>
                     </div>
                 </div>
             </div>
@@ -433,6 +444,36 @@
     <main class="flex-1 p-6">
         @yield('content')
     </main>
+</div>
+
+{{-- Logout Modal --}}
+<div id="logout-modal" class="fixed inset-0 bg-black/40 z-[99999] hidden items-center justify-center">
+  <div class="bg-white rounded-[20px] border border-[#F4E6D2] w-full max-w-sm mx-4 overflow-hidden shadow-xl">
+    
+    {{-- Header --}}
+    <div class="bg-[#FFF3E8] px-7 pt-7 pb-5 text-center border-b border-[#F4E6D2]">
+      <div class="w-15 h-15 bg-white rounded-2xl border border-[#F4E6D2] flex items-center justify-center mx-auto mb-3.5" style="width:60px;height:60px">
+        <i class="fa-solid fa-right-from-bracket text-orange-600 text-2xl"></i>
+      </div>
+      <p class="font-semibold text-stone-800 text-base mb-1">Keluar dari akun?</p>
+      <p class="text-sm text-gray-400 leading-relaxed">Sesi kamu akan diakhiri dan kamu perlu login kembali untuk mengakses panel.</p>
+    </div>
+
+    {{-- Buttons --}}
+    <div class="px-7 py-5 flex flex-col gap-2.5">
+      <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit"
+                class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium transition-colors">
+          Ya, keluar sekarang
+        </button>
+      </form>
+      <button onclick="closeLogoutModal()"
+              class="w-full py-2.5 rounded-xl bg-[#FFF3E8] hover:bg-orange-100 text-orange-600 text-sm font-medium border border-[#F4E6D2] transition-colors">
+        Batal
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -502,6 +543,38 @@
             : 'fa-solid fa-expand text-primary text-xs';
         if (labelFs) labelFs.textContent = isFullscreen ? 'Keluar Layar Penuh' : 'Layar Penuh';
     });
+
+    function refreshOrderBadge() {
+    fetch('/pengelola/orders/badge-count')
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.getElementById('nav-order-badge');
+            if (!badge) return;
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        })
+        .catch(() => {}); // silent fail
+}
+
+setInterval(refreshOrderBadge, 15000);
+
+function openLogoutModal() {
+  const m = document.getElementById('logout-modal');
+  m.classList.remove('hidden');
+  m.classList.add('flex');
+}
+function closeLogoutModal() {
+  const m = document.getElementById('logout-modal');
+  m.classList.add('hidden');
+  m.classList.remove('flex');
+}
+document.getElementById('logout-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeLogoutModal();
+});
 </script>
 @stack('scripts')
 </body>

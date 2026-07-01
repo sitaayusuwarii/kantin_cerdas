@@ -23,7 +23,7 @@ class CartController extends Controller
             $query->with(['items' => function ($q) {
                 $q->select('id', 'cart_id', 'menu_id', 'quantity', 'subtotal')
                   ->with(['menu' => function ($q2) {
-                      $q2->select('id', 'name', 'price', 'image');
+                      $q2->select('id', 'name', 'price', 'image', 'stock');
                   }]);
             }]);
         }
@@ -165,6 +165,7 @@ class CartController extends Controller
             'price'        => $item->menu->price,
             'qty'          => $item->quantity,
             'subtotal'     => $item->subtotal,
+            'stock'        => $item->menu->stock,
             'image'        => $item->menu->image
                                 ? asset('storage/' . $item->menu->image)
                                 : null,

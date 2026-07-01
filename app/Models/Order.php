@@ -33,6 +33,8 @@ class Order extends Model
         'payment_method',
         'payment_proof',
         'payment_status',
+         'order_source', 
+         'kasir_id', 
     ];
 
     protected function casts(): array
@@ -258,4 +260,29 @@ class Order extends Model
     {
         return $this->hasOne(Delivery::class);
     }
+
+    public function kasir()
+    {
+        return $this->belongsTo(User::class, 'kasir_id');
+    }
+
+    // Helper: cek sumber order
+    public function isFromKasir(): bool
+    {
+        return $this->order_source === 'kasir';
+    }
+
+    // Ambil order items dikelompokkan per tenant
+    public function itemsPerTenant()
+    {
+        return $this->orderItems()
+                    ->with(['menu', 'tenant'])
+                    ->get()
+                    ->groupBy('tenant_id');
+    }
+
+    public function getRouteKeyName()
+{
+    return 'order_number';
+}
 }

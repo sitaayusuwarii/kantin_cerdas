@@ -67,17 +67,37 @@ class NotificationService
     );
 }
 
-    public static function pembayaranBaru(string $orderNumber): void
-    {
-        self::toAllPengelola([
-            'type'    => 'payment_new',
-            'title'   => 'Bukti Pembayaran Masuk',
-            'message' => "Order #{$orderNumber} mengirim bukti pembayaran.",
-            'icon'    => 'fa-money-bill',
-            'color'   => 'bg-amber-500',
+   public static function pembayaranBaru(string $orderNumber): void
+{
+    $order = \App\Models\Order::where('order_number', $orderNumber)->first();
+
+    \App\Models\AdminNotification::create([
+        'type'            => 'payment_new',
+        'title'           => 'Bukti Pembayaran Masuk',
+        'message'         => "Order #{$orderNumber} mengirim bukti pembayaran.",
+        'icon'            => 'fa-money-bill',
+        'color'           => 'bg-amber-500',
+        'url'             => '/admin/verification',
+        'notifiable_type' => \App\Models\Order::class,
+        'notifiable_id'   => $order?->id ?? 0,
+    ]);
+}
+
+// Notif ke PENGELOLA setelah admin verifikasi
+public static function pesananBaru(string $orderNumber): void
+{
+    $pengelolas = \App\Models\User::where('role', 'pengelola')->pluck('id');
+    foreach ($pengelolas as $id) {
+        \App\Models\Notification::send($id, [
+            'type'    => 'order_new',
+            'title'   => 'Pesanan Baru',
+            'message' => "Order #{$orderNumber} sudah diverifikasi, siap diproses.",
+            'icon'    => 'fa-bell',
+            'color'   => 'bg-green-500',
             'url'     => '/pengelola/orders',
         ]);
     }
+}
 
     public static function stokHabis(string $menuName): void
     {
@@ -90,4 +110,35 @@ class NotificationService
             'url'     => '/pengelola/menu-management',
         ]);
     }
+
+    public static function pesananKasirBaru($order): void
+{
+    $order->loadMissing('items.menu');
+
+    $tenantIds = $order->items
+        ->pluck('tenant_id')
+        ->filter()
+        ->unique()
+        ->values();
+
+    if ($tenantIds->isEmpty()) {
+        return;
+    }
+
+    $tenantUsers = \App\Models\Tenant::whereIn('id', $tenantIds)
+        ->pluck('user_id')
+        ->filter()
+        ->unique();
+
+    foreach ($tenantUsers as $userId) {
+        \App\Models\Notification::send($userId, [
+            'type'    => 'order_new',
+            'title'   => 'Pesanan Kasir Baru',
+            'message' => "Order #{$order->order_number} dari kasir sudah dibayar dan siap diproses.",
+            'icon'    => 'fa-cash-register',
+            'color'   => 'bg-orange-500',
+            'url'     => '/pengelola/orders',
+        ]);
+    }
+}
 }

@@ -18,6 +18,7 @@ class Menu extends Model
         'is_available',
         'total_sold',
         'seller_id',
+        'tenant_id',
     ];
 
     protected static function boot()
@@ -42,6 +43,12 @@ class Menu extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    // Relasi ke tenant
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
     }
     
 }

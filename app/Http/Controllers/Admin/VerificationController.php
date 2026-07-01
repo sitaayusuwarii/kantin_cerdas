@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Services\NotificationService;
 
 class VerificationController extends Controller
 {
@@ -29,7 +30,7 @@ class VerificationController extends Controller
 
         // ── Payments list ────────────────────────────────────────────────
         $query = Payment::with([
-                'user:id,full_name,kelas,class,phone',
+                'user:id,full_name,kelas,class,phone,photo',
                 'order:id,order_number,total_price,note',
                 'order.items.menu:id,name',
             ])
@@ -60,7 +61,7 @@ class VerificationController extends Controller
      */
  public function verify(Payment $payment)
 {
-   $payment->update([
+    $payment->update([
         'status'      => 'terverifikasi',
         'verified_at' => now(),
         'verified_by' => Auth::id(),
@@ -68,15 +69,16 @@ class VerificationController extends Controller
 
     $order = Order::find($payment->order_id);
     
-    \Log::info('ORDER UPDATE', ['order_id' => $payment->order_id, 'order' => $order?->status]);
-    
     if ($order) {
         $order->update([
             'status'         => 'pembayaran_terverifikasi',
             'payment_status' => 'paid',
         ]);
-    
-        // Kirim notif Telegram
+
+        // ✅ Notif ke pengelola
+        NotificationService::pesananBaru($order->order_number);
+
+        // Kirim notif Telegram ke customer
         $chatId = $order->user->telegram_chat_id ?? null;
         if ($chatId) {
             (new \App\Http\Controllers\TelegramController)->sendMessage(
@@ -91,7 +93,6 @@ class VerificationController extends Controller
         'message' => 'Pembayaran berhasil diverifikasi.',
     ]);
 }
-
     /**
      * Tolak pembayaran → status: ditolak + simpan alasan
      */

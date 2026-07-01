@@ -15,9 +15,9 @@ class NotificationController extends Controller
             ->paginate(20);
 
         // Tandai semua sebagai dibaca saat halaman dibuka
-        Notification::where('user_id', auth()->id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        // Notification::where('user_id', auth()->id())
+        //     ->whereNull('read_at')
+        //     ->update(['read_at' => now()]);
 
         return view('pengelola.notifications', compact('notifications'));
     }
@@ -30,11 +30,9 @@ class NotificationController extends Controller
 
     public function markAllRead()
     {
-        Notification::where('user_id', auth()->id())
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+       Notification::where('user_id', auth()->id())->delete();
 
-        return back()->with('success', 'Semua notifikasi ditandai dibaca.');
+        return back()->with('success', 'Semua notifikasi dihapus.');
     }
 
     public function destroy(Notification $notification)
@@ -51,4 +49,17 @@ class NotificationController extends Controller
                         ->unread()->count()
         ]);
     }
+
+    public function open(Notification $notification)
+{
+    abort_if($notification->user_id !== auth()->id(), 403);
+
+    if (is_null($notification->read_at)) {
+        $notification->update([
+            'read_at' => now(),
+        ]);
+    }
+
+    return redirect($notification->url ?: route('pengelola.orders'));
+}
 }

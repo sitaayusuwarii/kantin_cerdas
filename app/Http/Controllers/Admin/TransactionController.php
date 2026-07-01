@@ -22,7 +22,7 @@ class TransactionController extends Controller
 
         // ── Query utama ─────────────────────────────────────────────────
         $query = Payment::with([
-                'user:id,full_name,phone,kelas,class',
+                'user:id,full_name,phone,kelas,class,photo',
                 'order:id,order_number,total_price,note',
                 'order.items.menu:id,name',
             ])
@@ -58,7 +58,7 @@ class TransactionController extends Controller
     public function detail(Payment $payment)
     {
         $payment->load([
-            'user:id,full_name,phone,kelas,class',
+            'user:id,full_name,phone,kelas,class,photo',
             'order.items.menu:id,name',
             'verifiedBy:id,full_name',
         ]);

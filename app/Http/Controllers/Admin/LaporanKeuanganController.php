@@ -15,6 +15,12 @@ class LaporanKeuanganController extends Controller
     private function getData(Request $request): array
     {
         $period = $request->get('period', 'bulan_ini');
+
+        // Jika ada custom date tapi period bukan custom, set ke custom
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $period = 'custom';
+        }
+
         [$startDate, $endDate] = $this->resolveDates($period, $request);
 
         $totalIncome = DB::table('payments')
@@ -70,19 +76,23 @@ class LaporanKeuanganController extends Controller
         return compact('period', 'startDate', 'endDate', 'totalIncome', 'totalTransactions', 'avgPerTransaction', 'monthlyData', 'currentYear');
     }
 
-    private function resolveDates(string $period, Request $request): array
-    {
-        return match ($period) {
-            'hari_ini'   => [Carbon::today(), Carbon::today()],
-            'minggu_ini' => [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()],
-            'tahun_ini'  => [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()],
-            'custom'     => [
-                Carbon::parse($request->get('start_date', now()->startOfMonth())),
-                Carbon::parse($request->get('end_date', now())),
-            ],
-            default => [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()],
-        };
+   private function resolveDates(string $period, Request $request): array
+{
+    // Jika ada start_date & end_date di request, selalu pakai itu
+    if ($request->filled('start_date') && $request->filled('end_date')) {
+        return [
+            Carbon::parse($request->get('start_date'))->startOfDay(),
+            Carbon::parse($request->get('end_date'))->endOfDay(),
+        ];
     }
+
+    return match ($period) {
+        'hari_ini'   => [Carbon::today()->startOfDay(), Carbon::today()->endOfDay()],
+        'minggu_ini' => [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()],
+        'tahun_ini'  => [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()],
+        default      => [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()],
+    };
+}
 
     public function index(Request $request)
     {

@@ -1,260 +1,373 @@
 @extends('layouts.app')
-@section('title', 'Dashboard — SmartCanteen')
+@section('title', 'Dashboard - SmartCanteen')
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-{{-- ===== HERO / GREETING ===== --}}
 @php
-    $hour = now()->format('H');
-    if ($hour < 12) { $greeting = 'Selamat Pagi'; $icon = 'fa-sun'; }
-    elseif ($hour < 15) { $greeting = 'Selamat Siang'; $icon = 'fa-cloud-sun'; }
-    elseif ($hour < 18) { $greeting = 'Selamat Sore'; $icon = 'fa-cloud'; }
-    else { $greeting = 'Selamat Malam'; $icon = 'fa-moon'; }
+    $hour = (int) now()->format('H');
+    if ($hour < 12) {
+        $greeting = 'Selamat Pagi';
+        $greetingIcon = 'fa-sun';
+    } elseif ($hour < 15) {
+        $greeting = 'Selamat Siang';
+        $greetingIcon = 'fa-cloud-sun';
+    } elseif ($hour < 18) {
+        $greeting = 'Selamat Sore';
+        $greetingIcon = 'fa-cloud';
+    } else {
+        $greeting = 'Selamat Malam';
+        $greetingIcon = 'fa-moon';
+    }
+
+    $user = auth()->user();
+
+    $stats = [
+        [
+            'label' => 'Total Pesanan',
+            'value' => $totalPesanan,
+            'icon' => 'fa-bag-shopping',
+            'color' => 'bg-orange-50 text-orange-600',
+        ],
+        [
+            'label' => 'Selesai',
+            'value' => $selesai,
+            'icon' => 'fa-circle-check',
+            'color' => 'bg-emerald-50 text-emerald-600',
+        ],
+        [
+            'label' => 'Diproses',
+            'value' => $proses,
+            'icon' => 'fa-clock',
+            'color' => 'bg-amber-50 text-amber-600',
+        ],
+        [
+            'label' => 'Tagihan',
+            'value' => $tagihan,
+            'icon' => 'fa-receipt',
+            'color' => 'bg-rose-50 text-rose-600',
+        ],
+    ];
+
+    $quickActions = [
+        [
+            'label' => 'Pesan Menu',
+            'caption' => 'Pilih makanan kantin',
+            'url' => route('customer.menu'),
+            'icon' => 'fa-utensils',
+            'color' => 'from-orange-500 to-orange-600',
+        ],
+        [
+            'label' => 'Tagihan',
+            'caption' => 'Cek pembayaran',
+            'url' => url('/invoice'),
+            'icon' => 'fa-file-invoice-dollar',
+            'color' => 'from-sky-500 to-blue-600',
+        ],
+        [
+            'label' => 'Upload Bukti',
+            'caption' => 'Kirim bukti bayar',
+            'url' => url('/payment'),
+            'icon' => 'fa-upload',
+            'color' => 'from-emerald-500 to-green-600',
+        ],
+        [
+            'label' => 'Riwayat',
+            'caption' => 'Lihat pesananmu',
+            'url' => url('/history'),
+            'icon' => 'fa-clock-rotate-left',
+            'color' => 'from-violet-500 to-purple-600',
+        ],
+    ];
 @endphp
 
-<div class="relative overflow-hidden rounded-3xl mb-8 shadow-xl">
-    <div class="absolute inset-0 bg-gradient-to-br from-primary-500 via-primary-600 to-orange-700"></div>
-    <div class="absolute -top-10 -right-10 w-56 h-56 bg-white/10 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-0 left-0 w-72 h-72 bg-orange-300/10 rounded-full blur-3xl"></div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
-    <div class="relative px-6 py-8 md:px-10 md:py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-        <div>
-            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-orange-100 text-sm font-medium mb-5 border border-white/10">
-                <i class="fa-solid {{ $icon }}"></i>
-                {{ $greeting }} 👋
-            </div>
-            <h1 class="font-heading font-extrabold text-3xl md:text-4xl text-white leading-tight">
-                {{ auth()->user()->full_name }}
-            </h1>
-            <p class="text-orange-100 mt-3 text-sm md:text-base max-w-xl">
-                Selamat datang kembali di SmartCanteen.
-                Pesan makanan favoritmu dengan cepat dan praktis.
-            </p>
-            <div class="flex flex-wrap gap-3 mt-6">
-                @if(auth()->user()->student_id)
-                <div class="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white text-sm">
-                    <i class="fa-solid fa-id-card mr-2 text-orange-200"></i>
-                    {{ auth()->user()->student_id }}
-                </div>
-                @endif
-                @if(auth()->user()->class)
-                <div class="bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-2xl text-white text-sm">
-                    <i class="fa-solid fa-graduation-cap mr-2 text-orange-200"></i>
-                    {{ auth()->user()->class }}
-                </div>
-                @endif
-            </div>
+    {{-- Hero --}}
+    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 shadow-xl shadow-orange-200/60">
+        <div class="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.24),transparent_38%)]"></div>
+        <div class="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="absolute right-12 bottom-8 hidden lg:block text-white/10">
+            <i class="fa-solid fa-bowl-food text-[9rem]"></i>
         </div>
 
-        <div class="bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-lg min-w-[260px]">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <i class="fa-regular fa-calendar text-white text-xl"></i>
+        <div class="relative grid lg:grid-cols-[1fr_360px] gap-8 px-5 py-7 sm:px-8 lg:px-10 lg:py-9">
+            <div class="flex flex-col justify-center">
+                <div class="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur">
+                    <i class="fa-solid {{ $greetingIcon }} text-orange-100"></i>
+                    {{ $greeting }}
                 </div>
-                <div>
-                    <p class="text-orange-100 text-sm">Hari Ini</p>
-                    <p class="text-white font-heading font-bold text-lg leading-tight">
-                        {{ now()->translatedFormat('l') }}
-                    </p>
-                    <p class="text-orange-100 text-sm mt-1">
-                        {{ now()->translatedFormat('d F Y') }}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-orange-50 card-hover">
-            <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center mb-3">
-                <i class="fa-solid fa-bag-shopping text-primary-500"></i>
-            </div>
-            <p class="text-2xl font-heading font-bold text-canteen-dark">{{ $totalPesanan }}</p>
-            <p class="text-gray-500 text-xs mt-0.5">Total Pesanan</p>
-        </div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-orange-50 card-hover">
-            <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center mb-3">
-                <i class="fa-solid fa-circle-check text-green-500"></i>
-            </div>
-            <p class="text-2xl font-heading font-bold text-canteen-dark">{{ $selesai }}</p>
-            <p class="text-gray-500 text-xs mt-0.5">Selesai</p>
-        </div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-orange-50 card-hover">
-            <div class="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center mb-3">
-                <i class="fa-solid fa-clock text-yellow-500"></i>
-            </div>
-            <p class="text-2xl font-heading font-bold text-canteen-dark">{{ $proses }}</p>
-            <p class="text-gray-500 text-xs mt-0.5">Proses</p>
-        </div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-orange-50 card-hover">
-            <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center mb-3">
-                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
-            </div>
-            <p class="text-2xl font-heading font-bold text-canteen-dark">{{ $tagihan }}</p>
-            <p class="text-gray-500 text-xs mt-0.5">Tagihan</p>
-        </div>
-    </div>
+                <h1 class="mt-5 font-heading text-3xl font-extrabold leading-tight text-white md:text-4xl">
+                    Hai, {{ $user->full_name ?? $user->name }}
+                </h1>
 
-    {{-- Status Pembayaran --}}
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-orange-50 mb-8">
-        <h2 class="font-heading font-bold text-base text-canteen-dark mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-file-invoice-dollar text-primary-500"></i>
-            Status Pembayaran Terkini
-        </h2>
-        @if($tagihanTerbaru)
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-red-50 rounded-xl border border-red-100">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <i class="fa-solid fa-receipt text-red-500"></i>
-                </div>
-                <div>
-                    <p class="font-semibold text-sm text-gray-800">Order #{{ $tagihanTerbaru->order_number }}</p>
-                    <p class="text-xs text-gray-500">{{ $tagihanTerbaru->created_at->translatedFormat('d F Y') }}</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <p class="font-heading font-bold text-lg text-red-600">
-                        Rp {{ number_format($tagihanTerbaru->total_price, 0, ',', '.') }}
-                    </p>
-                    <span class="inline-flex items-center gap-1 bg-red-100 text-red-600 text-xs font-semibold px-2.5 py-1 rounded-full">
-                        <i class="fa-solid fa-circle text-[8px]"></i>Belum Lunas
-                    </span>
-                </div>
-                <a href="{{ url('/payment') }}"
-                   class="btn-primary text-white text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
-                    <i class="fa-solid fa-upload text-xs"></i>Bayar
-                </a>
-            </div>
-        </div>
-        @else
-        <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex items-center gap-3">
-            <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-circle-check text-green-500"></i>
-            </div>
-            <div>
-                <p class="font-semibold text-sm text-gray-800">Semua Lunas</p>
-                <p class="text-xs text-gray-500">Tidak ada tagihan yang tertunda</p>
-            </div>
-        </div>
-        @endif
-    </div>
+                <p class="mt-3 max-w-2xl text-sm leading-6 text-orange-50 md:text-base">
+                    Pilih menu kantin, pantau pesanan, dan selesaikan pembayaran dari satu dashboard.
+                </p>
 
-    {{-- Quick Actions + Favorit --}}
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-orange-50">
-            <h2 class="font-heading font-bold text-base text-canteen-dark mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-bolt text-primary-500"></i>Aksi Cepat
-            </h2>
-            <div class="grid grid-cols-2 gap-3">
-                <a href="{{ route('customer.menu') }}" class="flex flex-col items-center gap-2 p-4 bg-orange-50 hover:bg-orange-100 rounded-xl transition-colors group text-center">
-                    <div class="w-11 h-11 btn-primary rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-utensils text-white text-sm"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-700">Pesan Menu</span>
-                </a>
-                <a href="{{ url('/invoice') }}" class="flex flex-col items-center gap-2 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors group text-center">
-                    <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-file-invoice text-white text-sm"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-700">Tagihan</span>
-                </a>
-                <a href="{{ url('/payment') }}" class="flex flex-col items-center gap-2 p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group text-center">
-                    <div class="w-11 h-11 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-upload text-white text-sm"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-700">Upload Bukti</span>
-                </a>
-                <a href="{{ url('/history') }}" class="flex flex-col items-center gap-2 p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors group text-center">
-                    <div class="w-11 h-11 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                        <i class="fa-solid fa-clock-rotate-left text-white text-sm"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-700">Riwayat</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="lg:col-span-3 bg-white rounded-2xl p-6 shadow-sm border border-orange-50">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="font-heading font-bold text-base text-canteen-dark flex items-center gap-2">
-                    <i class="fa-solid fa-fire text-primary-500"></i>Menu Terpopuler
-                </h2>
-                <a href="{{ route('customer.menu') }}" class="text-xs text-primary-500 hover:text-primary-700 font-semibold transition-colors">Lihat Semua →</a>
-            </div>
-            @forelse($menuFavorit as $i => $menu)
-            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-                <div class="w-8 h-8 flex-shrink-0 font-heading font-bold text-sm
-                    {{ $i === 0 ? 'text-yellow-500' : ($i === 1 ? 'text-gray-400' : 'text-orange-400') }}
-                    flex items-center justify-center">#{{ $i + 1 }}</div>
-                <div class="w-10 h-10 bg-orange-50 rounded-xl overflow-hidden flex-shrink-0">
-                    @if($menu->image)
-                        <img src="{{ asset('storage/' . $menu->image) }}" class="w-full h-full object-cover">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center text-lg">🍽️</div>
-                    @endif
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-sm text-gray-800 truncate">{{ $menu->name }}</p>
-                    <p class="text-xs text-gray-400">{{ $menu->total_sold }}x dipesan</p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="font-heading font-bold text-sm text-primary-500">
-                        Rp {{ number_format($menu->price, 0, ',', '.') }}
-                    </p>
+                <div class="mt-6 flex flex-wrap gap-3">
                     <a href="{{ route('customer.menu') }}"
-                       class="text-xs text-primary-400 hover:text-primary-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        Pesan →
+                       class="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-orange-600 shadow-lg shadow-orange-900/10 transition hover:-translate-y-0.5 hover:shadow-xl">
+                        <i class="fa-solid fa-utensils"></i>
+                        Pesan Sekarang
+                    </a>
+                    <a href="{{ url('/history') }}"
+                       class="inline-flex items-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Lihat Riwayat
                     </a>
                 </div>
             </div>
-            @empty
-            <div class="text-center py-8 text-gray-400 text-sm">Belum ada menu tersedia</div>
-            @endforelse
-        </div>
-    </div>
 
-    {{-- Pesanan Aktif --}}
-    <div class="mt-8 bg-white rounded-2xl p-6 shadow-sm border border-orange-50">
-        <h2 class="font-heading font-bold text-base text-canteen-dark mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-spinner text-primary-500"></i>Pesanan Aktif
-        </h2>
-        @if($pesananAktif)
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center text-xl">🍽️</div>
-                <div>
-                    <p class="font-semibold text-sm text-gray-800">
-                        {{ $pesananAktif->items->take(2)->map(fn($i) => $i->menu->name)->join(', ') }}
-                        @if($pesananAktif->items->count() > 2)
-                            <span class="text-gray-400">+{{ $pesananAktif->items->count() - 2 }} lainnya</span>
-                        @endif
-                    </p>
-                    <p class="text-xs text-gray-500">
-                        Order #{{ $pesananAktif->order_number }} · {{ $pesananAktif->created_at->diffForHumans() }}
-                    </p>
+            <div class="rounded-3xl border border-white/20 bg-white/15 p-5 text-white backdrop-blur-md">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-orange-100">Hari ini</p>
+                        <p class="mt-1 font-heading text-2xl font-bold">{{ now()->translatedFormat('l') }}</p>
+                        <p class="mt-1 text-sm text-orange-100">{{ now()->translatedFormat('d F Y') }}</p>
+                    </div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
+                        <i class="fa-regular fa-calendar text-xl"></i>
+                    </div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-1 gap-3 text-sm">
+                    @if($user->student_id)
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3">
+                            <i class="fa-solid fa-id-card text-orange-100"></i>
+                            <span>{{ $user->student_id }}</span>
+                        </div>
+                    @endif
+                    @if($user->class)
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3">
+                            <i class="fa-solid fa-graduation-cap text-orange-100"></i>
+                            <span>{{ $user->class }}</span>
+                        </div>
+                    @endif
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full
-                    {{ $pesananAktif->status === 'diproses' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700' }}">
-                    <i class="fa-solid {{ $pesananAktif->status === 'diproses' ? 'fa-fire-burner' : 'fa-clock' }} text-xs"></i>
-                    {{ $pesananAktif->status === 'diproses' ? 'Sedang Dimasak' : 'Menunggu Konfirmasi' }}
-                </span>
-                <a href="{{ url('/history') }}" class="text-xs text-primary-500 hover:text-primary-700 font-semibold">Detail →</a>
+        </div>
+    </section>
+
+    {{-- Stats --}}
+    <section class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        @foreach($stats as $stat)
+            <div class="rounded-3xl border border-orange-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="font-heading text-2xl font-extrabold text-gray-900">{{ $stat['value'] }}</p>
+                        <p class="mt-1 text-xs font-semibold text-gray-500">{{ $stat['label'] }}</p>
+                    </div>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl {{ $stat['color'] }}">
+                        <i class="fa-solid {{ $stat['icon'] }}"></i>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </section>
+
+    <section class="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        {{-- Payment Status --}}
+        <div class="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Status Pembayaran</p>
+                    <h2 class="mt-1 font-heading text-xl font-bold text-gray-950">Pembayaran Terkini</h2>
+                </div>
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+
+            @if($tagihanTerbaru)
+                <div class="mt-5 rounded-3xl border border-rose-100 bg-rose-50 p-4 sm:p-5">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-rose-500 shadow-sm">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900">Order #{{ $tagihanTerbaru->order_number }}</p>
+                                <p class="mt-0.5 text-xs text-gray-500">{{ $tagihanTerbaru->created_at->translatedFormat('d F Y, H:i') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="sm:text-right">
+                            <p class="font-heading text-xl font-extrabold text-rose-600">
+                                Rp {{ number_format($tagihanTerbaru->total_price, 0, ',', '.') }}
+                            </p>
+                            <span class="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-rose-600">
+                                <i class="fa-solid fa-circle text-[7px]"></i>
+                                Belum Lunas
+                            </span>
+                        </div>
+                    </div>
+
+                    <a href="{{ url('/payment') }}"
+                       class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-rose-200 transition hover:bg-rose-600 sm:w-auto">
+                        <i class="fa-solid fa-upload"></i>
+                        Upload Bukti Pembayaran
+                    </a>
+                </div>
+            @else
+                <div class="mt-5 rounded-3xl border border-emerald-100 bg-emerald-50 p-5">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-500 shadow-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900">Semua Lunas</p>
+                            <p class="mt-1 text-sm text-gray-500">Tidak ada tagihan yang perlu dibayar saat ini.</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        {{-- Active Order --}}
+        <div class="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Pantauan Pesanan</p>
+                    <h2 class="mt-1 font-heading text-xl font-bold text-gray-950">Pesanan Aktif</h2>
+                </div>
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                    <i class="fa-solid fa-bell-concierge"></i>
+                </div>
+            </div>
+
+            @if($pesananAktif)
+                <div class="mt-5 rounded-3xl border border-amber-100 bg-amber-50 p-5">
+                    <div class="flex items-start gap-4">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white text-amber-500 shadow-sm">
+                            <i class="fa-solid fa-bowl-food"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="font-bold text-gray-900">
+                                Order #{{ $pesananAktif->order_number }}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ $pesananAktif->items->take(2)->map(fn($item) => $item->menu->name)->join(', ') }}
+                                @if($pesananAktif->items->count() > 2)
+                                    <span class="text-gray-400">+{{ $pesananAktif->items->count() - 2 }} lainnya</span>
+                                @endif
+                            </p>
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-amber-700">
+                                    <i class="fa-solid {{ $pesananAktif->status === 'diproses' ? 'fa-fire-burner' : 'fa-clock' }}"></i>
+                                    {{ $pesananAktif->status === 'diproses' ? 'Sedang Dimasak' : 'Menunggu Konfirmasi' }}
+                                </span>
+                                <span class="text-xs font-medium text-gray-500">{{ $pesananAktif->created_at->diffForHumans() }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="{{ url('/history') }}"
+                       class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-amber-700 shadow-sm transition hover:bg-amber-100">
+                        Lihat Detail
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            @else
+                <div class="mt-5 rounded-3xl border border-gray-100 bg-gray-50 p-5 text-center">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-gray-400 shadow-sm">
+                        <i class="fa-solid fa-clipboard-check text-xl"></i>
+                    </div>
+                    <p class="mt-3 font-bold text-gray-800">Belum ada pesanan aktif</p>
+                    <p class="mt-1 text-sm text-gray-500">Pesanan yang sedang berjalan akan tampil di sini.</p>
+                    <a href="{{ route('customer.menu') }}"
+                       class="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600">
+                        Pesan Menu
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            @endif
+        </div>
+    </section>
+
+    <section class="mt-6 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        {{-- Quick Actions --}}
+        <div class="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+            <div class="mb-5 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Shortcut</p>
+                    <h2 class="mt-1 font-heading text-xl font-bold text-gray-950">Aksi Cepat</h2>
+                </div>
+                <i class="fa-solid fa-bolt text-orange-500"></i>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                @foreach($quickActions as $action)
+                    <a href="{{ $action['url'] }}"
+                       class="group flex items-center gap-3 rounded-3xl border border-gray-100 bg-gray-50 p-4 transition hover:-translate-y-0.5 hover:border-orange-100 hover:bg-orange-50 hover:shadow-md">
+                        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br {{ $action['color'] }} text-white shadow-md transition group-hover:scale-105">
+                            <i class="fa-solid {{ $action['icon'] }}"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-gray-900">{{ $action['label'] }}</p>
+                            <p class="mt-0.5 text-xs text-gray-500">{{ $action['caption'] }}</p>
+                        </div>
+                    </a>
+                @endforeach
             </div>
         </div>
-        @else
-        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 text-center">
-            <p class="text-gray-400 text-sm">Tidak ada pesanan aktif saat ini</p>
-            <a href="{{ route('customer.menu') }}" class="text-xs text-primary-500 font-semibold mt-1 inline-block">
-                Yuk pesan sekarang →
-            </a>
-        </div>
-        @endif
-    </div>
 
+        {{-- Popular Menu --}}
+        <div class="rounded-3xl border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+            <div class="mb-5 flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Rekomendasi</p>
+                    <h2 class="mt-1 font-heading text-xl font-bold text-gray-950">Menu Terpopuler</h2>
+                </div>
+                <a href="{{ route('customer.menu') }}" class="text-sm font-bold text-orange-500 hover:text-orange-600">
+                    Lihat Semua
+                </a>
+            </div>
+
+            <div class="space-y-3">
+                @forelse($menuFavorit as $i => $menu)
+                    <a href="{{ route('customer.menu') }}"
+                       class="group flex items-center gap-4 rounded-3xl border border-gray-100 bg-white p-3 transition hover:border-orange-100 hover:bg-orange-50/70">
+                        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-gray-50 font-heading text-sm font-extrabold text-orange-500">
+                            #{{ $i + 1 }}
+                        </div>
+
+                        <div class="h-14 w-14 flex-shrink-0 overflow-hidden rounded-2xl bg-orange-50">
+                            @if($menu->image)
+                                <img src="{{ asset('storage/' . $menu->image) }}"
+                                     alt="{{ $menu->name }}"
+                                     class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                            @else
+                                <div class="flex h-full w-full items-center justify-center text-orange-500">
+                                    <i class="fa-solid fa-utensils"></i>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate font-bold text-gray-900">{{ $menu->name }}</p>
+                            <p class="mt-0.5 text-xs text-gray-500">{{ $menu->total_sold }}x dipesan</p>
+                        </div>
+
+                        <div class="text-right">
+                            <p class="whitespace-nowrap font-heading text-base font-extrabold text-orange-600">
+                                Rp {{ number_format($menu->price, 0, ',', '.') }}
+                            </p>
+                            <p class="mt-0.5 text-xs font-bold text-orange-400 opacity-0 transition group-hover:opacity-100">
+                                Pesan
+                            </p>
+                        </div>
+                    </a>
+                @empty
+                    <div class="rounded-3xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-gray-400 shadow-sm">
+                            <i class="fa-solid fa-bowl-food text-xl"></i>
+                        </div>
+                        <p class="mt-3 font-bold text-gray-700">Belum ada menu populer</p>
+                        <p class="mt-1 text-sm text-gray-400">Data menu favorit akan muncul setelah ada transaksi.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </section>
 </div>
 @endsection

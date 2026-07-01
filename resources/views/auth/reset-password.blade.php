@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi OTP — Smart Canteen</title>
+    <title>Password Baru — Smart Canteen</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,16 +21,11 @@
                             '0%':   { opacity: '0' },
                             '100%': { opacity: '1' },
                         },
-                        'slide-right': {
-                            '0%':   { opacity: '0', transform: 'translateX(-20px)' },
-                            '100%': { opacity: '1', transform: 'translateX(0)' },
-                        },
                     },
                     animation: {
-                        'fade-up':    'fade-up 0.45s ease both',
-                        'fade-up-1':  'fade-up 0.45s 0.05s ease both',
-                        'fade-in':    'fade-in 0.4s ease both',
-                        'slide-right':'slide-right 0.4s ease both',
+                        'fade-up':   'fade-up 0.45s ease both',
+                        'fade-up-1': 'fade-up 0.45s 0.05s ease both',
+                        'fade-in':   'fade-in 0.4s ease both',
                     }
                 }
             }
@@ -40,21 +35,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
         .dot-pattern {
-            background-image: radial-gradient(circle, #e9d5ff 1px, transparent 1px);
+            background-image: radial-gradient(circle, #d1d5db 1px, transparent 1px);
             background-size: 24px 24px;
         }
+
         .input-field { transition: border-color .15s, box-shadow .15s; }
         .input-field:focus {
             outline: none;
-            border-color: #a855f7;
-            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
         }
         .input-field.error {
-            border-color: #f87171;
-            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10);
         }
-        .otp-input { letter-spacing: 0.35em; font-variant-numeric: tabular-nums; }
+        .input-field.match {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.10);
+        }
+
         .btn-primary { position: relative; overflow: hidden; }
         .btn-primary::after {
             content: '';
@@ -65,227 +66,263 @@
             transition: transform 0.5s ease;
         }
         .btn-primary:hover::after { transform: translateX(100%); }
-        #countdown { font-variant-numeric: tabular-nums; }
     </style>
 </head>
 <body class="min-h-screen bg-gray-100 dot-pattern flex items-center justify-center p-4">
 
-    <!-- Ambient blobs (Z-index lowered) -->
+    <!-- Ambient blobs -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
-        <div class="absolute -top-40 -left-32 w-96 h-96 bg-purple-200 rounded-full opacity-30 blur-3xl"></div>
-        <div class="absolute -bottom-40 -right-32 w-96 h-96 bg-violet-100 rounded-full opacity-35 blur-3xl"></div>
+        <div class="absolute -top-32 -left-32 w-80 h-80 bg-orange-200 rounded-full opacity-30 blur-3xl"></div>
+        <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-200 rounded-full opacity-25 blur-3xl"></div>
     </div>
 
-    <div class="relative w-full max-w-md">
-        <!-- Brand mark -->
-        <div class="flex justify-center mb-6 animate-fade-up">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-200">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"/>
-                    </svg>
-                </div>
-                <span class="text-gray-800 font-bold text-lg tracking-tight">SmartCanteen</span>
-            </div>
+    <div class="relative w-full max-w-md animate-fade-up">
+
+        <!-- Brand -->
+        <div class="flex justify-center mb-6">
+            <span class="text-gray-800 font-bold text-lg tracking-tight">SmartCanteen</span>
         </div>
 
         <!-- Card -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-up-1">
-            <div class="h-1 w-full bg-gradient-to-r from-purple-500 via-violet-500 to-fuchsia-500"></div>
+        <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/80 border border-gray-100 p-8 animate-fade-up-1">
 
-            <div class="p-8">
-                <!-- Step indicator -->
-                <div class="flex items-center gap-2 mb-7">
+            <!-- Header -->
+            <div class="mb-7">
+                <div class="flex items-center gap-3 mb-5">
+                    <img src="{{ asset('images/canteen.png') }}"
+                         alt="Logo SmartCanteen"
+                         class="w-12 h-12 object-contain flex-shrink-0">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Password Baru</h1>
+                        <p class="text-gray-500 text-sm mt-0.5 leading-relaxed">
+                            OTP terverifikasi. Buat password baru kamu.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step indicator — step 3 aktif, step 1 & 2 done -->
+                <div class="flex items-center gap-2">
+                    <!-- Step 1 done -->
                     <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-purple-100 text-purple-600 border-2 border-purple-300">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-orange-100 text-orange-500 border-2 border-orange-300">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
                             </svg>
                         </div>
                         <span class="text-xs font-medium text-gray-400">Nomor HP</span>
                     </div>
-                    <div class="flex-1 h-px bg-purple-400"></div>
+                    <div class="flex-1 h-px bg-orange-300"></div>
+                    <!-- Step 2 done -->
                     <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-purple-600 text-white">2</div>
-                        <span class="text-xs font-medium text-purple-700">Verifikasi</span>
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-orange-100 text-orange-500 border-2 border-orange-300">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-400">Verifikasi OTP</span>
+                    </div>
+                    <div class="flex-1 h-px bg-orange-300"></div>
+                    <!-- Step 3 aktif -->
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-orange-500 text-white">3</div>
+                        <span class="text-xs font-medium text-orange-600">Password Baru</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Header -->
-                <div class="mb-6 animate-slide-right">
-                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Verifikasi OTP</h1>
-                    <p class="text-gray-500 text-sm mt-1.5 leading-relaxed">
-                        Kode OTP telah dikirim ke Telegram nomor 
-                        <strong class="text-gray-700">+62 {{ session('otp_phone', '8123456xxx') }}</strong>
-                    </p>
-                </div>
+            <!-- Error alert -->
+            @if ($errors->any())
+            <div class="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm animate-fade-in">
+                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+                <ul class="space-y-0.5">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
 
-                <!-- Status Banner -->
-                @if(session('success'))
-                <div class="mb-5 flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm animate-fade-in">
-                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
-                    </svg>
-                    {{ session('success') }}
-                </div>
-                @endif
+            <!-- Form -->
+            <form method="POST" action="{{ route('password.reset') }}" class="space-y-5">
+                @csrf
 
-                @if ($errors->any())
-    <div class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 text-red-700">
-        <p class="font-bold">Gagal menyimpan:</p>
-        <ul class="list-disc ml-5">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-                <!-- Form Utama -->
-                <form method="POST" action="{{ route('password.update') }}" class="space-y-5" id="main-form">
-                    @csrf
-                    <div>
-                        <label for="otp" class="block text-sm font-medium text-gray-700 mb-1.5">Kode OTP</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                    <path d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268"/>
-                                </svg>
-                            </span>
-                            <input id="otp" type="text" name="otp" maxlength="6" inputmode="numeric" required
-                                class="otp-input input-field w-full pl-10 pr-4 py-2.5 text-sm bg-gray-50 border rounded-xl text-center font-mono {{ $errors->has('otp') ? 'border-red-400 error' : 'border-gray-200' }}"
-                                placeholder="******">
-                        </div>
-                        
-                        <div class="flex items-center justify-between mt-2">
-                            <p class="text-xs text-gray-400">Berlaku: <span id="countdown" class="font-semibold text-purple-600">05:00</span></p>
-                            <!-- Tombol resend dipindah agar tidak nested form secara visual tetap di sini -->
-                            <button type="button" id="resend-trigger" disabled
-                                class="text-xs font-semibold text-gray-400 hover:text-purple-600 disabled:opacity-40 disabled:cursor-not-allowed">
-                                Kirim ulang OTP
-                            </button>
-                        </div>
-                    </div>
-                                    
-                <!-- Input Password Baru -->
+                <!-- Password Baru -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password Baru</label>
                     <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"/>
+                            </svg>
+                        </span>
                         <input id="password" type="password" name="password" required
-                            class="input-field w-full pl-4 pr-11 py-2.5 text-sm bg-gray-50 border rounded-xl {{ $errors->has('password') ? 'border-red-400 error' : 'border-gray-200' }}"
+                            class="input-field w-full pl-10 pr-11 py-2.5 text-sm bg-gray-50 border rounded-xl placeholder-gray-400
+                                {{ $errors->has('password') ? 'border-red-400 error' : 'border-gray-200' }}"
                             placeholder="Minimal 8 karakter">
-                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3.5 text-gray-400">
+                        <button type="button" id="toggle-password"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 transition-colors">
                             <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
                             </svg>
                         </button>
                     </div>
-                    <!-- Strength meter cukup di password utama saja agar tidak penuh -->
+
+                    <!-- Strength meter -->
                     <div class="mt-2 flex gap-1" id="strength-meter">
-                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all"></div>
-                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all"></div>
-                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all"></div>
-                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all"></div>
+                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
+                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
+                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
+                        <div class="h-1 flex-1 rounded-full bg-gray-200 transition-all duration-300"></div>
                     </div>
-                    <p id="str-label" class="text-[10px] mt-1 uppercase font-bold tracking-wider"></p>
+                    <p id="str-label" class="text-xs mt-1"></p>
                 </div>
 
-                <!-- Input Konfirmasi Password Baru -->
-                <div class="mt-4">
+                <!-- Konfirmasi Password -->
+                <div>
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1.5">Konfirmasi Password Baru</label>
                     <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"/>
+                            </svg>
+                        </span>
                         <input id="password_confirmation" type="password" name="password_confirmation" required
-                            class="input-field w-full pl-4 pr-11 py-2.5 text-sm bg-gray-50 border rounded-xl {{ $errors->has('password_confirmation') ? 'border-red-400 error' : 'border-gray-200' }}"
+                            class="input-field w-full pl-10 pr-11 py-2.5 text-sm bg-gray-50 border rounded-xl placeholder-gray-400
+                                {{ $errors->has('password_confirmation') ? 'border-red-400 error' : 'border-gray-200' }}"
                             placeholder="Ulangi password baru">
-                        <button type="button" id="toggle-confirm-password" class="absolute inset-y-0 right-0 pr-3.5 text-gray-400">
-                            <svg id="eye-icon-confirm" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                        <button type="button" id="toggle-confirm-password"
+                            class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
                             </svg>
                         </button>
                     </div>
+                    <!-- Match indicator -->
+                    <p id="match-label" class="text-xs mt-1.5 hidden"></p>
                 </div>
 
-                <button type="submit" class="btn-primary w-full mt-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-lg shadow-purple-100 transition-all">
+                <!-- Submit -->
+                <button type="submit"
+                    class="btn-primary w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md shadow-orange-200 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25z"/>
+                    </svg>
                     Simpan Password Baru
                 </button>
+            </form>
 
-                <!-- Hidden Resend Form (Mencegah Nested Form) -->
-                <form id="resend-form" method="POST" action="{{ route('password.resend') }}" class="hidden">
-                    @csrf
-                </form>
-
-                <div class="mt-8 text-center">
-                    <a href="{{ route('login') }}" class="text-sm text-gray-500 hover:text-purple-600 font-medium"> Kembali ke Login </a>
+            <!-- Divider -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-100"></div>
+                </div>
+                <div class="relative flex justify-center">
+                    <span class="bg-white px-3 text-xs text-gray-400 font-medium">atau</span>
                 </div>
             </div>
+
+            <p class="text-center text-sm text-gray-500">
+                <a href="{{ route('login') }}"
+                   class="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors">
+                    Kembali ke Login
+                </a>
+            </p>
         </div>
-        <p class="text-center text-[10px] text-gray-400 mt-6 uppercase tracking-widest">&copy; 2026 SmartCanteen — SMAN 1</p>
+
+        <p class="text-center text-xs text-gray-400 mt-5">
+            &copy; {{ date('Y') }} SmartCanteen
+        </p>
     </div>
 
     <script>
-        // 1. Logic OTP (Hanya Angka)
-        const otpInput = document.getElementById('otp');
-        otpInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
-
-        // Toggle Password Utama
+        // Toggle password
         const pwInput = document.getElementById('password');
-        const toggleBtn = document.getElementById('toggle-password');
-        toggleBtn.addEventListener('click', () => {
+        document.getElementById('toggle-password').addEventListener('click', () => {
             pwInput.type = pwInput.type === 'password' ? 'text' : 'password';
         });
 
-        // Toggle Konfirmasi Password
+        // Toggle konfirmasi
         const confirmInput = document.getElementById('password_confirmation');
-        const toggleConfirmBtn = document.getElementById('toggle-confirm-password');
-        toggleConfirmBtn.addEventListener('click', () => {
+        document.getElementById('toggle-confirm-password').addEventListener('click', () => {
             confirmInput.type = confirmInput.type === 'password' ? 'text' : 'password';
         });
-        
-        // 3. Password Strength
-        const bars = document.querySelectorAll('#strength-meter div');
-        const label = document.getElementById('str-label');
-        pwInput.addEventListener('input', () => {
-            const val = pwInput.value;
-            let score = 0;
-            if (val.length >= 8) score++;
-            if (/[A-Z]/.test(val)) score++;
-            if (/[0-9]/.test(val)) score++;
-            if (/[^A-Za-z0-9]/.test(val)) score++;
 
-            const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
-            const texts = ['Lemah', 'Sedang', 'Cukup', 'Sangat Kuat'];
-            
+        // Strength meter
+        const bars   = document.querySelectorAll('#strength-meter div');
+        const strLabel = document.getElementById('str-label');
+        const levels = [
+            { color: 'bg-red-400',    label: 'Sangat lemah', text: 'text-red-500' },
+            { color: 'bg-orange-300', label: 'Lemah',        text: 'text-orange-400' },
+            { color: 'bg-yellow-400', label: 'Cukup',        text: 'text-yellow-600' },
+            { color: 'bg-orange-500', label: 'Kuat',         text: 'text-orange-600' },
+        ];
+
+        pwInput.addEventListener('input', () => {
+            const v = pwInput.value;
+            let score = 0;
+            if (v.length >= 8)           score++;
+            if (/[A-Z]/.test(v))         score++;
+            if (/[0-9]/.test(v))         score++;
+            if (/[^A-Za-z0-9]/.test(v))  score++;
+
             bars.forEach((b, i) => {
-                b.className = `h-1 flex-1 rounded-full transition-all ${i < score ? colors[score-1] : 'bg-gray-200'}`;
+                b.className = 'h-1 flex-1 rounded-full transition-all duration-300 ' +
+                    (v.length === 0 ? 'bg-gray-200' : i < score ? levels[score - 1].color : 'bg-gray-200');
             });
-            label.textContent = val ? texts[score-1] : '';
-            label.className = `text-[10px] mt-1 uppercase font-bold tracking-wider ${val ? 'text-' + colors[score-1].split('-')[1] + '-500' : ''}`;
+
+            if (v.length === 0) {
+                strLabel.textContent = '';
+            } else {
+                const lvl = levels[score - 1] || levels[0];
+                strLabel.className = 'text-xs mt-1 ' + lvl.text;
+                strLabel.textContent = 'Kekuatan: ' + lvl.label;
+            }
+
+            checkMatch();
         });
 
-        // 4. Countdown & Resend logic
-        const countdownEl = document.getElementById('countdown');
-        const resendTrigger = document.getElementById('resend-trigger');
-        let timeLeft = 300; // 5 menit
+        // Password match indicator
+        const matchLabel = document.getElementById('match-label');
 
-        const timer = setInterval(() => {
-            timeLeft--;
-            const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const secs = (timeLeft % 60).toString().padStart(2, '0');
-            countdownEl.textContent = `${mins}:${secs}`;
-
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                countdownEl.textContent = "Expired";
-                countdownEl.classList.replace('text-purple-600', 'text-red-500');
-                resendTrigger.disabled = false;
-                resendTrigger.classList.replace('text-gray-400', 'text-purple-600');
+        function checkMatch() {
+            const pw = pwInput.value;
+            const cf = confirmInput.value;
+            if (!cf) {
+                matchLabel.classList.add('hidden');
+                confirmInput.classList.remove('match', 'error', 'border-green-400', 'border-red-400');
+                confirmInput.classList.add('border-gray-200');
+                return;
             }
-        }, 1000);
+            matchLabel.classList.remove('hidden');
+            if (pw === cf) {
+                matchLabel.textContent = '✓ Password cocok';
+                matchLabel.className = 'text-xs mt-1.5 text-green-600';
+                confirmInput.classList.remove('error', 'border-red-400');
+                confirmInput.classList.add('match', 'border-green-400');
+            } else {
+                matchLabel.textContent = '✗ Password tidak cocok';
+                matchLabel.className = 'text-xs mt-1.5 text-red-500';
+                confirmInput.classList.remove('match', 'border-green-400');
+                confirmInput.classList.add('error', 'border-red-400');
+            }
+        }
 
-        resendTrigger.addEventListener('click', () => {
-            document.getElementById('resend-form').submit();
+        confirmInput.addEventListener('input', checkMatch);
+
+        // Clear error on input
+        document.querySelectorAll('.input-field').forEach(input => {
+            input.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    this.classList.remove('error', 'border-red-400');
+                    if (this.id !== 'password_confirmation') {
+                        this.classList.add('border-gray-200');
+                    }
+                }
+            });
         });
     </script>
 </body>

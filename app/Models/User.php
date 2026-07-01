@@ -42,4 +42,30 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
-}
+    public function tenant()
+    {
+        return $this->hasOne(Tenant::class);
+    }
+
+    // Helper: cek role
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isPengelola(): bool
+    {
+        return $this->role === 'pengelola';
+    }
+
+    public function isKasir(): bool
+    {
+        return $this->role === 'kasir';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
+    }
+
+ }

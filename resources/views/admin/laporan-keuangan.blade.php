@@ -14,13 +14,13 @@
         <span class="text-stone-600 text-sm font-medium">Periode:</span>
     </div>
     <div class="flex flex-wrap gap-2">
-        @foreach([
+       @foreach([
             'hari_ini'   => 'Hari Ini',
             'minggu_ini' => 'Minggu Ini',
             'bulan_ini'  => 'Bulan Ini',
             'tahun_ini'  => 'Tahun Ini',
         ] as $key => $label)
-        <button type="submit" name="period" value="{{ $key }}"
+        <button type="button" onclick="setPeriod('{{ $key }}')"
             class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
             {{ $period === $key ? 'bg-primary-500/20 border border-primary-500/40 text-primary-300' : 'bg-orange-50 border border-border text-slate-400 hover:text-stone-800 hover:border-slate-600' }}">
             {{ $label }}
@@ -392,5 +392,15 @@
         @endforelse
     </div>
 </div>
-
+@push('scripts')
+<script>
+function setPeriod(period) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('period', period);
+    url.searchParams.delete('start_date');
+    url.searchParams.delete('end_date');
+    window.location.href = url.toString();
+}
+</script>
+@endpush
 @endsection

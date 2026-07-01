@@ -49,8 +49,8 @@
         /* Input focus glow */
         .input-field:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
         }
         .input-field.error {
             border-color: #ef4444;
@@ -77,7 +77,7 @@
 
     {{-- Ambient blobs --}}
     <div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div class="absolute -top-32 -left-32 w-80 h-80 bg-blue-200 rounded-full opacity-30 blur-3xl"></div>
+        <div class="absolute -top-32 -left-32 w-80 h-80 bg-orange-200 rounded-full opacity-30 blur-3xl"></div>
         <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-200 rounded-full opacity-25 blur-3xl"></div>
     </div>
 
@@ -91,6 +91,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"/>
                     </svg>
                 </div> -->
+                
                 <span class="text-gray-800 font-bold text-lg tracking-tight">SmartCanteen</span>
             </div>
         </div>
@@ -108,9 +109,16 @@
         <div class="bg-white rounded-2xl shadow-xl shadow-gray-200/80 border border-gray-100 p-8">
 
             {{-- Header --}}
-            <div class="mb-7 animate-fade-up-1">
-                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Masuk ke Akun</h1>
-                <p class="text-gray-500 text-sm mt-1.5 leading-relaxed">Selamat datang kembali, silakan login</p>
+           <div class="mb-7 animate-fade-up-1">
+                <div class="flex items-center gap-3 mb-4">
+                    <img src="{{ asset('images/canteen.png') }}"
+                        alt="Logo SmartCanteen"
+                        class="w-12 h-12 object-contain flex-shrink-0">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Masuk ke Akun</h1>
+                        <p class="text-gray-500 text-sm mt-0.5 leading-relaxed">Selamat datang kembali, silakan login</p>
+                    </div>
+                </div>
             </div>
 
             {{-- Global error alert --}}
@@ -219,7 +227,7 @@
                     {{-- Forgot password --}}
                     <div class="flex justify-end mt-2">
                         <a href="{{ route('password.request') }}"
-                           class="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors">
+                           class="text-xs text-orange-600 hover:text-orange-700 font-medium hover:underline transition-colors">
                             Lupa Password?
                         </a>
                     </div>
@@ -231,7 +239,7 @@
                 {{-- Submit --}}
                 <div class="animate-fade-up-5">
                     <button type="submit"
-                        class="btn-login w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md shadow-blue-200 flex items-center justify-center gap-2">
+                        class="btn-login w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md shadow-orange-200 flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
                         </svg>
@@ -255,7 +263,7 @@
             <p class="text-center text-sm text-gray-500">
                 Belum punya akun?
                 <a href="{{ route('register') }}"
-                   class="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors ml-1">
+                   class="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors ml-1">
                     Daftar sekarang
                 </a>
             </p>

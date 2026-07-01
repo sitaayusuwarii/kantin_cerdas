@@ -13,6 +13,8 @@ class OrderItem extends Model
         'quantity',
         'unit_price',
         'subtotal',
+        'tenant_id',      
+        'tenant_status',
     ];
 
     protected function casts(): array
@@ -46,5 +48,11 @@ class OrderItem extends Model
     public function menu(): BelongsTo
     {
         return $this->belongsTo(Menu::class);
+    }
+
+    // Relasi ke tenant
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
     }
 }

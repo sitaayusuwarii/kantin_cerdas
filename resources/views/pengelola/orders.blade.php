@@ -65,7 +65,16 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-cream-200" id="desktop-tbody">
-            @forelse($orders as $order)
+            @foreach($orders as $order)
+            @php
+                $customerName = $order->user->full_name ?? $order->user->name ?? $order->user->username ?? 'Pelanggan';
+
+                if ($order->note && preg_match('/Nama pelanggan:\s*([^|]+)/i', $order->note, $matches)) {
+                    $customerName = trim($matches[1]);
+                }
+
+                $displayNote = trim(preg_replace('/Nama pelanggan:\s*[^|]+(\|\s*)?/i', '', $order->note ?? ''));
+            @endphp
             <tr class="order-row hover:bg-cream-100/50 transition-colors {{ $order->status === 'pembayaran_terverifikasi' ? 'bg-forest-50/40' : '' }}"
                  data-status="{{ $order->status }}">
                 <td class="px-6 py-4">
@@ -75,8 +84,10 @@
                     </p>
                 </td>
                 <td class="px-4 py-4">
-                    <p class="font-semibold text-xs text-forest-900">{{ $order->user->name }}</p>
-                    <p class="text-[10px] text-forest-400">{{ $order->user->class }}</p>
+                    <p class="font-semibold text-xs text-forest-900">{{ $customerName }}</p>
+                    <p class="text-[10px] text-forest-400">
+                        {{ $order->user->class ?? $order->user->kelas ?? '-' }}
+                    </p>
                 </td>
                 <td class="px-4 py-4">
                     <span class="inline-flex items-center text-[10px] font-semibold px-2 py-1 rounded-full {{ $order->order_type_color }}">
@@ -87,9 +98,9 @@
                             <i class="fa-solid fa-location-dot"></i> {{ $order->classroom }}
                         </p>
                     @endif
-                    @if($order->note)
-                        <p class="text-[10px] text-gray-400 mt-1 italic truncate max-w-[120px]" title="{{ $order->note }}">
-                            📝 {{ $order->note }}
+                    @if($displayNote)
+                        <p class="text-[10px] text-gray-400 mt-1 italic truncate max-w-[120px]" title="{{ $displayNote }}">
+                            📝 {{ $displayNote }}
                         </p>
                     @endif
                 </td>
@@ -121,7 +132,7 @@
                 </td>
                 <td class="px-6 py-4 text-center">
                     @if($order->status === 'pembayaran_terverifikasi')
-                        <form action="{{ route('pengelola.orders.confirm', $order->id) }}" method="POST">
+                        <form action="{{ route('pengelola.orders.confirm', $order->order_number) }}" method="POST">
                             @csrf @method('PATCH')
                             <button type="submit"
                                     class="btn-primary text-white text-xs font-bold px-4 py-2 rounded-xl shadow">
@@ -129,7 +140,7 @@
                             </button>
                         </form>
                     @elseif($order->status === 'dikonfirmasi')
-                        <form action="{{ route('pengelola.orders.process', $order->id) }}" method="POST">
+                        <form action="{{ route('pengelola.orders.process', $order->order_number) }}" method="POST">
                             @csrf @method('PATCH')
                             <button type="submit"
                                     class="bg-amber-500 text-white text-xs font-bold px-4 py-2 rounded-xl shadow">
@@ -137,7 +148,7 @@
                             </button>
                         </form>
                     @elseif($order->status === 'diproses')
-                        <form action="{{ route('pengelola.orders.complete', $order->id) }}" method="POST">
+                        <form action="{{ route('pengelola.orders.complete', $order->order_number) }}" method="POST">
                             @csrf @method('PATCH')
                             <button type="submit"
                                     class="bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow">
@@ -149,15 +160,7 @@
                     @endif
                 </td>
             </tr>
-            @empty
-            {{-- Ditangani JS, tapi fallback kalau memang 0 order dari server --}}
-            <tr id="empty-fallback">
-                <td colspan="8" class="text-center py-16">
-                    <div class="text-5xl mb-3">📋</div>
-                    <p class="text-forest-600 font-semibold text-sm">Belum ada pesanan masuk</p>
-                </td>
-            </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 
@@ -197,7 +200,7 @@
             <div class="px-4 py-3.5">
                 <div class="flex items-start justify-between gap-3 mb-2.5">
                     <div>
-                        <p class="font-semibold text-sm text-forest-900">{{ $order->user->name }}</p>
+                        <p class="font-semibold text-sm text-forest-900">{{ $customerName }}</p>
                         <p class="text-xs text-forest-400">{{ $order->user->class }} · {{ $order->pickup_display }}</p>
                     </div>
                     <p class="font-display font-bold text-base text-forest-800 flex-shrink-0">
@@ -228,7 +231,7 @@
 
                 {{-- ↓ Tombol aksi mobile — lengkap untuk semua status --}}
                 @if($order->status === 'pembayaran_terverifikasi')
-                    <form action="{{ route('pengelola.orders.confirm', $order->id) }}" method="POST">
+                    <form action="{{ route('pengelola.orders.confirm', $order->order_number) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit"
                                 class="btn-primary w-full text-white text-sm font-bold py-2.5 rounded-xl shadow flex items-center justify-center gap-2">
@@ -236,7 +239,7 @@
                         </button>
                     </form>
                 @elseif($order->status === 'dikonfirmasi')
-                    <form action="{{ route('pengelola.orders.process', $order->id) }}" method="POST">
+                    <form action="{{ route('pengelola.orders.process', $order->order_number) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit"
                                 class="w-full text-center text-sm text-white bg-amber-500 font-semibold py-2.5 rounded-xl">
@@ -245,7 +248,7 @@
                     </form>
                 @elseif($order->status === 'diproses')
                     {{-- ↓ Sebelumnya tidak ada tombol untuk status ini di mobile --}}
-                    <form action="{{ route('pengelola.orders.complete', $order->id) }}" method="POST">
+                    <form action="{{ route('pengelola.orders.complete', $order->order_number) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit"
                                 class="w-full text-center text-sm text-white bg-emerald-600 font-semibold py-2.5 rounded-xl">
@@ -293,6 +296,17 @@ document.querySelectorAll('.filter-tab').forEach(btn => {
         if (emptyDesktop) emptyDesktop.style.display = visible === 0 ? 'block' : 'none';
         if (emptyMobile)  emptyMobile.style.display  = visible === 0 ? 'block' : 'none';
     });
+});
+
+// Cek saat halaman pertama load
+document.addEventListener('DOMContentLoaded', function () {
+    const rows = document.querySelectorAll('.order-row');
+    const emptyDesktop = document.getElementById('empty-order-msg');
+    const emptyMobile  = document.getElementById('empty-order-msg-mobile');
+    if (rows.length === 0) {
+        if (emptyDesktop) emptyDesktop.style.display = 'block';
+        if (emptyMobile)  emptyMobile.style.display  = 'block';
+    }
 });
 </script>
 @endpush

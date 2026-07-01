@@ -5,6 +5,50 @@
 
 @section('content')
 
+{{-- ── FILTER PERIODE ─────────────────────────────────── --}}
+<form method="GET" action="{{ route('pengelola.delivery') }}" id="filter-form"
+      class="bg-white rounded-2xl shadow-sm border border-cream-200 px-4 py-3 mb-5 flex flex-wrap items-center justify-center gap-2">
+
+    @php
+    $activePeriod = $period ?? 'today';
+    $periods = [
+        'today' => 'Hari Ini',
+        'week'  => 'Minggu Ini',
+        'month' => 'Bulan Ini',
+        'year'  => 'Tahun Ini',
+    ];
+    @endphp
+
+    <span class="text-xs font-semibold text-forest-500 mr-1">Periode:</span>
+
+    @foreach($periods as $key => $label)
+    <button type="submit" name="period" value="{{ $key }}"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors
+                   {{ $activePeriod === $key && !request('date_from')
+                       ? 'bg-orange-500 text-white shadow-sm'
+                       : 'bg-cream-100 text-forest-600 hover:bg-orange-100 hover:text-orange-600' }}">
+        {{ $label }}
+    </button>
+    @endforeach
+
+    {{-- Divider --}}
+    <span class="text-cream-300 text-sm hidden sm:block">|</span>
+
+    {{-- Custom date range --}}
+    <div class="flex items-center gap-2 flex-wrap">
+        <input type="date" name="date_from"
+               value="{{ $dateFrom ?? '' }}"
+               class="text-xs px-3 py-1.5 rounded-xl border border-cream-200 bg-cream-50
+                      text-forest-700 focus:outline-none focus:border-orange-400 transition-colors">
+        <span class="text-xs text-forest-400">—</span>
+        <input type="date" name="date_to"
+               value="{{ $dateTo ?? '' }}"
+               class="text-xs px-3 py-1.5 rounded-xl border border-cream-200 bg-cream-50
+                      text-forest-700 focus:outline-none focus:border-orange-400 transition-colors">
+    </div>
+
+</form>
+
 {{-- ── SUMMARY STATS ────────────────────────────────────── --}}
 <div class="grid grid-cols-4 gap-4 mb-6">
    @php
@@ -113,15 +157,15 @@ $cols = [
                         <p class="text-[10px] text-forest-400">{{ $d->order->user->class }}</p>
                     </div>
                     <div class="text-right flex-shrink-0">
-                        <p class="font-display font-bold text-sm text-forest-700">Rp {{ number_format($d->order->total_price, 0, ',', '.') }}</p>
-                        <p class="text-[10px] text-forest-400 flex items-center gap-0.5 justify-end mt-0.5">
+                    @php $tenantTotal = $d->order->items->where('tenant_id', auth()->user()->tenant->id)->sum('subtotal'); @endphp
+                    <p class="font-display font-bold text-sm text-forest-700">Rp {{ number_format($tenantTotal, 0, ',', '.') }}</p>                        <p class="text-[10px] text-forest-400 flex items-center gap-0.5 justify-end mt-0.5">
                             <i class="fa-solid fa-clock text-forest-300 text-[9px]"></i>{{ $d->created_at->diffForHumans() }}
                         </p>
                     </div>
                 </div>
                 <div class="bg-cream-100 rounded-lg px-3 py-2 mb-3">
                     <div class="space-y-1">
-                        @foreach($d->order->items as $item)
+                        @foreach($d->order->items->where('tenant_id', auth()->user()->tenant->id) as $item)
                             <p class="text-[11px] text-forest-700 font-medium">
                                 {{ $item->menu->name }} ×{{ $item->quantity }}
                             </p>
@@ -155,11 +199,12 @@ $cols = [
                     @if($d->order->isDelivery())
                         → akan masuk ke "Dikirim"
                     @else
-                        → langsung Selesai
+                        → menunggu konfirmasi selesai
                     @endif
                 </p>
                 </form>
             @elseif($d->status === 'selesai_dimasak')
+            @if($d->order->isDelivery())
                 <form action="{{ route('pengelola.delivery.send', $d->id) }}" method="POST">
                     @csrf @method('PATCH')
                     <button type="submit"
@@ -167,6 +212,16 @@ $cols = [
                         <i class="fa-solid fa-truck-fast text-[10px]"></i> Kirim Sekarang
                     </button>
                 </form>
+            @else
+                {{-- Takeaway / Dine-in → langsung selesai --}}
+                <form action="{{ route('pengelola.delivery.complete', $d->id) }}" method="POST">
+                    @csrf @method('PATCH')
+                    <button type="submit"
+                            class="bg-emerald-600 hover:bg-emerald-700 w-full py-2 rounded-xl text-xs font-bold text-white shadow flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-check text-[10px]"></i> Tandai Selesai
+                    </button>
+                </form>
+            @endif
             @elseif($d->status === 'dikirim')
                 <form action="{{ route('pengelola.delivery.complete', $d->id) }}" method="POST">
                     @csrf @method('PATCH')
@@ -221,11 +276,11 @@ $cols = [
                 <div class="flex items-center justify-between gap-3">
                 <div>
                     <div class="space-y-1">
-                    @foreach($d->order->items as $item)
-                        <p class="text-[11px] text-forest-700 font-medium">
-                            {{ $item->menu->name }} ×{{ $item->quantity }}
-                        </p>
-                    @endforeach
+                @foreach($d->order->items->where('tenant_id', auth()->user()->tenant->id) as $item)
+                    <p class="text-[11px] text-forest-700 font-medium">
+                        {{ $item->menu->name }} ×{{ $item->quantity }}
+                    </p>
+                @endforeach
                 </div>
                 <div class="flex items-center gap-1.5 mt-1 mb-0.5 flex-wrap">
                     <span class="inline-flex items-center text-[10px] font-semibold px-2 py-1 rounded-full {{ $d->order->order_type_color }}">
@@ -240,8 +295,7 @@ $cols = [
                 @if($d->order->note)
                     <p class="text-[10px] text-gray-400 italic mb-0.5">📝 {{ $d->order->note }}</p>
                 @endif
-                    <p class="text-[10px] text-forest-400 mt-0.5">{{ $d->order->pickup_display }} · Rp {{ number_format($d->order->total_price,0,',','.') }}</p>
-                </div>
+                <p class="text-[10px] text-forest-400 mt-0.5">{{ $d->order->pickup_display }} · Rp {{ number_format($d->order->items->where('tenant_id', auth()->user()->tenant->id)->sum('subtotal'),0,',','.') }}</p>                </div>
                 @if($d->status === 'diproses')
                 <form action="{{ route('pengelola.delivery.cooked', $d->id) }}" method="POST">
                     @csrf @method('PATCH')
@@ -251,9 +305,10 @@ $cols = [
                     </button>
                 </form>
                 <p class="text-[10px] text-gray-400 mt-1">
-                    @if($d->order->isDelivery()) → ke Dikirim @else → langsung Selesai @endif
+                    @if($d->order->isDelivery()) → ke Dikirim @else → menunggu konfirmasi selesai @endif
                 </p>
-            @elseif($d->status === 'selesai_dimasak')
+           @elseif($d->status === 'selesai_dimasak')
+            @if($d->order->isDelivery())
                 <form action="{{ route('pengelola.delivery.send', $d->id) }}" method="POST">
                     @csrf @method('PATCH')
                     <button type="submit"
@@ -261,6 +316,15 @@ $cols = [
                         <i class="fa-solid fa-truck-fast text-[10px]"></i> Kirim
                     </button>
                 </form>
+            @else
+                <form action="{{ route('pengelola.delivery.complete', $d->id) }}" method="POST">
+                    @csrf @method('PATCH')
+                    <button type="submit"
+                            class="bg-emerald-600 text-xs font-bold px-3.5 py-2 rounded-xl text-white shadow flex items-center gap-1.5 flex-shrink-0">
+                        <i class="fa-solid fa-check text-[10px]"></i> Selesai
+                    </button>
+                </form>
+            @endif
             @elseif($d->status === 'dikirim')
                 <form action="{{ route('pengelola.delivery.complete', $d->id) }}" method="POST">
                     @csrf @method('PATCH')

@@ -8,20 +8,38 @@ use Illuminate\Http\RedirectResponse;
 
 class DeliveryController extends Controller
 {
-    public function index()
-    {
-        $deliveries = Delivery::with([
-                'order.user',
-                'order.items.menu'
-            ])
-            // ↓ hanya tampilkan yang sudah masuk pipeline pengiriman
-            ->whereIn('status', ['diproses', 'selesai_dimasak', 'dikirim', 'selesai'])
-            // ↓ yang paling lama menunggu muncul paling atas
-            ->latest()
-            ->get();
+   public function index()
+{
+    $tenant = auth()->user()->tenant;
+    abort_if(!$tenant, 403, 'Akun ini tidak memiliki tenant.');
 
-        return view('pengelola.delivery', compact('deliveries'));
+    $period  = request('period', 'today');
+    $dateFrom = request('date_from');
+    $dateTo   = request('date_to');
+
+    $query = Delivery::with(['order.user', 'order.items.menu'])
+        ->whereIn('status', ['diproses', 'selesai_dimasak', 'dikirim', 'selesai'])
+        ->whereHas('order.items', function ($q) use ($tenant) {
+            $q->where('tenant_id', $tenant->id);
+        });
+
+    // Filter tanggal custom override period
+    if ($dateFrom && $dateTo) {
+        $query->whereDate('created_at', '>=', $dateFrom)
+              ->whereDate('created_at', '<=', $dateTo);
+    } else {
+        match($period) {
+            'week'  => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+            'year'  => $query->whereYear('created_at', now()->year),
+            default => $query->whereDate('created_at', today()), // 'today'
+        };
     }
+
+    $deliveries = $query->latest()->get();
+
+    return view('pengelola.delivery', compact('deliveries', 'period', 'dateFrom', 'dateTo'));
+}
 
     public function send(Delivery $delivery)
 {
@@ -51,8 +69,17 @@ class DeliveryController extends Controller
 public function complete(Delivery $delivery)
 {
     $delivery->load('order.user');
-    
-    abort_if($delivery->status !== 'dikirim', 403, 'Pesanan belum dikirim.');
+
+    //  Delivery wajib lewat 'dikirim' dulu
+    // Takeaway & dine-in boleh langsung dari 'selesai_dimasak'
+    $allowedStatus = $delivery->order->isDelivery()
+        ? ['dikirim']
+        : ['selesai_dimasak', 'dikirim'];
+
+    abort_if(
+        !in_array($delivery->status, $allowedStatus),
+        403, 'Pesanan belum dikirim.'
+    );
 
     $delivery->update([
         'status'       => 'selesai',
@@ -81,17 +108,17 @@ public function cooked(Delivery $delivery): RedirectResponse
     $delivery->load('order');
     $order = $delivery->order;
 
-    // Pastikan order statusnya diproses dulu sebelum nextStatus() dipanggil
     abort_if(
-    !in_array($order->status, [Order::STATUS_DIPROSES, Order::STATUS_DIKONFIRMASI]),
-    403, 'Status tidak valid.'
-);
+        !in_array($order->status, [Order::STATUS_DIPROSES, Order::STATUS_DIKONFIRMASI]),
+        403, 'Status tidak valid.'
+    );
 
-    $next = $order->nextStatus(); // 'selesai_dimasak'
-
+    // Tentukan next status berdasarkan order_type
+   $next = Order::STATUS_SELESAI_DIMASAK;
+   
     $delivery->update([
         'status'    => $next,
-        'cooked_at' => now(),   // pastikan kolom ini ada, atau hapus baris ini
+        'cooked_at' => now(),
     ]);
 
     $order->update([
@@ -108,8 +135,16 @@ public function cooked(Delivery $delivery): RedirectResponse
 
 public function display()
 {
+    $tenant = auth()->user()->tenant;
+
+    abort_if(!$tenant, 403, 'Akun ini tidak memiliki tenant.');
+
     $deliveries = Delivery::with(['order.user', 'order.items.menu'])
         ->whereIn('status', ['diproses', 'selesai_dimasak', 'dikirim', 'selesai'])
+        ->whereHas('order.items', function ($q) use ($tenant) {
+            $q->where('tenant_id', $tenant->id);
+        })
+        ->whereDate('created_at', today())
         ->latest()
         ->get();
 

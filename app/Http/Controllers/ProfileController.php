@@ -64,11 +64,7 @@ class ProfileController extends Controller
 
     $user->update($data);
 
-    if ($user->role === 'customer') {
-        return redirect()->route('profile.edit')->with('success', 'Profil berhasil diperbarui!');
-    }
-
-    return redirect()->route('pengelola.dashboard')->with('success', 'Profil berhasil diperbarui!');
+    return redirect()->route('profile.edit')->with('success', 'Profil berhasil diperbarui!');
 }
 
     /**

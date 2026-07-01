@@ -84,7 +84,7 @@ class DashboardController extends Controller
             : 0;
 
         // ── Pending list (5 terbaru) ─────────────────────────────────────
-        $pendingList = Payment::with(['user:id,full_name,kelas,class', 'order:id,order_number'])
+        $pendingList = Payment::with(['user:id,full_name,kelas,class,photo', 'order:id,order_number'])
             ->where('status', 'menunggu')
             ->latest()
             ->limit(5)

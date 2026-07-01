@@ -36,6 +36,10 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('pengelola.dashboard');
     }
 
+    if (auth()->user()->role == 'kasir') {
+        return redirect()->route('kasir.dashboard');
+    }
+
     return redirect()->route('customer.home');
 }
 

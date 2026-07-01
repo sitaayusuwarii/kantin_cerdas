@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Http\Controllers\Auth;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -45,23 +45,25 @@ class PasswordResetLinkController extends Controller
     ]
     );
 
-    session(['reset_phone' => $inputPhone]);
+    session([
+        'otp_secret' => $otp,        // plain OTP untuk dicek dengan !=
+        'otp_phone'  => $user->phone, // pakai phone dari DB, bukan input
+        'otp_created_at' => now()->timestamp,
+    ]);
 
     // 3. Kirim ke Telegram
     try {
         Telegram::sendMessage([
             'chat_id' => $user->telegram_chat_id,
-            'text' => "Halo *{$user->name}*, kode reset password kamu adalah: *{$otp}*\n\nKode berlaku selama 60 menit.",
+            'text' => "Halo *{$user->name}*, kode reset password kamu adalah: *{$otp}*\n\nKode berlaku selama 60 detik.",
             'parse_mode' => 'Markdown'
         ]);
     } catch (\Exception $e) {
         return back()->withErrors(['phone' => 'Gagal mengirim pesan ke Telegram.']);
     }
 
-    return redirect()->route('password.reset', [
-        'token' => $otp,             // <--- Tambahkan ini agar error hilang
-        'phone' => $inputPhone       // Tetap bawa nomor HP untuk identifikasi user
-    ])->with('status', 'Kode OTP telah dikirim ke Telegram kamu!');
+    return redirect()->route('password.otp')
+                 ->with('status', 'Kode OTP telah dikirim ke Telegram kamu!');
 }
 
     public function handleTelegram(Request $request)
@@ -95,13 +97,13 @@ class PasswordResetLinkController extends Controller
 
     public function resend(Request $request)
     {
-        $phone = session('reset_phone'); 
+        $phone = session('otp_phone');
 
         if (!$phone) {
-            return back()->withErrors(['phone' => 'Sesi habis, silakan masukkan nomor HP kembali.']);
+            return redirect()->route('password.request')
+                            ->withErrors(['phone' => 'Sesi habis, silakan masukkan nomor HP kembali.']);
         }
 
-        // Trick: Panggil fungsi store lagi untuk kirim ulang
         return $this->store(new Request(['phone' => $phone]));
     }
 }

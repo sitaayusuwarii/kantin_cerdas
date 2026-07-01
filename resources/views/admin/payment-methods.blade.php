@@ -38,11 +38,11 @@
                     <h3 class="text-stone-800 font-bold">{{ $method->name }}</h3>
                     <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border
                         {{ $method->is_active
-                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            : 'bg-orange-100 text-stone-400 border-slate-600' }}">
+                            ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                            : 'bg-orange-100 text-stone-500 border-slate-300' }}">
                         {{ $method->is_active ? 'Aktif' : 'Nonaktif' }}
                     </span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-orange-100 text-slate-400 border border-slate-600">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-orange-100 text-stone-500 border border-slate-300">
                         {{ $method->code }}
                     </span>
                 </div>
@@ -64,21 +64,21 @@
 
             {{-- Actions --}}
             <div class="flex items-center gap-2 flex-shrink-0">
-                <button onclick="toggleMethod({{ $method->id }})"
+                <button onclick="confirmToggle({{ $method->id }}, '{{ $method->name }}', {{ $method->is_active ? 'true' : 'false' }})"
                         class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
                                {{ $method->is_active
-                                   ? 'bg-orange-100 border border-slate-600 text-slate-400 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400'
-                                   : 'bg-orange-100 border border-slate-600 text-slate-400 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-400' }}">
+                                   ? 'bg-white border border-orange-200 text-orange-600 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-500'
+                                   : 'bg-white border border-orange-200 text-stone-500 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-600' }}">
                     {{ $method->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                 </button>
                 <button onclick="openEditModal({{ $method->id }}, @js($method))"
                         class="px-3 py-1.5 rounded-lg bg-primary-500/10 border border-primary-500/20
-                               text-primary-400 text-xs font-semibold hover:bg-primary-500/20 transition-all">
+                               text-primary-500 text-xs font-semibold hover:bg-primary-500/20 transition-all">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
-                <button onclick="deleteMethod({{ $method->id }}, '{{ $method->name }}')"
+                <button onclick="confirmDelete({{ $method->id }}, '{{ $method->name }}')"
                         class="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20
-                               text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-all">
+                               text-red-500 text-xs font-semibold hover:bg-red-500/20 transition-all">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -90,10 +90,10 @@
 
 {{-- ===== MODAL TAMBAH ===== --}}
 <div id="add-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
-    <div class="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 border border-orange-100 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 border border-orange-100 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
             <h3 class="text-stone-800 font-bold text-lg">Tambah Metode Pembayaran</h3>
-            <button onclick="closeModal('add-modal')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeModal('add-modal')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -101,24 +101,24 @@
         <form id="add-form" onsubmit="submitAdd(event)" enctype="multipart/form-data" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Kode Unik <span class="text-red-400">*</span></label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Kode Unik <span class="text-red-500">*</span></label>
                     <input type="text" name="code" placeholder="transfer_bca"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono"
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 font-mono transition-all"
                            required>
                     <p class="text-stone-400 text-xs mt-1">Huruf, angka, underscore</p>
                 </div>
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nama Tampilan <span class="text-red-400">*</span></label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Nama Tampilan <span class="text-red-500">*</span></label>
                     <input type="text" name="name" placeholder="Transfer BCA"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500"
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
                            required>
                 </div>
             </div>
 
             <div>
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Tipe <span class="text-red-400">*</span></label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Tipe <span class="text-red-500">*</span></label>
                 <select name="type" id="add-type" onchange="toggleFields('add')"
-                        class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                        class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all">
                     <option value="bank_transfer">Transfer Bank</option>
                     <option value="ewallet">E-Wallet</option>
                     <option value="qris">QRIS</option>
@@ -129,43 +129,43 @@
             {{-- Fields untuk bank/ewallet --}}
             <div id="add-bank-fields" class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nomor Rekening</label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Nomor Rekening</label>
                     <input type="text" name="account_number" placeholder="1234567890"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono">
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 font-mono transition-all">
                 </div>
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Atas Nama</label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Atas Nama</label>
                     <input type="text" name="account_name" placeholder="Kantin PAUD"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all">
                 </div>
             </div>
 
             {{-- Field QRIS --}}
             <div id="add-qris-field" class="hidden">
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Upload Gambar QRIS</label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Upload Gambar QRIS</label>
                 <input type="file" name="qris_image" accept="image/*"
-                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-slate-400">
+                       class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-600 transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-500/10 file:text-primary-600 hover:file:bg-primary-500/20">
             </div>
 
             <div>
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Instruksi Pembayaran</label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Instruksi Pembayaran</label>
                 <textarea name="instructions" rows="2" placeholder="Transfer ke rekening di atas, lalu upload bukti..."
-                          class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 resize-none"></textarea>
+                          class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 placeholder-stone-400 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 resize-none transition-all"></textarea>
             </div>
 
             <div>
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Urutan Tampil</label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Urutan Tampil</label>
                 <input type="number" name="sort_order" value="0" min="0"
-                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                       class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all">
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeModal('add-modal')"
-                        class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-600 text-sm font-semibold hover:bg-slate-600 transition-all">
+                        class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-700 text-sm font-semibold hover:bg-orange-200 transition-all border border-orange-200">
                     Batal
                 </button>
                 <button type="submit"
-                        class="flex-1 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
+                        class="flex-1 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all shadow">
                     <i class="fa-solid fa-plus mr-1"></i> Tambahkan
                 </button>
             </div>
@@ -175,10 +175,10 @@
 
 {{-- ===== MODAL EDIT ===== --}}
 <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
-    <div class="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 border border-orange-100 shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 border border-orange-100 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-5">
             <h3 class="text-stone-800 font-bold text-lg">Edit Metode Pembayaran</h3>
-            <button onclick="closeModal('edit-modal')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-slate-400 transition-all">
+            <button onclick="closeModal('edit-modal')" class="w-8 h-8 rounded-lg bg-orange-100 hover:bg-red-500/20 hover:text-red-500 flex items-center justify-center text-stone-500 transition-all">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -188,60 +188,82 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Kode</label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Kode</label>
                     <input type="text" id="edit-code"
-                           class="w-full px-4 py-2.5 bg-orange-100/50 border border-orange-100 rounded-xl text-sm text-stone-400 font-mono cursor-not-allowed"
+                           class="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-400 font-mono cursor-not-allowed"
                            disabled>
                 </div>
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nama Tampilan</label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Nama Tampilan</label>
                     <input type="text" name="name" id="edit-name"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all">
                 </div>
             </div>
 
             <div id="edit-bank-fields" class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Nomor Rekening</label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Nomor Rekening</label>
                     <input type="text" name="account_number" id="edit-account-number"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 font-mono">
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 font-mono transition-all">
                 </div>
                 <div>
-                    <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Atas Nama</label>
+                    <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Atas Nama</label>
                     <input type="text" name="account_name" id="edit-account-name"
-                           class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                           class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all">
                 </div>
             </div>
 
             <div id="edit-qris-field" class="hidden">
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Upload QRIS Baru</label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Upload QRIS Baru</label>
                 <input type="file" name="qris_image" accept="image/*"
-                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-slate-400">
+                       class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-600 transition-all file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-500/10 file:text-primary-600 hover:file:bg-primary-500/20">
             </div>
 
             <div>
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Instruksi</label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Instruksi</label>
                 <textarea name="instructions" id="edit-instructions" rows="2"
-                          class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500 resize-none"></textarea>
+                          class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 resize-none transition-all"></textarea>
             </div>
 
             <div>
-                <label class="block text-slate-400 text-xs mb-1.5 font-semibold">Urutan Tampil</label>
+                <label class="block text-stone-600 text-xs mb-1.5 font-semibold">Urutan Tampil</label>
                 <input type="number" name="sort_order" id="edit-sort-order" min="0"
-                       class="w-full px-4 py-2.5 bg-orange-50 border border-orange-100 rounded-xl text-sm text-white outline-none focus:border-primary-500">
+                       class="w-full px-4 py-2.5 bg-white border border-orange-200 rounded-xl text-sm text-stone-800 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all">
             </div>
 
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeModal('edit-modal')"
-                        class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-600 text-sm font-semibold hover:bg-slate-600 transition-all">
+                        class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-700 text-sm font-semibold hover:bg-orange-200 transition-all border border-orange-200">
                     Batal
                 </button>
                 <button type="submit"
-                        class="flex-1 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all">
+                        class="flex-1 py-3 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold transition-all shadow">
                     <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+{{-- ===== MODAL KONFIRMASI (Toggle & Delete) ===== --}}
+<div id="confirm-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-200">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 border border-orange-100 shadow-2xl">
+        {{-- Icon area --}}
+        <div class="flex justify-center mb-4">
+            <div id="confirm-icon-wrap" class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl">
+            </div>
+        </div>
+        <h3 id="confirm-title" class="text-stone-800 font-bold text-lg text-center mb-2"></h3>
+        <p id="confirm-desc" class="text-stone-500 text-sm text-center mb-6 leading-relaxed"></p>
+        <div class="flex gap-3">
+            <button onclick="closeModal('confirm-modal')"
+                    class="flex-1 py-3 rounded-xl bg-orange-100 text-stone-700 text-sm font-semibold hover:bg-orange-200 transition-all border border-orange-200">
+                Batal
+            </button>
+            <button id="confirm-action-btn"
+                    class="flex-1 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow">
+            </button>
+        </div>
     </div>
 </div>
 
@@ -299,15 +321,14 @@ function submitAdd(e) {
 
 // ── Edit ─────────────────────────────────────────────────
 function openEditModal(id, method) {
-    document.getElementById('edit-id').value           = id;
-    document.getElementById('edit-code').value         = method.code;
-    document.getElementById('edit-name').value         = method.name;
+    document.getElementById('edit-id').value              = id;
+    document.getElementById('edit-code').value            = method.code;
+    document.getElementById('edit-name').value            = method.name;
     document.getElementById('edit-account-number').value = method.account_number ?? '';
-    document.getElementById('edit-account-name').value = method.account_name ?? '';
-    document.getElementById('edit-instructions').value = method.instructions ?? '';
-    document.getElementById('edit-sort-order').value   = method.sort_order ?? 0;
+    document.getElementById('edit-account-name').value   = method.account_name ?? '';
+    document.getElementById('edit-instructions').value   = method.instructions ?? '';
+    document.getElementById('edit-sort-order').value     = method.sort_order ?? 0;
 
-    // Toggle fields
     const bankFields = document.getElementById('edit-bank-fields');
     const qrisField  = document.getElementById('edit-qris-field');
     bankFields.classList.toggle('hidden', method.type === 'qris' || method.type === 'cash');
@@ -337,8 +358,37 @@ function submitEdit(e) {
     });
 }
 
-// ── Toggle aktif ─────────────────────────────────────────
-function toggleMethod(id) {
+// ── Konfirmasi Toggle Aktif/Nonaktif ─────────────────────
+function confirmToggle(id, name, isActive) {
+    const isDeactivate = isActive;
+
+    document.getElementById('confirm-title').textContent = isDeactivate
+        ? 'Nonaktifkan Metode?'
+        : 'Aktifkan Metode?';
+
+    document.getElementById('confirm-desc').innerHTML = isDeactivate
+        ? `Metode <strong>${name}</strong> tidak akan bisa dipilih pelanggan saat checkout. Kamu bisa mengaktifkannya kembali kapan saja.`
+        : `Metode <strong>${name}</strong> akan tersedia untuk pelanggan saat checkout.`;
+
+    const iconWrap = document.getElementById('confirm-icon-wrap');
+    iconWrap.className = isDeactivate
+        ? 'w-16 h-16 rounded-2xl flex items-center justify-center text-2xl bg-orange-100 text-orange-500'
+        : 'w-16 h-16 rounded-2xl flex items-center justify-center text-2xl bg-emerald-500/10 text-emerald-500';
+    iconWrap.innerHTML = isDeactivate
+        ? '<i class="fa-solid fa-toggle-off"></i>'
+        : '<i class="fa-solid fa-toggle-on"></i>';
+
+    const btn = document.getElementById('confirm-action-btn');
+    btn.textContent  = isDeactivate ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan';
+    btn.className    = isDeactivate
+        ? 'flex-1 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow bg-orange-500 hover:bg-orange-400'
+        : 'flex-1 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow bg-emerald-600 hover:bg-emerald-500';
+    btn.onclick = () => doToggle(id);
+
+    openModal('confirm-modal');
+}
+
+function doToggle(id) {
     fetch(`/admin/payment-methods/${id}/toggle`, {
         method: 'PATCH',
         headers: { 'X-CSRF-TOKEN': CSRF }
@@ -347,16 +397,32 @@ function toggleMethod(id) {
     .then(() => window.location.reload());
 }
 
-// ── Hapus ────────────────────────────────────────────────
-function deleteMethod(id, name) {
-    if (!confirm(`Hapus metode "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+// ── Konfirmasi Hapus ─────────────────────────────────────
+function confirmDelete(id, name) {
+    document.getElementById('confirm-title').textContent = 'Hapus Metode Pembayaran?';
+    document.getElementById('confirm-desc').innerHTML =
+        `Metode <strong>${name}</strong> akan dihapus permanen. Tindakan ini <strong>tidak dapat dibatalkan</strong>.`;
 
+    const iconWrap = document.getElementById('confirm-icon-wrap');
+    iconWrap.className = 'w-16 h-16 rounded-2xl flex items-center justify-center text-2xl bg-red-500/10 text-red-500';
+    iconWrap.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+
+    const btn = document.getElementById('confirm-action-btn');
+    btn.textContent = 'Ya, Hapus';
+    btn.className   = 'flex-1 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow bg-red-600 hover:bg-red-500';
+    btn.onclick     = () => doDelete(id, name);
+
+    openModal('confirm-modal');
+}
+
+function doDelete(id, name) {
     fetch(`/admin/payment-methods/${id}`, {
         method: 'DELETE',
         headers: { 'X-CSRF-TOKEN': CSRF }
     })
     .then(r => r.json())
     .then(res => {
+        closeModal('confirm-modal');
         if (res.success) {
             showToast(res.message, 'emerald');
             setTimeout(() => window.location.reload(), 800);
@@ -375,7 +441,7 @@ function showToast(message, color) {
 }
 
 // Close modal on overlay click
-['add-modal', 'edit-modal'].forEach(id => {
+['add-modal', 'edit-modal', 'confirm-modal'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', function(e) {
         if (e.target === this) closeModal(id);
     });

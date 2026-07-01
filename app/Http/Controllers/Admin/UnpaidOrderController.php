@@ -30,25 +30,28 @@ class UnpaidOrderController extends Controller
     }
 
     // Admin bisa cancel manual
-    public function cancel(Order $order)
-    {
-        $order->update([
-            'status'       => 'dibatalkan',
-            'cancelled_at' => now(),
-        ]);
+   public function cancel(Order $order, Request $request)
+{
+    $order->update([
+        'status'       => 'dibatalkan',
+        'cancelled_at' => now(),
+    ]);
 
-        $chatId = $order->user->telegram_chat_id ?? null;
-        if ($chatId) {
-            (new \App\Http\Controllers\TelegramController)->sendMessage(
-                $chatId,
-                "❌ *Pesanan kamu dibatalkan oleh admin.*\n\n" .
-                "Pesanan *#{$order->order_number}* dibatalkan karena pembayaran tidak diterima.\n\n" .
-                "Hubungi kantin jika ada pertanyaan."
-            );
-        }
+    $alasan = $request->cancel_reason ?? 'Pembayaran tidak diterima.';
 
-        return back()->with('success', 'Pesanan berhasil dibatalkan.');
+    $chatId = $order->user->telegram_chat_id ?? null;
+    if ($chatId) {
+        (new \App\Http\Controllers\TelegramController)->sendMessage(
+            $chatId,
+            "❌ *Pesanan kamu dibatalkan oleh admin.*\n\n" .
+            "Pesanan *#{$order->order_number}* dibatalkan.\n" .
+            "Alasan: {$alasan}\n\n" .
+            "Hubungi kantin jika ada pertanyaan."
+        );
     }
+
+    return back()->with('success', 'Pesanan berhasil dibatalkan.');
+}
 
     // Admin kirim reminder manual ke 1 customer
     public function sendReminder(Order $order)
@@ -68,4 +71,6 @@ class UnpaidOrderController extends Controller
 
         return back()->with('success', 'Reminder berhasil dikirim ke ' . $order->user->name);
     }
-}
+
+
+    }

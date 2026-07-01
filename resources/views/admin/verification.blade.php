@@ -62,19 +62,23 @@
                      : ($val === 'terverifikasi' ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300'
                      : ($val === 'ditolak' ? 'bg-red-500/20 border border-red-500/40 text-red-300'
                      : 'bg-primary-500/20 border border-primary-500/40 text-primary-300')))
-                   : 'bg-orange-50 border border-orange-100 text-stone-500 hover:text-white hover:border-slate-600' }}">
+                  : 'bg-orange-50 border border-orange-100 text-stone-600 hover:text-primary-600 hover:border-primary-200 hover:bg-orange-100' }}">
                 {{ $label }}
             </a>
             @endforeach
         </div>
     </div>
-    <form method="GET" action="{{ request()->url() }}" class="flex items-center gap-2 bg-orange-50 border border-border rounded-xl px-3 py-2">
-        <input type="hidden" name="status" value="{{ $statusFilter }}">
+    <div class="flex items-center gap-2 bg-orange-50 border border-border rounded-xl px-3 py-2 w-full sm:w-64 lg:w-72">
         <i class="fa-solid fa-search text-stone-400 text-xs"></i>
-        <input type="text" name="search" value="{{ request('search') }}"
+        <input id="paymentSearchInput" type="text" value="{{ request('search') }}"
                placeholder="Cari No. Order / Nama..."
-               class="bg-transparent text-sm text-stone-600 placeholder-slate-600 outline-none w-36 sm:w-48">
-    </form>
+               class="bg-transparent text-sm text-stone-600 placeholder-slate-600 outline-none flex-1 min-w-0"
+        <button id="clearPaymentSearch" type="button"
+                class="hidden px-2 py-1.5 rounded-lg text-stone-400 hover:text-red-500 transition-all"
+                title="Hapus pencarian">
+            <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+    </div>
 </div>
 
 {{-- ===== DESKTOP TABLE ===== --}}
@@ -113,8 +117,17 @@
                         'transfer_bri'=>'BRI','transfer_bca'=>'BCA','transfer_mandiri'=>'Mandiri',
                         'gopay'=>'GoPay','ovo'=>'OVO','dana'=>'DANA','tunai'=>'Tunai',
                     ];
+                    $searchText = strtolower(trim(implode(' ', [
+                        $payment->order->order_number ?? '',
+                        $payment->user->full_name ?? '',
+                        $payment->user->name ?? '',
+                        $payment->user->kelas ?? '',
+                        $payment->user->class ?? '',
+                        $payment->method ?? '',
+                        $methodLabels[$payment->method] ?? '',
+                    ])));
                 @endphp
-                <tr class="table-row" id="row-{{ $payment->id }}">
+                <tr class="table-row payment-search-item" id="row-{{ $payment->id }}" data-search="{{ $searchText }}">
                     <td class="px-5 py-4">
                         <span class="font-mono text-primary-400 text-sm font-semibold">
                             {{ $payment->order->order_number ?? '-' }}
@@ -122,8 +135,15 @@
                     </td>
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                                {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
+                            <div class="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                @if($payment->user->photo)
+                                    <img src="{{ asset('storage/' . $payment->user->photo) }}"
+                                        class="w-full h-full object-cover" alt="foto">
+                                @else
+                                    <div class="w-full h-full bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
+                                        {{ strtoupper(substr($payment->user->full_name, 0, 1)) }}
+                                    </div>
+                                @endif
                             </div>
                             <div>
                                 <p class="text-stone-800 text-sm font-semibold">{{ $payment->user->full_name }}</p>
@@ -188,6 +208,14 @@
                     </td>
                 </tr>
                 @endforelse
+                <tr id="desktop-search-empty" class="hidden">
+                    <td colspan="8" class="px-5 py-16 text-center">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-primary-400 text-3xl"></i>
+                            <p class="text-stone-400 text-sm">Data pembayaran tidak ditemukan</p>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -244,8 +272,16 @@
             'ditolak'       => ['label'=>'DITOLAK', 'bg'=>'bg-red-500/10',    'border'=>'border-red-500/20',    'text'=>'text-red-400'],
             default         => ['label'=>'PENDING', 'bg'=>'bg-amber-500/10',  'border'=>'border-amber-500/20',  'text'=>'text-amber-400'],
         };
+        $mobileSearchText = strtolower(trim(implode(' ', [
+            $payment->order->order_number ?? '',
+            $payment->user->full_name ?? '',
+            $payment->user->name ?? '',
+            $payment->user->kelas ?? '',
+            $payment->user->class ?? '',
+            $payment->method ?? '',
+        ])));
     @endphp
-    <div class="glass-card rounded-2xl p-4 border border-amber-500/10" id="card-{{ $payment->id }}">
+    <div class="glass-card rounded-2xl p-4 border border-amber-500/10 payment-search-item" id="card-{{ $payment->id }}" data-search="{{ $mobileSearchText }}">
         <div class="flex items-start justify-between mb-3">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-stone-800 font-bold text-sm flex-shrink-0">
@@ -308,6 +344,10 @@
         <p class="text-stone-400 text-sm">Tidak ada pembayaran ditemukan</p>
     </div>
     @endforelse
+    <div id="mobile-search-empty" class="hidden glass-card rounded-2xl p-8 text-center">
+        <i class="fa-solid fa-magnifying-glass text-primary-400 text-3xl mb-2"></i>
+        <p class="text-stone-400 text-sm">Data pembayaran tidak ditemukan</p>
+    </div>
 
     @if($payments->hasPages())
     <div class="flex items-center justify-center gap-2 pt-2">
@@ -457,6 +497,45 @@
 <script>
 const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 let currentPaymentId = null;
+
+function filterPayments() {
+    const input = document.getElementById('paymentSearchInput');
+    const clearBtn = document.getElementById('clearPaymentSearch');
+    const keyword = input ? input.value.toLowerCase().trim() : '';
+
+    let visibleRows = 0;
+    let visibleCards = 0;
+
+    document.querySelectorAll('tr.payment-search-item').forEach(row => {
+        const match = !keyword || (row.dataset.search || '').includes(keyword);
+        row.classList.toggle('hidden', !match);
+        if (match) visibleRows++;
+    });
+
+    document.querySelectorAll('div.payment-search-item').forEach(card => {
+        const match = !keyword || (card.dataset.search || '').includes(keyword);
+        card.classList.toggle('hidden', !match);
+        if (match) visibleCards++;
+    });
+
+    document.getElementById('desktop-search-empty')?.classList.toggle('hidden', visibleRows > 0);
+    document.getElementById('mobile-search-empty')?.classList.toggle('hidden', visibleCards > 0);
+    clearBtn?.classList.toggle('hidden', keyword.length === 0);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('paymentSearchInput');
+    const clearBtn = document.getElementById('clearPaymentSearch');
+
+    input?.addEventListener('input', filterPayments);
+    clearBtn?.addEventListener('click', () => {
+        input.value = '';
+        input.focus();
+        filterPayments();
+    });
+
+    filterPayments();
+});
 
 // ── Proof Modal ──────────────────────────────────────────────────────────────
 function openProof(src, orderId) {

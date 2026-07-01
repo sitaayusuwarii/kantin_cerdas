@@ -89,22 +89,33 @@
 
                 <img src="{{ asset('images/canteen.png') }}"
                 alt="Logo"
-                class="w-14 h-14 object-contain group-hover:scale-105 transition-transform"
+                class="w-14 h-14 object-contain group-hover:scale-105 transition-transform">
             </a>
 
                 {{-- Desktop Menu --}}
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="{{ url('/home') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('home') ? 'active' : '' }}">
-                        <i class="fa-solid fa-house mr-1.5 text-xs"></i>Home
-                    </a>
-                    <a href="{{ url('/menu') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('menu*') ? 'active' : '' }}">
+                @php
+                    $isKasir = auth()->check() && auth()->user()->role === 'kasir';
+                    $homeRoute = $isKasir ? route('kasir.dashboard') : route('customer.home');
+                @endphp
+
+                <a href="{{ $homeRoute }}"
+                class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->routeIs(['customer.home','kasir.dashboard']) ? 'active' : '' }}">
+                    <i class="fa-solid {{ $isKasir ? 'fa-cash-register' : 'fa-house' }} mr-1.5 text-xs"></i>
+                    {{ $isKasir ? 'Dashboard Kasir' : 'Home' }}
+                </a>
+
+                @if(!$isKasir)
+                    <a href="{{ url('/menu') }}"
+                    class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('menu*') ? 'active' : '' }}">
                         <i class="fa-solid fa-utensils mr-1.5 text-xs"></i>Menu
                     </a>
-                    <a href="{{ url('/history') }}" class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('history*') ? 'active' : '' }}">
-                        <i class="fa-solid fa-clock-rotate-left mr-1.5 text-xs"></i>Riwayat
-                    </a>
-                  
-                </div>
+                @endif
+
+               <a href="{{ $isKasir ? route('kasir.history') : url('/history') }}"
+                class="nav-link font-medium text-sm text-gray-700 hover:text-primary-600 transition-colors {{ request()->is('history*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clock-rotate-left mr-1.5 text-xs"></i>
+                    {{ $isKasir ? 'Riwayat Transaksi' : 'Riwayat' }}
+                </a>
 
                 {{-- Right Actions --}}
                 <div class="hidden md:flex items-center gap-3">
@@ -213,21 +224,16 @@
                             </div>
 
                             {{-- Logout --}}
-                            <div class="border-t border-gray-100 py-1.5">
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit"
-                                            class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
-                                                   text-red-500 hover:bg-red-50 transition-colors group text-left">
-                                        <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
-                                                    flex items-center justify-center transition-colors flex-shrink-0">
-                                            <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
-                                        </div>
-                                        <span class="font-semibold">Logout</span>
-                                    </button>
-                                </form>
-                            </div>
-
+                        <div class="border-t border-gray-100 py-1.5">
+                            <button type="button" onclick="openLogoutModal()"
+                                    class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                                        text-red-500 hover:bg-red-50 transition-colors group text-left">
+                                <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
+                                            flex items-center justify-center transition-colors flex-shrink-0">
+                                    <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
+                                </div>
+                                <span class="font-semibold">Logout</span>
+                            </button>
                         </div>
                         {{-- End Dropdown Panel --}}
 
@@ -245,20 +251,31 @@
         {{-- Mobile Menu --}}
         <div id="mobile-menu" class="md:hidden border-t border-orange-100 animate-slide-down">
             <div class="px-4 py-4 space-y-1 bg-white/95">
-                <a href="{{ url('/home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('home') ? 'bg-orange-50 text-primary-600' : '' }}">
+              @php
+                    $isKasir = auth()->check() && auth()->user()->role === 'kasir';
+                    $homeRoute = $isKasir ? route('kasir.dashboard') : route('customer.home');
+                @endphp
+
+                <a href="{{ $homeRoute }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->routeIs(['customer.home','kasir.dashboard']) ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-house w-4 text-center text-primary-400"></i>Home
                 </a>
-                <a href="{{ url('/menu') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('menu*') ? 'bg-orange-50 text-primary-600' : '' }}">
-                    <i class="fa-solid fa-utensils w-4 text-center text-primary-400"></i>Menu
-                </a>
+                @if(!$isKasir)
+                    <a href="{{ url('/menu') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('menu*') ? 'bg-orange-50 text-primary-600' : '' }}">
+                        <i class="fa-solid fa-utensils w-4 text-center text-primary-400"></i>Menu
+                    </a>
+                @endif
                 <a href="{{ url('/history') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-orange-50 hover:text-primary-600 transition-all {{ request()->is('history*') ? 'bg-orange-50 text-primary-600' : '' }}">
                     <i class="fa-solid fa-clock-rotate-left w-4 text-center text-primary-400"></i>Riwayat
                 </a>
 
                 <div class="pt-3 pb-1 border-t border-orange-100 space-y-2">
-                    <a href="{{ url('/payment') }}" class="btn-primary text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 w-full shadow-md">
-                        <i class="fa-solid fa-upload text-xs"></i>Upload Bukti Bayar
-                    </a>
+                    @if(!$isKasir)
+                            <a href="{{ url('/payment') }}"
+                            class="btn-primary text-white text-sm font-semibold px-4 py-3 rounded-xl flex items-center justify-center gap-2 w-full shadow-md">
+                                <i class="fa-solid fa-upload text-xs"></i>Upload Bukti Bayar
+                            </a>
+                        @endif
 
                     {{-- Mobile Profile Row --}}
                     <div class="flex items-center gap-3 px-4 py-3 bg-orange-50 rounded-xl">
@@ -282,14 +299,14 @@
                         <i class="fa-solid fa-user-pen w-4 text-center text-primary-400"></i>Edit Profil
                     </a>
 
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium
-                                       text-red-500 hover:bg-red-50 transition-all">
-                            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>Logout
-                        </button>
-                    </form>
+                     <button type="button" onclick="openLogoutModal()"
+                                class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors group text-left">
+                            <div class="w-7 h-7 rounded-lg bg-gray-100 group-hover:bg-red-100
+                                        flex items-center justify-center transition-colors flex-shrink-0">
+                                <i class="fa-solid fa-right-from-bracket text-gray-400 group-hover:text-red-400 text-xs"></i>
+                            </div>
+                            <span class="font-semibold">Logout</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -302,195 +319,190 @@
 
 {{-- ===== FOOTER ===== --}}
 <footer class="relative mt-16 overflow-hidden border-t border-orange-200">
-
-    {{-- Background --}}
-    <div class="absolute inset-0 bg-gradient-to-br from-[#c2410c] via-[#ea580c] to-[#f97316]"></div>
+    <div class="absolute inset-0 bg-gradient-to-br from-orange-700 via-orange-600 to-primary-500"></div>
+    <div class="absolute -top-24 -right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 -left-24 w-80 h-80 bg-yellow-300/10 rounded-full blur-3xl"></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-
         <div class="py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
             {{-- Brand --}}
             <div class="lg:col-span-2">
-
-                <div class="flex items-center mb-5">
-
-                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white/90 p-2 shadow-lg">
+                <div class="flex items-center gap-4 mb-5">
+                    <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white p-2 shadow-lg">
                         <img src="{{ asset('images/canteen.png') }}"
-                             alt="Logo"
+                             alt="Logo SmartCanteen"
                              class="w-full h-full object-contain">
                     </div>
 
+                    <div>
+                        <h2 class="font-heading font-extrabold text-white text-xl">
+                            SmartCanteen
+                        </h2>
+                        <p class="text-orange-100 text-xs mt-1">
+                            Kantin sekolah digital
+                        </p>
+                    </div>
                 </div>
 
                 <p class="text-orange-50 text-sm leading-relaxed max-w-md">
-                    Platform kantin digital modern untuk membantu siswa memesan makanan,
-                    melihat riwayat transaksi, dan melakukan pembayaran dengan cepat dan praktis.
+                    Platform kantin digital untuk membantu siswa, kasir, dan pengelola kantin
+                    dalam proses pemesanan, pembayaran, serta pemantauan pesanan secara praktis.
                 </p>
 
-                {{-- Social --}}
                 <div class="flex items-center gap-3 mt-6">
-
                     <a href="https://instagram.com/username"
                        target="_blank"
-                       class="w-10 h-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center text-pink-500 hover:bg-pink-500 hover:text-white transition-all">
-
+                       class="w-10 h-10 rounded-xl bg-white/90 shadow-sm flex items-center justify-center text-pink-500 hover:bg-pink-500 hover:text-white hover:-translate-y-1 transition-all">
                         <i class="fa-brands fa-instagram"></i>
-
                     </a>
 
                     <a href="https://facebook.com/username"
                        target="_blank"
-                       class="w-10 h-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center text-blue-500 hover:bg-blue-500 hover:text-white transition-all">
-
+                       class="w-10 h-10 rounded-xl bg-white/90 shadow-sm flex items-center justify-center text-blue-500 hover:bg-blue-500 hover:text-white hover:-translate-y-1 transition-all">
                         <i class="fa-brands fa-facebook-f"></i>
-
                     </a>
 
                     <a href="https://wa.me/6281234567890"
                        target="_blank"
-                       class="w-10 h-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center text-green-500 hover:bg-green-500 hover:text-white transition-all">
-
+                       class="w-10 h-10 rounded-xl bg-white/90 shadow-sm flex items-center justify-center text-green-500 hover:bg-green-500 hover:text-white hover:-translate-y-1 transition-all">
                         <i class="fa-brands fa-whatsapp"></i>
-
                     </a>
-
                 </div>
-
             </div>
 
             {{-- Navigation --}}
             <div>
-
                 <h3 class="font-heading font-bold text-white mb-5">
                     Navigasi
                 </h3>
 
                 <ul class="space-y-3">
+                    @php
+                        $isKasir = auth()->check() && auth()->user()->role === 'kasir';
+                    @endphp
 
                     <li>
-                        <a href="{{ url('/home') }}"
-                           class="text-sm text-orange-100 hover:text-white transition">
-                            Dashboard
+                        <a href="{{ $isKasir ? route('kasir.dashboard') : url('/home') }}"
+                           class="inline-flex items-center gap-2 text-sm text-orange-100 hover:text-white transition">
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            {{ $isKasir ? 'Dashboard Kasir' : 'Dashboard' }}
                         </a>
                     </li>
 
+                    @if(!$isKasir)
                     <li>
                         <a href="{{ url('/menu') }}"
-                           class="text-sm text-orange-100 hover:text-white transition">
+                           class="inline-flex items-center gap-2 text-sm text-orange-100 hover:text-white transition">
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
                             Menu Kantin
                         </a>
                     </li>
+                    @endif
 
                     <li>
-                        <a href="{{ url('/history') }}"
-                           class="text-sm text-orange-100 hover:text-white transition">
-                            Riwayat
+                        <a href="{{ $isKasir ? route('kasir.history') : url('/history') }}"
+                           class="inline-flex items-center gap-2 text-sm text-orange-100 hover:text-white transition">
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            {{ $isKasir ? 'Riwayat Transaksi' : 'Riwayat Pesanan' }}
                         </a>
                     </li>
-
                 </ul>
-
             </div>
 
             {{-- Contact --}}
             <div>
-
                 <h3 class="font-heading font-bold text-white mb-5">
                     Bantuan
                 </h3>
 
                 <div class="space-y-4">
-
-                    {{-- WhatsApp --}}
                     <a href="https://wa.me/6281234567890"
-                    target="_blank"
-                    class="flex items-start gap-3 group transition-all">
-
+                       target="_blank"
+                       class="flex items-start gap-3 group">
                         <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:bg-green-500 transition-all">
-                            <i class="fa-brands fa-whatsapp text-green-300 group-hover:text-white"></i>
+                            <i class="fa-brands fa-whatsapp text-green-200 group-hover:text-white"></i>
                         </div>
-
                         <div>
-                            <p class="text-xs text-orange-100/80 mb-1">
-                                WhatsApp
-                            </p>
-
+                            <p class="text-xs text-orange-100/80 mb-1">WhatsApp</p>
                             <p class="text-sm text-white group-hover:text-green-100 transition">
                                 +62 812-3456-7890
                             </p>
                         </div>
-
                     </a>
 
-                    {{-- Email --}}
                     <a href="mailto:kantin@sekolah.sch.id"
-                    class="flex items-start gap-3 group transition-all">
-
+                       class="flex items-start gap-3 group">
                         <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500 transition-all">
-                            <i class="fa-solid fa-envelope text-blue-200 group-hover:text-white"></i>
+                            <i class="fa-solid fa-envelope text-blue-100 group-hover:text-white"></i>
                         </div>
-
                         <div>
-                            <p class="text-xs text-orange-100/80 mb-1">
-                                Email
-                            </p>
-
+                            <p class="text-xs text-orange-100/80 mb-1">Email</p>
                             <p class="text-sm text-white group-hover:text-blue-100 transition">
                                 kantin@sekolah.sch.id
                             </p>
                         </div>
-
                     </a>
 
-                    {{-- Lokasi --}}
                     <a href="https://share.google/qr7crJrj6nqOjRS3q"
-                    target="_blank"
-                    class="flex items-start gap-3 group transition-all">
-
+                       target="_blank"
+                       class="flex items-start gap-3 group">
                         <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:bg-red-500 transition-all">
-                            <i class="fa-solid fa-location-dot text-red-200 group-hover:text-white"></i>
+                            <i class="fa-solid fa-location-dot text-red-100 group-hover:text-white"></i>
                         </div>
-
                         <div>
-                            <p class="text-xs text-orange-100/80 mb-1">
-                                Lokasi Sekolah
-                            </p>
-
+                            <p class="text-xs text-orange-100/80 mb-1">Lokasi Sekolah</p>
                             <p class="text-sm text-white group-hover:text-red-100 transition">
                                 Buka Google Maps
                             </p>
                         </div>
-
                     </a>
-
                 </div>
-
             </div>
-
         </div>
 
-            {{-- Bottom --}}
-            <div class="mt-8 pt-5 pb-24 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-3">
+        {{-- Bottom --}}
+        <div class="border-t border-white/10 py-5 flex flex-col md:flex-row items-center justify-between gap-3">
+            <p class="text-xs sm:text-sm text-white/90 font-medium">
+                © {{ date('Y') }} SmartCanteen. All rights reserved.
+            </p>
 
-                <p class="text-sm text-white/95 font-medium tracking-wide">
-                    © {{ date('Y') }} SmartCanteen. All rights reserved.
-                </p>
-
-                <div class="flex items-center gap-2 text-sm text-white/95 font-medium">
-
-                    <span>Dibuat dengan</span>
-
-                    <i class="fa-solid fa-heart text-red-400 animate-pulse"></i>
-
-                    <span>untuk digitalisasi kantin sekolah</span>
-
-                </div>
-
-            </div>
+            <p class="text-xs sm:text-sm text-white/90 font-medium flex items-center gap-2">
+                <span>Dibuat untuk digitalisasi kantin sekolah</span>
+                <i class="fa-solid fa-heart text-red-300"></i>
+            </p>
+        </div>
+    </div>
+</footer>
+{{-- Logout Modal --}}
+<div id="logout-modal" class="fixed inset-0 bg-black/40 z-[99999] hidden items-center justify-center">
+  <div class="bg-white rounded-[20px] border border-[#F4E6D2] w-full max-w-sm mx-4 overflow-hidden shadow-xl">
+    
+    {{-- Header --}}
+    <div class="bg-[#FFF3E8] px-7 pt-7 pb-5 text-center border-b border-[#F4E6D2]">
+      <div class="w-15 h-15 bg-white rounded-2xl border border-[#F4E6D2] flex items-center justify-center mx-auto mb-3.5" style="width:60px;height:60px">
+        <i class="fa-solid fa-right-from-bracket text-orange-600 text-2xl"></i>
+      </div>
+      <p class="font-semibold text-stone-800 text-base mb-1">Keluar dari akun?</p>
+      <p class="text-sm text-gray-400 leading-relaxed">Sesi kamu akan diakhiri dan kamu perlu login kembali untuk mengakses panel.</p>
     </div>
 
-</footer>
+    {{-- Buttons --}}
+    <div class="px-7 py-5 flex flex-col gap-2.5">
+      <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit"
+                class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium transition-colors">
+          Ya, keluar sekarang
+        </button>
+      </form>
+      <button onclick="closeLogoutModal()"
+              class="w-full py-2.5 rounded-xl bg-[#FFF3E8] hover:bg-orange-100 text-orange-600 text-sm font-medium border border-[#F4E6D2] transition-colors">
+        Batal
+      </button>
+    </div>
+  </div>
+</div>
 
 <script>
     // Hamburger
@@ -517,6 +529,20 @@
         if (wrap && !wrap.contains(e.target)) {
             document.getElementById('profile-dropdown').classList.remove('open');
         }
+    });
+
+    function openLogoutModal() {
+    const m = document.getElementById('logout-modal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    }
+    function closeLogoutModal() {
+    const m = document.getElementById('logout-modal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    }
+    document.getElementById('logout-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeLogoutModal();
     });
 </script>
 

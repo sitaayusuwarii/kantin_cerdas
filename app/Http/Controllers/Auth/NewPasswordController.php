@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -14,59 +13,88 @@ use Illuminate\View\View;
 class NewPasswordController extends Controller
 {
     /**
-     * Tampilkan halaman form reset password (WAJIB ADA).
+     * Step 2 — Tampilkan form input OTP.
      */
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
-        return view('auth.reset-password', [
-            // Ambil token dari URL (reset-password/{token})
-            'token' => $request->route('token'),
-            // Ambil nomor HP dari parameter query (?phone=...)
-            'phone' => $request->query('phone'),
-        ]);
+        if (!session('otp_phone')) {
+            return redirect()->route('password.request');
+        }
+
+        return view('auth.verify-otp');
     }
 
     /**
-     * Handle proses verifikasi OTP dan update password baru.
+     * Step 2 — Proses verifikasi OTP.
+     * Kalau benar, set session otp_verified dan redirect ke form password.
      */
-   public function store(Request $request): RedirectResponse
+    public function verifyOtp(Request $request): RedirectResponse
 {
-    // 1. Validasi input
     $request->validate([
         'otp' => ['required', 'numeric'],
-        'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
     ]);
 
-    // Tambahkan ini untuk driver database agar session terbaru dipastikan sinkron
-    $request->session()->save(); 
+    // ← TAMBAH INI (cek expiry dulu)
+    $createdAt = session('otp_created_at');
+    if (!$createdAt || now()->timestamp - $createdAt > 60) {
+        return back()->withErrors(['otp' => 'Kode OTP telah kadaluwarsa. Silakan kirim ulang.']);
+    }
 
-    // 2. Verifikasi OTP (Gunakan perbandingan longgar != dan pastikan tidak null)
-    $inputOtp = $request->otp;
+    $inputOtp  = $request->otp;
     $storedOtp = session('otp_secret');
 
     if (!$storedOtp || $inputOtp != $storedOtp) {
         return back()->withErrors(['otp' => 'Kode OTP salah atau sesi telah kadaluwarsa.']);
     }
 
-    // 3. Cari User berdasarkan session phone
-    $phone = session('otp_phone');
-    $user = \App\Models\User::where('phone', $phone)->first();
+    session(['otp_verified' => true]);
 
-    if (!$user) {
-        return back()->withErrors(['otp' => 'User tidak ditemukan untuk nomor ini.']);
-    }
-
-    // 4. Update Password
-    $user->forceFill([
-        'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-        'remember_token' => \Illuminate\Support\Str::random(60),
-    ])->save();
-
-    // 5. Bersihkan Session
-    session()->forget(['otp_secret', 'otp_phone']);
-
-    return redirect()->route('login')->with('success_password', 'Reset password berhasil! Silakan login.');
+    return redirect()->route('password.reset.form');
 }
 
+    /**
+     * Step 3 — Tampilkan form input password baru.
+     * Hanya bisa diakses kalau OTP sudah diverifikasi.
+     */
+    public function showResetForm(Request $request): View|RedirectResponse
+    {
+        if (!session('otp_verified') || !session('otp_phone')) {
+            return redirect()->route('password.request');
+        }
 
+        return view('auth.reset-password');
+    }
+
+    /**
+     * Step 3 — Simpan password baru.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        // Guard: harus sudah lewat verifikasi OTP
+        if (!session('otp_verified') || !session('otp_phone')) {
+            return redirect()->route('password.request');
+        }
+
+        $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $phone = session('otp_phone');
+        $user  = User::where('phone', $phone)->first();
+
+        if (!$user) {
+            return back()->withErrors(['password' => 'User tidak ditemukan.']);
+        }
+
+        $user->forceFill([
+            'password'       => Hash::make($request->password),
+            'remember_token' => \Illuminate\Support\Str::random(60),
+        ])->save();
+
+        // Bersihkan semua session OTP
+        session()->forget(['otp_secret', 'otp_phone', 'otp_verified']);
+
+        return redirect()->route('login')
+            ->with('success_password', 'Reset password berhasil! Silakan login.');
+    }
 }

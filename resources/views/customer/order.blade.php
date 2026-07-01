@@ -1,513 +1,593 @@
 @extends('layouts.app')
-@section('title', 'Detail Pesanan — SmartCanteen')
+@section('title', 'Detail Pesanan - SmartCanteen')
 
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+@php
+    $isKasir = auth()->check() && auth()->user()->role === 'kasir';
+    $totalQty = $cart->items->sum('quantity');
+@endphp
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-28">
 
     {{-- Header --}}
-    <div class="flex items-center gap-3 mb-8">
-        <a href="{{ route('cart') }}"
-           class="w-10 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
-            <i class="fa-solid fa-arrow-left text-sm text-gray-600"></i>
-        </a>
-        <div>
-            <h1 class="font-heading font-bold text-2xl text-canteen-dark">Detail Pesanan</h1>
-            <p class="text-gray-400 text-sm">Review pesananmu sebelum dikonfirmasi</p>
+    <section class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 px-5 py-7 shadow-xl shadow-orange-200/50 sm:px-8 lg:px-10">
+        <div class="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_40%)]"></div>
+        <div class="absolute -bottom-24 -left-20 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+        <div class="absolute bottom-6 right-10 hidden text-white/10 lg:block">
+            <i class="fa-solid fa-clipboard-check text-[8rem]"></i>
         </div>
-    </div>
+
+        <div class="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <a href="{{ route('cart') }}"
+                   class="mb-5 inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/15 px-4 py-2 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                    Kembali ke Keranjang
+                </a>
+
+                <h1 class="font-heading text-3xl font-extrabold leading-tight text-white md:text-4xl">
+                    Detail Pesanan
+                </h1>
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-orange-50">
+                    Cek item, pilih tipe layanan, atur jadwal, lalu konfirmasi pesanan.
+                </p>
+            </div>
+
+            <div class="w-full rounded-3xl border border-white/20 bg-white/15 p-4 text-white backdrop-blur sm:w-auto sm:min-w-[280px]">
+                <p class="text-xs font-bold uppercase tracking-wide text-orange-100">Total Pesanan</p>
+                <p class="mt-1 font-heading text-3xl font-extrabold">
+                    Rp {{ number_format($totalPrice, 0, ',', '.') }}
+                </p>
+                <p class="mt-1 text-sm text-orange-100">{{ $totalQty }} item dipilih</p>
+            </div>
+        </div>
+    </section>
 
     <form action="{{ route('customer.order.confirm') }}" method="POST" id="main-order-form">
         @csrf
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_390px] lg:items-start">
 
-            {{-- ═══ KOLOM KIRI ═══ --}}
-            <div class="lg:col-span-2 space-y-4">
+            {{-- Left Column --}}
+            <div class="space-y-6">
 
-                {{-- ORDER ITEMS --}}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h2 class="font-heading font-bold text-sm text-canteen-dark mb-5 flex items-center gap-2">
-                        <i class="fa-solid fa-basket-shopping text-primary-500"></i>
-                        Item Pesanan ({{ $cart->items->sum('quantity') }} item)
-                    </h2>
+                {{-- Items --}}
+                <section class="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="mb-5 flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Isi Keranjang</p>
+                            <h2 class="mt-1 font-heading text-xl font-extrabold text-gray-950">
+                                Item Pesanan
+                            </h2>
+                        </div>
+                        <span class="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-extrabold text-orange-600">
+                            {{ $totalQty }} item
+                        </span>
+                    </div>
+
                     <div class="space-y-3">
                         @foreach($cart->items as $item)
-                        <div class="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                            <div class="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                @if($item->menu->image)
-                                    <img src="{{ asset('storage/' . $item->menu->image) }}" class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
-                                @endif
+                            <div class="flex gap-4 rounded-3xl border border-gray-100 bg-white p-3 transition hover:border-orange-100 hover:bg-orange-50/40">
+                                <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-orange-50">
+                                    @if($item->menu->image)
+                                        <img src="{{ asset('storage/' . $item->menu->image) }}"
+                                             alt="{{ $item->menu->name }}"
+                                             class="h-full w-full object-cover">
+                                    @else
+                                        <div class="flex h-full w-full items-center justify-center text-orange-400">
+                                            <i class="fa-solid fa-bowl-food text-2xl"></i>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="truncate font-heading text-base font-extrabold text-gray-950">
+                                                {{ $item->menu->name }}
+                                            </p>
+                                            @if($item->menu->tenant)
+                                                <p class="mt-1 text-xs font-bold text-orange-500">
+                                                    {{ $item->menu->tenant->name }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                        <p class="whitespace-nowrap text-right font-heading text-base font-extrabold text-gray-950">
+                                            Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                        </p>
+                                    </div>
+
+                                    <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                        <span class="rounded-full bg-gray-50 px-3 py-1 font-bold">
+                                            {{ $item->quantity }} x Rp {{ number_format($item->menu->price, 0, ',', '.') }}
+                                        </span>
+                                        @if($item->menu->category)
+                                            <span class="rounded-full bg-orange-50 px-3 py-1 font-bold text-orange-600">
+                                                {{ $item->menu->category->name }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-sm text-gray-800">{{ $item->menu->name }}</p>
-                                <p class="text-xs text-gray-400 mt-1">
-                                    {{ $item->quantity }} × Rp {{ number_format($item->menu->price, 0, ',', '.') }}
-                                </p>
-                            </div>
-                            <div class="text-right flex-shrink-0">
-                                <p class="font-heading font-bold text-sm text-canteen-dark">
-                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                                </p>
-                            </div>
-                        </div>
                         @endforeach
                     </div>
-                    <div class="mt-5 pt-4 border-t border-dashed border-gray-200">
-                        <a href="{{ route('customer.menu') }}"
-                           class="text-sm text-primary-500 hover:text-primary-700 font-semibold flex items-center gap-2">
-                            <i class="fa-solid fa-plus-circle"></i> Tambah Item
-                        </a>
+
+                    <a href="{{ route('customer.menu') }}"
+                       class="mt-5 inline-flex items-center gap-2 rounded-2xl bg-orange-50 px-4 py-3 text-sm font-extrabold text-orange-600 transition hover:bg-orange-100">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        Tambah Item
+                    </a>
+                </section>
+
+                {{-- Order Type --}}
+                <section class="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="mb-5">
+                        <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Layanan</p>
+                        <h2 class="mt-1 font-heading text-xl font-extrabold text-gray-950">Tipe Pesanan</h2>
                     </div>
-                </div>
 
-                {{-- ═══ TIPE PESANAN ═══ --}}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h2 class="font-heading font-bold text-sm text-canteen-dark mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-utensils text-primary-500"></i>
-                        Tipe Pesanan
-                    </h2>
-
-                    <div class="grid grid-cols-3 gap-3">
-
-                        {{-- Dine In --}}
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <label class="cursor-pointer">
                             <input type="radio" name="order_type" value="dine_in"
                                    class="sr-only order-type-radio" id="type-dinein">
-                            <div class="order-type-opt border-2 border-gray-200 rounded-xl p-4 text-center
-                                        hover:border-teal-400 hover:bg-teal-50 transition-all duration-200 h-full">
-                                <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-teal-100 flex items-center justify-center">
-                                    <i class="fa-solid fa-plate-wheat text-teal-600 text-lg"></i>
+                            <div class="order-type-opt h-full rounded-3xl border-2 border-gray-100 bg-white p-4 transition hover:border-teal-300 hover:bg-teal-50">
+                                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+                                    <i class="fa-solid fa-plate-wheat text-lg"></i>
                                 </div>
-                                <p class="font-bold text-sm text-gray-700">Dine In</p>
-                                <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Disajikan di piring, makan di kantin</p>
+                                <p class="font-heading text-base font-extrabold text-gray-900">Dine In</p>
+                                <p class="mt-1 text-xs leading-5 text-gray-500">Disajikan di piring dan makan di kantin.</p>
                             </div>
                         </label>
 
-                        {{-- Take Away --}}
                         <label class="cursor-pointer">
                             <input type="radio" name="order_type" value="takeaway"
                                    class="sr-only order-type-radio" id="type-takeaway" checked>
-                            <div class="order-type-opt border-2 border-primary-400 bg-orange-50 rounded-xl p-4 text-center
-                                        transition-all duration-200 h-full">
-                                <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-orange-100 flex items-center justify-center">
-                                    <i class="fa-solid fa-bag-shopping text-primary-500 text-lg"></i>
+                            <div class="order-type-opt is-active-takeaway h-full rounded-3xl border-2 border-orange-400 bg-orange-50 p-4 transition">
+                                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+                                    <i class="fa-solid fa-bag-shopping text-lg"></i>
                                 </div>
-                                <p class="font-bold text-sm text-gray-700">Take Away</p>
-                                <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Dibungkus, ambil di kasir</p>
+                                <p class="font-heading text-base font-extrabold text-gray-900">Take Away</p>
+                                <p class="mt-1 text-xs leading-5 text-gray-500">Dibungkus dan diambil sesuai jam.</p>
                             </div>
                         </label>
 
-                        {{-- Antar ke Kelas --}}
                         <label class="cursor-pointer">
                             <input type="radio" name="order_type" value="delivery"
                                    class="sr-only order-type-radio" id="type-delivery">
-                            <div class="order-type-opt border-2 border-gray-200 rounded-xl p-4 text-center
-                                        hover:border-purple-400 hover:bg-purple-50 transition-all duration-200 h-full">
-                                <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-purple-100 flex items-center justify-center">
-                                    <i class="fa-solid fa-person-walking text-purple-600 text-lg"></i>
+                            <div class="order-type-opt h-full rounded-3xl border-2 border-gray-100 bg-white p-4 transition hover:border-purple-300 hover:bg-purple-50">
+                                <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600">
+                                    <i class="fa-solid fa-person-walking text-lg"></i>
                                 </div>
-                                <p class="font-bold text-sm text-gray-700">Antar ke Kelas</p>
-                                <p class="text-[10px] text-gray-400 mt-0.5 leading-tight">Diantar ke ruang kelas</p>
+                                <p class="font-heading text-base font-extrabold text-gray-900">Antar ke Kelas</p>
+                                <p class="mt-1 text-xs leading-5 text-gray-500">Pesanan diantar ke kelas tujuan.</p>
                             </div>
                         </label>
-
                     </div>
 
-                    {{-- Info Dine In --}}
-                    <div id="dinein-info" class="hidden mt-4">
-                        <div class="flex items-start gap-3 p-3 bg-teal-50 rounded-xl border border-teal-100">
-                            <i class="fa-solid fa-circle-info text-teal-500 mt-0.5 flex-shrink-0"></i>
-                            <p class="text-xs text-teal-700 leading-relaxed">
-                                Pesananmu akan disajikan di piring. Tunjukkan <strong>nomor order</strong> ke kasir saat mengambil makanan.
+                    <div id="dinein-info" class="hidden mt-4 rounded-3xl border border-teal-100 bg-teal-50 p-4">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-teal-600">
+                                <i class="fa-solid fa-circle-info text-sm"></i>
+                            </div>
+                            <p class="text-sm leading-6 text-teal-700">
+                                Pesanan akan disajikan di piring. Tunjukkan nomor order ke kasir saat mengambil makanan.
                             </p>
                         </div>
                     </div>
 
-                    {{-- Input Kelas — muncul hanya kalau delivery --}}
-                    <div id="classroom-section" class="hidden mt-4 space-y-3">
-
-                        {{-- Info box --}}
-                        <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                            <i class="fa-solid fa-circle-info text-purple-400 mt-0.5 flex-shrink-0"></i>
-                            <p class="text-xs text-purple-700 leading-relaxed">
-                                Pesanan akan diantar ke kelas. Pastikan nama kelas sudah benar.
+                    <div id="classroom-section" class="hidden mt-4 space-y-4 rounded-3xl border border-purple-100 bg-purple-50 p-4">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-white text-purple-600">
+                                <i class="fa-solid fa-circle-info text-sm"></i>
+                            </div>
+                            <p class="text-sm leading-6 text-purple-700">
+                                Pastikan nama pemesan dan kelas tujuan sudah benar sebelum konfirmasi.
                             </p>
                         </div>
 
-                        {{-- Nama pemesan (readonly dari akun) --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                                <i class="fa-solid fa-user text-purple-500 mr-1"></i>
-                                Nama Pemesan
-                            </label>
-                            <input type="text"
-                                   value="{{ auth()->user()->full_name }}"
-                                   readonly
-                                   class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm text-gray-400 cursor-not-allowed select-none">
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1.5 block text-xs font-extrabold uppercase tracking-wide text-purple-700">
+                                    Nama Pemesan
+                                </label>
+                                <input type="text"
+                                       value="{{ auth()->user()->full_name }}"
+                                       readonly
+                                       class="w-full rounded-2xl border border-purple-100 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-500">
+                            </div>
+
+                            <div>
+                                <label class="mb-1.5 block text-xs font-extrabold uppercase tracking-wide text-purple-700">
+                                    Kelas Tujuan <span class="text-red-400">*</span>
+                                </label>
+                                <input type="text"
+                                       name="classroom"
+                                       id="classroom-input"
+                                       placeholder="Contoh: XI RPL A"
+                                       value="{{ old('classroom', auth()->user()->class) }}"
+                                       class="w-full rounded-2xl border border-purple-100 bg-white px-4 py-3 text-sm font-semibold text-gray-700 focus:border-purple-300 focus:outline-none focus:ring-4 focus:ring-purple-100">
+                                @error('classroom')
+                                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
-                        {{-- Kelas — default dari users.class, bisa diedit --}}
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                                <i class="fa-solid fa-school text-purple-500 mr-1"></i>
-                                Kelas Tujuan <span class="text-red-400">*</span>
-                                @if(auth()->user()->class)
-                                    <span class="ml-1 text-[10px] font-normal text-gray-400">(dari profil akunmu)</span>
-                                @endif
-                            </label>
-                            <input type="text"
-                                   name="classroom"
-                                   id="classroom-input"
-                                   placeholder="cth: TK A, Kelas B2, Ruang Mawar..."
-                                   value="{{ old('classroom', auth()->user()->class) }}"
-                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700
-                                          focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-100 transition-all">
-                            @error('classroom')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            @if(auth()->user()->class)
-                                <p class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    Bisa diubah jika berbeda dengan kelas di profil
-                                </p>
-                            @else
-                                <p class="text-[10px] text-amber-500 mt-1 flex items-center gap-1">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                    Profil akunmu belum ada kelas — isi manual
-                                </p>
-                            @endif
-                        </div>
+                        @if(auth()->user()->class)
+                            <p class="text-xs text-purple-500">Kelas otomatis diambil dari profil, tetapi tetap bisa diubah.</p>
+                        @else
+                            <p class="text-xs text-amber-600">Profil akun belum memiliki kelas, isi kelas tujuan manual.</p>
+                        @endif
+                    </div>
+                </section>
 
+                {{-- Pickup Time --}}
+                <section class="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-sm sm:p-6" id="pickup-section">
+                    <div class="mb-5">
+                        <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Jadwal</p>
+                        <h2 class="mt-1 font-heading text-xl font-extrabold text-gray-950" id="pickup-section-title">
+                            Jam Pengambilan
+                        </h2>
                     </div>
 
-                </div>
-
-                {{-- ═══ WAKTU PENGAMBILAN / PENGIRIMAN ═══ --}}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100" id="pickup-section">
-                    <h2 class="font-heading font-bold text-sm text-canteen-dark mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-clock text-primary-500"></i>
-                        <span id="pickup-section-title">Waktu Pengambilan</span>
-                    </h2>
-
-                    {{-- Slot tetap: Dine In & Delivery --}}
-                    <div id="pickup-slots" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div id="pickup-slots" class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                         @foreach([
-                            ['val' => 'istirahat_1', 'time' => 'Istirahat 1', 'sub' => '09:30 — 10:00'],
-                            ['val' => 'istirahat_2', 'time' => 'Istirahat 2', 'sub' => '12:00 — 12:30'],
-                            ['val' => 'pulang',      'time' => 'Pulang',      'sub' => '14:30 — 15:00'],
+                            ['val' => 'istirahat_1', 'time' => 'Istirahat 1', 'sub' => '09:30 - 10:00'],
+                            ['val' => 'istirahat_2', 'time' => 'Istirahat 2', 'sub' => '12:00 - 12:30'],
+                            ['val' => 'pulang',      'time' => 'Pulang',      'sub' => '14:30 - 15:00'],
+                            ['val' => 'atur_jam',    'time' => 'Atur Jam',    'sub' => 'Input manual'],
                         ] as $i => $slot)
-                        <label class="cursor-pointer">
-                            <input type="radio" name="pickup" value="{{ $slot['val'] }}"
-                                   class="sr-only pickup-radio" {{ $i === 0 ? 'checked' : '' }}>
-                            <div class="pickup-opt p-3 rounded-xl border-2
-                                        {{ $i === 0 ? 'border-primary-400 bg-orange-50' : 'border-gray-200' }}
-                                        hover:border-primary-300 transition-all text-center">
-                                <p class="text-xs font-bold text-gray-700">{{ $slot['time'] }}</p>
-                                <p class="text-[10px] text-gray-400 mt-0.5">{{ $slot['sub'] }}</p>
-                            </div>
-                        </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="pickup" value="{{ $slot['val'] }}"
+                                       class="sr-only pickup-radio" {{ $i === 0 ? 'checked' : '' }}>
+                                <div class="pickup-opt rounded-3xl border-2 p-4 text-left transition
+                                            {{ $i === 0 ? 'border-orange-400 bg-orange-50' : 'border-gray-100 bg-white hover:border-orange-200 hover:bg-orange-50/50' }}">
+                                    <p class="font-heading text-sm font-extrabold text-gray-900">{{ $slot['time'] }}</p>
+                                    <p class="mt-1 text-xs font-medium text-gray-500">{{ $slot['sub'] }}</p>
+                                </div>
+                            </label>
                         @endforeach
                     </div>
 
-                    {{-- Time picker bebas: hanya untuk Take Away --}}
-                    <div id="pickup-timepicker" class="hidden">
-                        <div class="flex items-center gap-3">
-                            <div class="flex-1">
-                                <input type="time"
-                                       name="pickup_time"
-                                       id="pickup-time-input"
-                                       min="07:00" max="15:00"
-                                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700
-                                              focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all">
-                            </div>
-                        </div>
-                        <p class="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-info"></i>
-                            Pilih jam kamu akan mengambil pesanan di kasir (07:00 — 15:00)
+                    <div id="pickup-timepicker" class="hidden mt-4 rounded-3xl border border-orange-100 bg-orange-50 p-4">
+                        <label class="mb-2 block text-xs font-extrabold uppercase tracking-wide text-orange-600">
+                            Pilih Jam
+                        </label>
+                        <input type="time"
+                               name="pickup_time"
+                               id="pickup-time-input"
+                               min="07:00"
+                               max="15:00"
+                               class="w-full rounded-2xl border border-orange-100 bg-white px-4 py-3 text-sm font-bold text-gray-700 focus:border-orange-300 focus:outline-none focus:ring-4 focus:ring-orange-100">
+                        <p class="mt-2 text-xs leading-5 text-gray-500">
+                            Pilih jam pengambilan, penyajian, atau pengantaran pesanan antara 07:00 sampai 15:00.
                         </p>
                         @error('pickup_time')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+                </section>
 
-                </div>
-
-                {{-- NOTES --}}
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <h2 class="font-heading font-bold text-sm text-canteen-dark mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-note-sticky text-primary-500"></i>
-                        Catatan Pesanan
-                    </h2>
-                    <textarea name="note" rows="3"
-                              placeholder="Catatan khusus, misal: tidak pedas..."
-                              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700 resize-none focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all">{{ old('note') }}</textarea>
-                </div>
-
+                {{-- Notes --}}
+                <section class="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="mb-4">
+                        <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Opsional</p>
+                        <h2 class="mt-1 font-heading text-xl font-extrabold text-gray-950">Catatan Pesanan</h2>
+                    </div>
+                    <textarea name="note"
+                              rows="4"
+                              placeholder="Contoh: tidak pedas, saus dipisah, minumannya tanpa es..."
+                              class="w-full resize-none rounded-3xl border border-gray-100 bg-gray-50 px-4 py-4 text-sm text-gray-700 placeholder:text-gray-400 focus:border-orange-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-100">{{ old('note') }}</textarea>
+                </section>
             </div>
 
-            {{-- ═══ KOLOM KANAN — SUMMARY ═══ --}}
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-24">
+            {{-- Summary --}}
+            <aside class="lg:sticky lg:top-24">
+                <section class="rounded-[2rem] border border-orange-100 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="mb-5 flex items-center justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wide text-orange-500">Checkout</p>
+                            <h2 class="mt-1 font-heading text-xl font-extrabold text-gray-950">Ringkasan</h2>
+                        </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                    </div>
 
-                    <h2 class="font-heading font-bold text-sm text-canteen-dark mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-receipt text-primary-500"></i>
-                        Ringkasan
-                    </h2>
-
-                    {{-- Badge tipe pesanan --}}
-                    <div class="mb-4 flex flex-wrap gap-1.5">
+                    <div class="mb-4 flex flex-wrap gap-2">
                         <span id="summary-type-badge"
-                              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                              class="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-extrabold text-orange-700">
                             <i class="fa-solid fa-bag-shopping text-[10px]"></i>
                             Take Away
                         </span>
                         <span id="summary-pickup-badge"
-                              class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                              class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-extrabold text-gray-600">
                             <i class="fa-solid fa-clock text-[10px]"></i>
-                            <span id="summary-pickup-text">Istirahat 1</span>
+                            <span id="summary-pickup-text">Pilih jam...</span>
                         </span>
-                        <span id="summary-class-badge" class="hidden inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                        <span id="summary-class-badge"
+                              class="hidden inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-extrabold text-purple-700">
                             <i class="fa-solid fa-school text-[10px]"></i>
-                            <span id="summary-class-text">—</span>
+                            <span id="summary-class-text">-</span>
                         </span>
                     </div>
 
-                    <div class="space-y-2 mb-4 max-h-44 overflow-y-auto">
+                    <div class="max-h-56 space-y-3 overflow-y-auto rounded-3xl bg-gray-50 p-4">
                         @foreach($cart->items as $item)
-                        <div class="flex justify-between text-xs text-gray-500">
-                            <span class="truncate pr-2">{{ $item->menu->name }} ×{{ $item->quantity }}</span>
-                            <span class="font-medium flex-shrink-0">
-                                Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                            </span>
-                        </div>
+                            <div class="flex justify-between gap-3 text-sm">
+                                <div class="min-w-0">
+                                    <p class="truncate font-bold text-gray-800">{{ $item->menu->name }} x{{ $item->quantity }}</p>
+                                    @if($item->menu->tenant)
+                                        <p class="mt-0.5 text-xs font-semibold text-orange-500">{{ $item->menu->tenant->name }}</p>
+                                    @endif
+                                </div>
+                                <span class="whitespace-nowrap font-bold text-gray-900">
+                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                </span>
+                            </div>
                         @endforeach
                     </div>
 
-                    <div class="border-t border-dashed border-gray-200 pt-3">
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span>Subtotal</span>
-                            <span class="font-medium text-gray-700">
+                    <div class="mt-5 rounded-3xl bg-orange-50 p-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="font-medium text-gray-500">Subtotal</span>
+                            <span class="font-bold text-gray-900">
                                 Rp {{ number_format($totalPrice, 0, ',', '.') }}
                             </span>
                         </div>
+                        <div class="mt-4 border-t border-orange-100 pt-4">
+                            <div class="flex items-end justify-between gap-3">
+                                <span class="font-heading text-base font-extrabold text-gray-950">Total</span>
+                                <span class="text-right font-heading text-3xl font-extrabold text-orange-600">
+                                    Rp {{ number_format($totalPrice, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="border-t border-gray-200 mt-3 pt-3 flex justify-between items-center">
-                        <span class="font-heading font-bold text-canteen-dark">Total</span>
-                        <span class="font-heading font-bold text-xl text-primary-500">
-                            Rp {{ number_format($totalPrice, 0, ',', '.') }}
-                        </span>
-                    </div>
-
-                    <button type="button" id="btn-confirm"
-                            class="btn-primary w-full text-white font-heading font-bold py-4 rounded-xl mt-5 text-sm shadow-lg flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check-circle"></i>
-                        Konfirmasi Pesanan
-                    </button>
+                    @if($isKasir)
+                        <button type="submit"
+                                class="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 py-4 text-sm font-heading font-extrabold text-white shadow-lg shadow-orange-100 transition hover:-translate-y-0.5 hover:shadow-orange-200 active:scale-95">
+                            <i class="fa-solid fa-check-circle"></i>
+                            Buat Pesanan
+                        </button>
+                    @else
+                        <button type="button"
+                                id="btn-confirm"
+                                class="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 py-4 text-sm font-heading font-extrabold text-white shadow-lg shadow-orange-100 transition hover:-translate-y-0.5 hover:shadow-orange-200 active:scale-95">
+                            <i class="fa-solid fa-check-circle"></i>
+                            Konfirmasi Pesanan
+                        </button>
+                    @endif
 
                     <a href="{{ route('cart') }}"
-                       class="block text-center text-sm text-gray-400 hover:text-gray-600 mt-3 transition-colors">
-                        ← Kembali ke Keranjang
+                       class="mt-4 block text-center text-sm font-bold text-gray-400 transition hover:text-gray-600">
+                        Kembali ke Keranjang
                     </a>
-
-                </div>
-            </div>
-
+                </section>
+            </aside>
         </div>
     </form>
-
 </div>
 
-{{-- ═══ MODAL PEMBAYARAN ═══ --}}
+{{-- Payment Modal --}}
+@if(!$isKasir)
 <div id="payment-modal"
-     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 hidden"
-     role="dialog" aria-modal="true" aria-labelledby="modal-title">
+     class="fixed inset-0 z-50 hidden items-end justify-center p-4 sm:items-center"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="modal-title">
 
     <div id="modal-backdrop"
-         class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+         class="absolute inset-0 bg-black/50 opacity-0 backdrop-blur-sm transition-opacity duration-300"></div>
 
     <div id="modal-sheet"
-         class="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 translate-y-8 opacity-0 transition-all duration-300">
+         class="relative w-full max-w-md translate-y-8 rounded-[2rem] bg-white p-5 opacity-0 shadow-2xl transition-all duration-300 sm:p-6">
 
-        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
+        <div class="mx-auto mb-5 h-1 w-10 rounded-full bg-gray-200 sm:hidden"></div>
 
-        {{-- Preview pesanan di modal --}}
-        <div class="rounded-2xl px-4 py-3 mb-5 text-center border" id="modal-preview-box">
-            <p class="text-[10px] text-gray-400 uppercase tracking-widest mb-1">Ringkasan Pesanan</p>
-            <div class="flex items-center justify-center gap-2 mb-1">
-                <span id="modal-type-icon" class="text-xl">🛍️</span>
-                <span class="font-heading font-bold text-base text-canteen-dark" id="modal-type-label">Take Away</span>
+        <div class="mb-5 rounded-3xl border px-4 py-4 text-center" id="modal-preview-box">
+            <p class="mb-1 text-[10px] font-bold uppercase tracking-widest text-gray-400">Ringkasan Pesanan</p>
+            <div class="flex items-center justify-center gap-2">
+                <span id="modal-type-icon" class="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-sm font-extrabold text-orange-600">TA</span>
+                <span class="font-heading text-base font-extrabold text-gray-950" id="modal-type-label">Take Away</span>
             </div>
-            <p class="text-xs text-gray-500" id="modal-pickup-info">—</p>
-            <p class="text-xs text-purple-600 font-medium hidden" id="modal-class-info"></p>
-            <div class="mt-2 pt-2 border-t border-dashed border-gray-200">
-                <p class="font-heading font-bold text-primary-500">
+            <p class="mt-2 text-xs font-medium text-gray-500" id="modal-pickup-info">-</p>
+            <p class="mt-1 hidden text-xs font-bold text-purple-600" id="modal-class-info"></p>
+            <div class="mt-3 border-t border-dashed border-gray-200 pt-3">
+                <p class="font-heading text-xl font-extrabold text-orange-600">
                     Rp {{ number_format($totalPrice, 0, ',', '.') }}
                 </p>
             </div>
         </div>
 
-        <h3 id="modal-title" class="font-heading font-bold text-lg text-canteen-dark text-center mb-1">
+        <h3 id="modal-title" class="text-center font-heading text-xl font-extrabold text-gray-950">
             Pilih Cara Pembayaran
         </h3>
-        <p class="text-xs text-gray-400 text-center mb-5">Konfirmasi pesanan dan lanjutkan pembayaran</p>
+        <p class="mb-5 mt-1 text-center text-sm text-gray-500">
+            Konfirmasi pesanan dan lanjutkan pembayaran.
+        </p>
 
-        <button id="btn-pay-telegram" type="button"
-                class="group w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 mb-3 text-left">
-            <div class="w-11 h-11 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                <i class="fa-brands fa-telegram text-white text-lg"></i>
+        <button id="btn-pay-telegram"
+                type="button"
+                class="group mb-3 flex w-full items-center gap-4 rounded-3xl border-2 border-gray-100 p-4 text-left transition hover:border-blue-300 hover:bg-blue-50">
+            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md transition group-hover:scale-105">
+                <i class="fa-brands fa-telegram text-lg"></i>
             </div>
-            <div class="flex-1 min-w-0">
-                <p class="font-semibold text-sm text-gray-800">Bayar via Telegram</p>
-                <p class="text-xs text-gray-400">Konfirmasi & bayar lewat bot</p>
+            <div class="min-w-0 flex-1">
+                <p class="font-bold text-gray-900">Bayar via Telegram</p>
+                <p class="mt-0.5 text-xs text-gray-500">Konfirmasi dan bayar lewat bot.</p>
             </div>
-            <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-blue-400 transition-colors"></i>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-blue-500"></i>
         </button>
 
-        <button id="btn-pay-upload" type="button"
-                class="group w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-primary-400 hover:bg-orange-50 transition-all duration-200 mb-5 text-left">
-            <div class="w-11 h-11 btn-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                <i class="fa-solid fa-cloud-arrow-up text-white text-lg"></i>
+        <button id="btn-pay-upload"
+                type="button"
+                class="group mb-5 flex w-full items-center gap-4 rounded-3xl border-2 border-gray-100 p-4 text-left transition hover:border-orange-300 hover:bg-orange-50">
+            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md transition group-hover:scale-105">
+                <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
             </div>
-            <div class="flex-1 min-w-0">
-                <p class="font-semibold text-sm text-gray-800">Upload Bukti Transfer</p>
-                <p class="text-xs text-gray-400">Upload langsung di website</p>
+            <div class="min-w-0 flex-1">
+                <p class="font-bold text-gray-900">Upload Bukti Transfer</p>
+                <p class="mt-0.5 text-xs text-gray-500">Upload langsung di website.</p>
             </div>
-            <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-primary-400 transition-colors"></i>
+            <i class="fa-solid fa-chevron-right text-xs text-gray-300 group-hover:text-orange-500"></i>
         </button>
 
-        <button id="btn-cancel-modal" type="button"
-                class="w-full text-center text-sm text-gray-400 hover:text-gray-600 transition-colors py-1">
+        <button id="btn-cancel-modal"
+                type="button"
+                class="w-full rounded-2xl py-3 text-center text-sm font-bold text-gray-400 transition hover:bg-gray-50 hover:text-gray-600">
             Batal
         </button>
     </div>
 </div>
 
-{{-- Hidden forms --}}
 <form id="form-confirm-telegram" action="{{ route('customer.order.confirm') }}" method="POST" class="hidden">
     @csrf
-    <input type="hidden" name="order_type"   id="hid-type-tg">
-    <input type="hidden" name="pickup"        id="hid-pickup-tg">
-    <input type="hidden" name="pickup_time"   id="hid-pickuptime-tg">
-    <input type="hidden" name="classroom"     id="hid-class-tg">
-    <input type="hidden" name="note"          id="hid-note-tg">
-    <input type="hidden" name="redirect_to"   value="telegram">
+    <input type="hidden" name="order_type" id="hid-type-tg">
+    <input type="hidden" name="pickup" id="hid-pickup-tg">
+    <input type="hidden" name="pickup_time" id="hid-pickuptime-tg">
+    <input type="hidden" name="classroom" id="hid-class-tg">
+    <input type="hidden" name="note" id="hid-note-tg">
+    <input type="hidden" name="redirect_to" value="telegram">
 </form>
 
 <form id="form-confirm-upload" action="{{ route('customer.order.confirm') }}" method="POST" class="hidden">
     @csrf
-    <input type="hidden" name="order_type"   id="hid-type-up">
-    <input type="hidden" name="pickup"        id="hid-pickup-up">
-    <input type="hidden" name="pickup_time"   id="hid-pickuptime-up">
-    <input type="hidden" name="classroom"     id="hid-class-up">
-    <input type="hidden" name="note"          id="hid-note-up">
-    <input type="hidden" name="redirect_to"   value="payment">
+    <input type="hidden" name="order_type" id="hid-type-up">
+    <input type="hidden" name="pickup" id="hid-pickup-up">
+    <input type="hidden" name="pickup_time" id="hid-pickuptime-up">
+    <input type="hidden" name="classroom" id="hid-class-up">
+    <input type="hidden" name="note" id="hid-note-up">
+    <input type="hidden" name="redirect_to" value="payment">
 </form>
-
+@endif
 @endsection
 
 @push('styles')
 <style>
-    .btn-primary { background: linear-gradient(135deg, #f97316, #ea580c); }
-    .btn-primary:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(234,88,12,0.3); }
+    .order-type-opt.is-active-dinein {
+        border-color: #14b8a6 !important;
+        background-color: #f0fdfa !important;
+    }
 
-    .order-type-opt.is-active-dinein   { border-color: #14b8a6 !important; background-color: #f0fdfa !important; }
-    .order-type-opt.is-active-takeaway { border-color: #f97316 !important; background-color: #fff7ed !important; }
-    .order-type-opt.is-active-delivery { border-color: #a855f7 !important; background-color: #faf5ff !important; }
+    .order-type-opt.is-active-takeaway {
+        border-color: #f97316 !important;
+        background-color: #fff7ed !important;
+    }
+
+    .order-type-opt.is-active-delivery {
+        border-color: #a855f7 !important;
+        background-color: #faf5ff !important;
+    }
 </style>
 @endpush
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-
-    // ─── State ───────────────────────────────────────────
     const state = {
-        orderType : 'takeaway',
-        pickup    : 'istirahat_1',
+        orderType: 'takeaway',
+        pickup: 'istirahat_1',
         pickupTime: '',
-        classroom : '',
+        classroom: '',
     };
 
-    // ─── Elemen ──────────────────────────────────────────
-    const pickupSlots      = document.getElementById('pickup-slots');
+    const mainForm = document.getElementById('main-order-form');
+    const pickupSlots = document.getElementById('pickup-slots');
     const pickupTimepicker = document.getElementById('pickup-timepicker');
-    const pickupTitle      = document.getElementById('pickup-section-title');
-    const dineinInfo       = document.getElementById('dinein-info');
+    const pickupTitle = document.getElementById('pickup-section-title');
+    const dineinInfo = document.getElementById('dinein-info');
     const classroomSection = document.getElementById('classroom-section');
-    const classroomInput   = document.getElementById('classroom-input');
-    const timeInput        = document.getElementById('pickup-time-input');
+    const classroomInput = document.getElementById('classroom-input');
+    const timeInput = document.getElementById('pickup-time-input');
 
-    // Summary badges
-    const summaryTypeBadge   = document.getElementById('summary-type-badge');
-    const summaryPickupBadge = document.getElementById('summary-pickup-badge');
-    const summaryPickupText  = document.getElementById('summary-pickup-text');
-    const summaryClassBadge  = document.getElementById('summary-class-badge');
-    const summaryClassText   = document.getElementById('summary-class-text');
+    const summaryTypeBadge = document.getElementById('summary-type-badge');
+    const summaryPickupText = document.getElementById('summary-pickup-text');
+    const summaryClassBadge = document.getElementById('summary-class-badge');
+    const summaryClassText = document.getElementById('summary-class-text');
 
     const pickupLabels = {
-        'istirahat_1': 'Istirahat 1 (09:30)',
-        'istirahat_2': 'Istirahat 2 (12:00)',
-        'pulang'     : 'Pulang (14:30)',
+        istirahat_1: 'Istirahat 1 (09:30)',
+        istirahat_2: 'Istirahat 2 (12:00)',
+        pulang: 'Pulang (14:30)',
+        atur_jam: 'Atur jam sendiri',
     };
 
     const typeConfig = {
-        dine_in  : { icon: '🍽️', label: 'Dine In',        badgeClass: 'bg-teal-100 text-teal-700',     badgeIcon: 'fa-plate-wheat' },
-        takeaway : { icon: '🛍️', label: 'Take Away',       badgeClass: 'bg-orange-100 text-orange-700', badgeIcon: 'fa-bag-shopping' },
-        delivery : { icon: '🚶', label: 'Antar ke Kelas',  badgeClass: 'bg-purple-100 text-purple-700', badgeIcon: 'fa-person-walking' },
+        dine_in: {
+            short: 'DI',
+            label: 'Dine In',
+            badgeClass: 'bg-teal-100 text-teal-700',
+            badgeIcon: 'fa-plate-wheat',
+        },
+        takeaway: {
+            short: 'TA',
+            label: 'Take Away',
+            badgeClass: 'bg-orange-100 text-orange-700',
+            badgeIcon: 'fa-bag-shopping',
+        },
+        delivery: {
+            short: 'AK',
+            label: 'Antar ke Kelas',
+            badgeClass: 'bg-purple-100 text-purple-700',
+            badgeIcon: 'fa-person-walking',
+        },
     };
 
-    // ─── Update UI saat tipe berubah ─────────────────────
+    function syncTimepicker() {
+        const useCustomTime = state.orderType === 'takeaway' || state.pickup === 'atur_jam';
+
+        pickupTimepicker.classList.toggle('hidden', !useCustomTime);
+        timeInput.required = useCustomTime;
+
+        if (!useCustomTime) {
+            state.pickupTime = '';
+            timeInput.value = '';
+        }
+    }
+
     function onTypeChange(type) {
         state.orderType = type;
 
-        // Reset active class semua opt
-        document.querySelectorAll('.order-type-opt').forEach(el => {
-            el.classList.remove('is-active-dinein','is-active-takeaway','is-active-delivery');
-            el.classList.add('border-gray-200');
-            el.classList.remove('border-teal-400','bg-teal-50','border-primary-400','bg-orange-50','border-purple-400','bg-purple-50');
+        document.querySelectorAll('.order-type-opt').forEach(option => {
+            option.classList.remove('is-active-dinein', 'is-active-takeaway', 'is-active-delivery');
         });
-        const activeOpt = document.querySelector(`.order-type-radio:checked`).nextElementSibling;
-        activeOpt.classList.add(`is-active-${type === 'dine_in' ? 'dinein' : type === 'takeaway' ? 'takeaway' : 'delivery'}`);
-        activeOpt.classList.remove('border-gray-200');
 
-        // Tampilkan/sembunyikan section
+        const activeOpt = document.querySelector('.order-type-radio:checked')?.nextElementSibling;
+        if (activeOpt) {
+            activeOpt.classList.add(`is-active-${type === 'dine_in' ? 'dinein' : type === 'takeaway' ? 'takeaway' : 'delivery'}`);
+        }
+
         dineinInfo.classList.toggle('hidden', type !== 'dine_in');
         classroomSection.classList.toggle('hidden', type !== 'delivery');
 
-        // Waktu pengambilan
         if (type === 'takeaway') {
             pickupSlots.classList.add('hidden');
-            pickupTimepicker.classList.remove('hidden');
             pickupTitle.textContent = 'Jam Pengambilan';
         } else {
             pickupSlots.classList.remove('hidden');
-            pickupTimepicker.classList.add('hidden');
-            pickupTitle.textContent = type === 'delivery' ? 'Slot Pengiriman' : 'Waktu Pengambilan';
+            pickupTitle.textContent = type === 'delivery' ? 'Waktu Pengantaran' : 'Waktu Penyajian';
         }
 
+        syncTimepicker();
         updateSummary();
     }
 
-    // ─── Update summary sidebar ───────────────────────────
     function updateSummary() {
         const cfg = typeConfig[state.orderType];
 
-        // Badge tipe
-        summaryTypeBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cfg.badgeClass}`;
+        summaryTypeBadge.className = `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-extrabold ${cfg.badgeClass}`;
         summaryTypeBadge.innerHTML = `<i class="fa-solid ${cfg.badgeIcon} text-[10px]"></i> ${cfg.label}`;
 
-        // Badge pickup
         if (state.orderType === 'takeaway') {
+            summaryPickupText.textContent = state.pickupTime ? `Jam ${state.pickupTime}` : 'Pilih jam...';
+        } else if (state.pickup === 'atur_jam') {
             summaryPickupText.textContent = state.pickupTime ? `Jam ${state.pickupTime}` : 'Pilih jam...';
         } else {
             summaryPickupText.textContent = pickupLabels[state.pickup] || state.pickup;
         }
 
-        // Badge kelas
-        if (state.orderType === 'delivery' && state.classroom) {
+        if (state.orderType === 'delivery' && state.classroom.trim()) {
             summaryClassBadge.classList.remove('hidden');
             summaryClassText.textContent = state.classroom;
         } else {
@@ -515,135 +595,155 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ─── Event listeners ─────────────────────────────────
-
-    // Tipe pesanan
-    document.querySelectorAll('.order-type-radio').forEach(r => {
-        r.addEventListener('change', () => onTypeChange(r.value));
+    document.querySelectorAll('.order-type-radio').forEach(radio => {
+        radio.addEventListener('change', () => onTypeChange(radio.value));
     });
 
-    // Pickup slot
-    document.querySelectorAll('.pickup-radio').forEach(r => {
-        r.addEventListener('change', () => {
-            document.querySelectorAll('.pickup-opt').forEach(el => {
-                el.classList.remove('border-primary-400', 'bg-orange-50');
-                el.classList.add('border-gray-200');
+    document.querySelectorAll('.pickup-radio').forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.pickup-opt').forEach(option => {
+                option.classList.remove('border-orange-400', 'bg-orange-50');
+                option.classList.add('border-gray-100', 'bg-white');
             });
-            r.nextElementSibling.classList.add('border-primary-400', 'bg-orange-50');
-            r.nextElementSibling.classList.remove('border-gray-200');
-            state.pickup = r.value;
+
+            radio.nextElementSibling.classList.add('border-orange-400', 'bg-orange-50');
+            radio.nextElementSibling.classList.remove('border-gray-100', 'bg-white');
+
+            state.pickup = radio.value;
+            syncTimepicker();
             updateSummary();
         });
     });
 
-    // Time picker
     timeInput.addEventListener('change', () => {
         state.pickupTime = timeInput.value;
         updateSummary();
     });
 
-    // ─── Validasi ────────────────────────────────────────
-    function validate() {
-        if (state.orderType === 'takeaway' && !state.pickupTime) {
-            pickupTimepicker.querySelector('input').focus();
-            pickupTimepicker.classList.add('ring-2','ring-red-400','rounded-xl','p-2');
-            setTimeout(() => pickupTimepicker.classList.remove('ring-2','ring-red-400','rounded-xl','p-2'), 2000);
-            alert('Pilih jam pengambilan untuk Take Away.');
-            return false;
-        }
-        if (state.orderType === 'delivery' && !state.classroom.trim()) {
-            classroomInput.focus();
-            classroomInput.classList.add('border-red-400','ring-2','ring-red-100');
-            setTimeout(() => classroomInput.classList.remove('border-red-400','ring-2','ring-red-100'), 2000);
-            alert('Masukkan nama kelas untuk Antar ke Kelas.');
-            return false;
-        }
-        return true;
-    }
-
-    // ─── Sync hidden fields ───────────────────────────────
-    function syncFields(suffix) {
-        const note = document.querySelector('textarea[name="note"]');
-        document.getElementById(`hid-type-${suffix}`).value        = state.orderType;
-        document.getElementById(`hid-pickup-${suffix}`).value      = state.orderType !== 'takeaway' ? state.pickup : '';
-        document.getElementById(`hid-pickuptime-${suffix}`).value  = state.orderType === 'takeaway' ? state.pickupTime : '';
-        document.getElementById(`hid-class-${suffix}`).value       = state.orderType === 'delivery' ? state.classroom : '';
-        document.getElementById(`hid-note-${suffix}`).value        = note ? note.value : '';
-    }
-
-    // ─── Update modal preview ────────────────────────────
-    function updateModalPreview() {
-        const cfg = typeConfig[state.orderType];
-        document.getElementById('modal-type-icon').textContent  = cfg.icon;
-        document.getElementById('modal-type-label').textContent = cfg.label;
-
-        const pickupInfo = document.getElementById('modal-pickup-info');
-        const classInfo  = document.getElementById('modal-class-info');
-
-        if (state.orderType === 'takeaway') {
-            pickupInfo.textContent = state.pickupTime ? `Ambil jam ${state.pickupTime}` : '—';
-        } else {
-            pickupInfo.textContent = pickupLabels[state.pickup] || '—';
-        }
-
-        if (state.orderType === 'delivery' && state.classroom) {
-            classInfo.textContent = `📍 ${state.classroom}`;
-            classInfo.classList.remove('hidden');
-        } else {
-            classInfo.classList.add('hidden');
-        }
-
-        // Warna box preview sesuai tipe
-        const box = document.getElementById('modal-preview-box');
-        box.className = 'rounded-2xl px-4 py-3 mb-5 text-center border ';
-        if (state.orderType === 'dine_in')  box.className += 'bg-teal-50 border-teal-200';
-        if (state.orderType === 'takeaway') box.className += 'bg-orange-50 border-orange-200';
-        if (state.orderType === 'delivery') box.className += 'bg-purple-50 border-purple-200';
-    }
-
-    // ─── Modal ───────────────────────────────────────────
-    const modal    = document.getElementById('payment-modal');
-    const backdrop = document.getElementById('modal-backdrop');
-    const sheet    = document.getElementById('modal-sheet');
-
-    function openModal() {
-        if (!validate()) return;
-        updateModalPreview();
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => {
-            backdrop.classList.replace('opacity-0','opacity-100');
-            sheet.classList.replace('opacity-0','opacity-100');
-            sheet.classList.replace('translate-y-8','translate-y-0');
-        });
-    }
-
-    function closeModal() {
-        backdrop.classList.replace('opacity-100','opacity-0');
-        sheet.classList.replace('opacity-100','opacity-0');
-        sheet.classList.replace('translate-y-0','translate-y-8');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-
-    document.getElementById('btn-confirm').addEventListener('click', openModal);
-    document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
-    backdrop.addEventListener('click', closeModal);
-
-    document.getElementById('btn-pay-telegram').addEventListener('click', () => {
-        syncFields('tg');
-        document.getElementById('form-confirm-telegram').submit();
-    });
-
-    document.getElementById('btn-pay-upload').addEventListener('click', () => {
-        syncFields('up');
-        document.getElementById('form-confirm-upload').submit();
-    });
-
-    // Init — classroom default dari value input (sudah diisi users.class di blade)
     if (classroomInput) {
         state.classroom = classroomInput.value;
         classroomInput.addEventListener('input', () => {
             state.classroom = classroomInput.value;
             updateSummary();
+        });
+    }
+
+    function validate() {
+        if (state.orderType === 'takeaway' && !state.pickupTime) {
+            timeInput.focus();
+            pickupTimepicker.classList.add('ring-4', 'ring-red-100');
+            setTimeout(() => pickupTimepicker.classList.remove('ring-4', 'ring-red-100'), 1800);
+            alert('Pilih jam pengambilan untuk Take Away.');
+            return false;
+        }
+
+        if (state.orderType !== 'takeaway' && state.pickup === 'atur_jam' && !state.pickupTime) {
+            timeInput.focus();
+            pickupTimepicker.classList.add('ring-4', 'ring-red-100');
+            setTimeout(() => pickupTimepicker.classList.remove('ring-4', 'ring-red-100'), 1800);
+            alert(state.orderType === 'delivery' ? 'Pilih jam pengantaran.' : 'Pilih jam penyajian.');
+            return false;
+        }
+
+        if (state.orderType === 'delivery' && !state.classroom.trim()) {
+            classroomInput.focus();
+            classroomInput.classList.add('border-red-400', 'ring-4', 'ring-red-100');
+            setTimeout(() => classroomInput.classList.remove('border-red-400', 'ring-4', 'ring-red-100'), 1800);
+            alert('Masukkan nama kelas untuk Antar ke Kelas.');
+            return false;
+        }
+
+        return true;
+    }
+
+    function syncFields(suffix) {
+        const note = document.querySelector('textarea[name="note"]');
+        document.getElementById(`hid-type-${suffix}`).value = state.orderType;
+        document.getElementById(`hid-pickup-${suffix}`).value = state.orderType !== 'takeaway' && state.pickup !== 'atur_jam' ? state.pickup : '';
+        document.getElementById(`hid-pickuptime-${suffix}`).value = state.orderType === 'takeaway' || state.pickup === 'atur_jam' ? state.pickupTime : '';
+        document.getElementById(`hid-class-${suffix}`).value = state.orderType === 'delivery' ? state.classroom : '';
+        document.getElementById(`hid-note-${suffix}`).value = note ? note.value : '';
+    }
+
+    function updateModalPreview() {
+        const cfg = typeConfig[state.orderType];
+        document.getElementById('modal-type-icon').textContent = cfg.short;
+        document.getElementById('modal-type-label').textContent = cfg.label;
+
+        const pickupInfo = document.getElementById('modal-pickup-info');
+        const classInfo = document.getElementById('modal-class-info');
+
+        if (state.orderType === 'takeaway') {
+            pickupInfo.textContent = state.pickupTime ? `Ambil jam ${state.pickupTime}` : '-';
+        } else if (state.pickup === 'atur_jam') {
+            pickupInfo.textContent = state.pickupTime
+                ? `${state.orderType === 'delivery' ? 'Antar' : 'Sajikan'} jam ${state.pickupTime}`
+                : '-';
+        } else {
+            pickupInfo.textContent = pickupLabels[state.pickup] || '-';
+        }
+
+        if (state.orderType === 'delivery' && state.classroom.trim()) {
+            classInfo.textContent = state.classroom;
+            classInfo.classList.remove('hidden');
+        } else {
+            classInfo.classList.add('hidden');
+        }
+
+        const box = document.getElementById('modal-preview-box');
+        box.className = 'mb-5 rounded-3xl border px-4 py-4 text-center ';
+        if (state.orderType === 'dine_in') box.className += 'bg-teal-50 border-teal-200';
+        if (state.orderType === 'takeaway') box.className += 'bg-orange-50 border-orange-200';
+        if (state.orderType === 'delivery') box.className += 'bg-purple-50 border-purple-200';
+    }
+
+    const modal = document.getElementById('payment-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const sheet = document.getElementById('modal-sheet');
+
+    function openModal() {
+        if (!validate()) return;
+        updateModalPreview();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        requestAnimationFrame(() => {
+            backdrop.classList.replace('opacity-0', 'opacity-100');
+            sheet.classList.replace('opacity-0', 'opacity-100');
+            sheet.classList.replace('translate-y-8', 'translate-y-0');
+        });
+    }
+
+    function closeModal() {
+        backdrop.classList.replace('opacity-100', 'opacity-0');
+        sheet.classList.replace('opacity-100', 'opacity-0');
+        sheet.classList.replace('translate-y-0', 'translate-y-8');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+
+    const btnConfirm = document.getElementById('btn-confirm');
+    if (btnConfirm) {
+        btnConfirm.addEventListener('click', openModal);
+        document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+
+        document.getElementById('btn-pay-telegram').addEventListener('click', () => {
+            syncFields('tg');
+            document.getElementById('form-confirm-telegram').submit();
+        });
+
+        document.getElementById('btn-pay-upload').addEventListener('click', () => {
+            syncFields('up');
+            document.getElementById('form-confirm-upload').submit();
+        });
+    }
+
+    if (mainForm) {
+        mainForm.addEventListener('submit', event => {
+            if (!validate()) event.preventDefault();
         });
     }
 

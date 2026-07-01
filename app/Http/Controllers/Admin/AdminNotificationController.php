@@ -10,30 +10,35 @@ class AdminNotificationController extends Controller
 {
     public function index()
     {
-        $notifications = AdminNotification::latest()
-            ->paginate(20);
-
-        // Mark semua yang dibuka sebagai read
+        // Tandai semua sebagai dibaca saat halaman dibuka → badge lonceng jadi 0
         AdminNotification::whereNull('read_at')->update(['read_at' => now()]);
 
-        $unreadCount = 0; // sudah di-read semua
+        $notifications = AdminNotification::latest()->paginate(20);
+        $unreadCount   = 0; // sudah semua dibaca
 
         return view('admin.notifications', compact('notifications', 'unreadCount'));
     }
 
     public function markRead(AdminNotification $notification)
     {
-        $notification->markAsRead();
-        return response()->json(['success' => true]);
+        // Hapus notif & redirect ke halaman yang sesuai
+        $type = $notification->type;
+        $notification->delete();
+
+        $redirect = match($type) {
+            'payment_new' => route('admin.verification'),
+            default       => route('admin.notifications'),
+        };
+
+        return redirect($redirect);
     }
 
     public function markAllRead()
     {
-        AdminNotification::whereNull('read_at')->update(['read_at' => now()]);
+        AdminNotification::query()->delete();
         return response()->json(['success' => true]);
     }
 
-    // Endpoint untuk dapat unread count (polling)
     public function unreadCount()
     {
         return response()->json([
