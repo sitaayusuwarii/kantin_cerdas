@@ -18,6 +18,7 @@ class PengelolaOrderController extends Controller
     'selesai_dimasak',
     'dikirim',
     'selesai',
+    'dibatalkan',
 ];
 
     // Ambil tenant milik pengelola yang login
@@ -57,6 +58,7 @@ class PengelolaOrderController extends Controller
     $processedOrders = $counts->get('diproses', 0);
     $readyOrders     = $counts->get('selesai_dimasak', 0);
     $completedOrders = $counts->get('selesai', 0);
+    $cancelledOrders = $counts->get('dibatalkan', 0);
 
     // Query listing: filter status di server + pagination
     $listQuery = (clone $baseQuery)->with([
@@ -75,7 +77,8 @@ class PengelolaOrderController extends Controller
     return view('pengelola.orders', compact(
         'orders', 'tenant',
         'totalOrders', 'newOrders', 'confirmedOrders',
-        'processedOrders', 'readyOrders', 'completedOrders'
+        'processedOrders', 'readyOrders', 'completedOrders',
+        'cancelledOrders'
     ) + [
         'filterFrom'   => $from->format('Y-m-d'),
         'filterTo'     => $to->format('Y-m-d'),

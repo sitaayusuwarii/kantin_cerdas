@@ -197,6 +197,19 @@
                 <div class="nav-icon"><i class="fa-solid fa-utensils text-sm {{ request()->routeIs('admin.menus') ? '' : 'text-orange-500' }}"></i></div>
                 <span class="flex-1">Kelola Menu</span>
             </a>
+
+            @php
+                $refundPendingCount = \App\Models\RefundRequest::whereIn('status', ['menunggu_info', 'menunggu_transfer'])->count();
+            @endphp
+            <a href="{{ route('admin.refunds.index') }}"
+            class="nav-item flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium
+                    {{ request()->routeIs('admin.refunds.index') ? 'active' : 'text-stone-700' }}">
+                <div class="nav-icon"><i class="fa-solid fa-money-bill-transfer text-sm {{ request()->routeIs('admin.refunds.index') ? '' : 'text-orange-500' }}"></i></div>
+                <span class="flex-1">Kelola Refund</span>
+                @if($refundPendingCount > 0)
+                <span class="notif-badge text-white px-1.5">{{ $refundPendingCount > 99 ? '99+' : $refundPendingCount }}</span>
+                @endif
+            </a>
         </nav>
 
         <div class="px-4 py-4 border-t border-[#F4E6D2] flex-shrink-0">

@@ -154,6 +154,21 @@ class TelegramController extends Controller
                 return response()->json(['ok' => true]);
             }
 
+            if (!str_starts_with($text, '/')) {
+                $user = User::where('telegram_chat_id', $chatId)->first();
+
+                if ($user) {
+                    $refundRequest = \App\Models\RefundRequest::where('user_id', $user->id)
+                        ->where('status', 'menunggu_info')
+                        ->latest()
+                        ->first();
+
+                    if ($refundRequest) {
+                        $this->handleRefundInfoInput($chatId, $refundRequest, $text);
+                        return response()->json(['ok' => true]);
+                    }
+                }
+            }
             $this->sendMessage($chatId, "Ketik /menu untuk memesan makanan.");
         }
 
@@ -393,4 +408,55 @@ class TelegramController extends Controller
             ]),
         ]);
     }
+
+    private function handleRefundInfoInput(int|string $chatId, $refundRequest, string $text): void
+{
+    $parts = array_map('trim', explode(',', $text));
+
+    if (count($parts) < 3 || empty($parts[0]) || empty($parts[1]) || empty($parts[2])) {
+        $this->sendMessage($chatId,
+            "❌ Format belum sesuai.\n\n" .
+            "Mohon kirim dengan format:\n" .
+            "*Nama Bank, Nomor Rekening, Nama Pemilik Rekening*\n\n" .
+            "Contoh:\n`BCA, 1234567890, Nama Kamu`"
+        );
+        return;
+    }
+
+    [$bankName, $accountNumber, $accountHolderName] = $parts;
+
+    if (!ctype_digit(str_replace(' ', '', $accountNumber))) {
+        $this->sendMessage($chatId,
+            "❌ Nomor rekening harus berupa angka.\n\n" .
+            "Contoh format:\n`BCA, 1234567890, Nama Kamu`"
+        );
+        return;
+    }
+
+    $refundRequest->update([
+        'bank_name'           => $bankName,
+        'account_number'      => $accountNumber,
+        'account_holder_name' => $accountHolderName,
+        'status'              => 'menunggu_transfer',
+    ]);
+
+    $this->sendMessage($chatId,
+        "✅ Terima kasih! Data rekening kamu sudah kami terima:\n\n" .
+        "🏦 Bank: *{$bankName}*\n" .
+        "🔢 No. Rekening: *{$accountNumber}*\n" .
+        "👤 Atas Nama: *{$accountHolderName}*\n\n" .
+        "Dana akan kami transfer secepatnya. Mohon ditunggu ya 🙏"
+    );
+
+    AdminNotification::create([
+        'type'            => 'refund_ready',
+        'title'           => '💸 Refund Siap Diproses',
+        'message'         => "Order #{$refundRequest->order->order_number} — data rekening customer sudah masuk.",
+        'icon'            => 'fa-money-bill-transfer',
+        'color'           => 'bg-blue-500',
+        'url'             => '/admin/refunds',
+        'notifiable_type' => \App\Models\RefundRequest::class,
+        'notifiable_id'   => $refundRequest->id,
+    ]);
+}
 }

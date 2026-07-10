@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\TenantController;
 use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\Pengelola\TenantOrderController;
 use App\Http\Controllers\Admin\AdminMenuController;
+use App\Http\Controllers\Admin\RefundController;
 
 
 Route::get('/', function () {
@@ -98,6 +99,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::patch('/admin/menu-management/toggle/{menu}', [AdminMenuController::class, 'toggle'])
         ->name('admin.menu-management.toggle');
         Route::delete('/admin/menu-management/{menu}', [AdminMenuController::class, 'destroy']);
+       
+      Route::get('/admin/refunds', [RefundController::class, 'index'])->name('admin.refunds.index');
+        Route::post('/admin/refunds/{refund}/complete', [RefundController::class, 'markComplete'])->name('admin.refunds.complete');
         });
         
 

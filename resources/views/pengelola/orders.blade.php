@@ -57,6 +57,7 @@
             'diproses'        => 'Diproses',
             'selesai_dimasak' => 'Siap Diambil',
             'selesai'         => 'Selesai',
+            'dibatalkan'      => 'Dibatalkan',
         ];
         $tabCounts = [
             'semua'           => $totalOrders,
@@ -65,6 +66,7 @@
             'diproses'        => $processedOrders,
             'selesai_dimasak' => $readyOrders,
             'selesai'         => $completedOrders,
+            'dibatalkan'      => $cancelledOrders,
         ];
     @endphp
 
@@ -195,6 +197,16 @@
                                 Selesai
                             </button>
                         </form>
+                    
+                    @elseif($order->status === 'dibatalkan')
+                    <span class="text-red-500 font-semibold text-xs">
+                        <i class="fa-solid fa-ban"></i> Dibatalkan
+                    </span>
+                    @if($order->alasan_batal ?? false)
+                        <p class="text-[9px] text-forest-400 mt-0.5 italic max-w-[140px] mx-auto truncate" title="{{ $order->alasan_batal }}">
+                            {{ $order->alasan_batal }}
+                        </p>
+                    @endif
                     @else
                         <span class="text-emerald-600 font-semibold text-xs">✓ Selesai</span>
                     @endif
@@ -234,6 +246,7 @@
                 'dikonfirmasi' => 'border-l-amber-500',
                 'diproses'     => 'border-l-blue-500',
                 'selesai'      => 'border-l-emerald-500',
+                'dibatalkan'   => 'border-l-red-500',
                 default        => 'border-l-gray-300',
             };
         @endphp
@@ -314,6 +327,16 @@
                             <i class="fa-solid fa-check-double mr-1.5"></i> Tandai Selesai
                         </button>
                     </form>
+                
+                @elseif($order->status === 'dibatalkan')
+                <span class="text-red-500 font-semibold text-xs">
+                    <i class="fa-solid fa-ban"></i> Dibatalkan
+                </span>
+                @if($order->alasan_batal ?? false)
+                    <p class="text-[9px] text-forest-400 mt-0.5 italic max-w-[140px] mx-auto truncate" title="{{ $order->alasan_batal }}">
+                        {{ $order->alasan_batal }}
+                    </p>
+                @endif
                 @else
                     <p class="text-center text-emerald-600 font-semibold text-sm py-1">✓ Pesanan Selesai</p>
                 @endif
