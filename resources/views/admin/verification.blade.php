@@ -425,7 +425,7 @@
                         <i class="fa-solid fa-circle-check text-emerald-400 group-hover:text-white text-xl transition-colors"></i>
                     </div>
                     <div class="text-center">
-                        <p class="text-emerald-400 font-bold text-sm">Verifikasi</p>
+                        <p class="text-emerald-400 font-bold text-sm">Terima</p>
                         <p class="text-stone-400 text-xs mt-0.5">Pembayaran valid</p>
                     </div>
                 </button>

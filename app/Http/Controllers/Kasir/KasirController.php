@@ -263,7 +263,7 @@ class KasirController extends Controller
         $order = DB::transaction(function () use ($validated, $items, $menus, $totalPrice) {
             $order = new Order();
             $order->user_id = auth()->id();
-            $order->order_number = $this->generateOrderNumber();
+            $order->order_number = Order::generateOrderNumber();
             $order->total_price = $totalPrice;
             $order->status = 'pembayaran_terverifikasi';
 
@@ -398,14 +398,6 @@ class KasirController extends Controller
             ->with('success', 'Pembayaran berhasil dikonfirmasi oleh kasir.');
     }
 
-    private function generateOrderNumber(): string
-    {
-        do {
-            $number = 'KS-' . now()->format('ymd') . '-' . str_pad((string) random_int(1, 9999), 4, '0', STR_PAD_LEFT);
-        } while (Order::where('order_number', $number)->exists());
-
-        return $number;
-    }
 
     private function applyKasirOrderScope($query)
     {

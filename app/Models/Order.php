@@ -153,27 +153,44 @@ class Order extends Model
      */
     public function getPickupDisplayAttribute(): string
     {
+        // Kasir bisa pilih "Sekarang" untuk dine_in/delivery, disimpan di pickup_time
+        if ($this->pickup_time === 'sekarang') {
+            return 'Sekarang';
+        }
+
         if ($this->order_type === self::ORDER_TYPE_TAKEAWAY) {
             return $this->pickup_time ? 'Jam ' . $this->pickup_time : '—';
         }
-        return self::$pickupLabels[$this->pickup_schedule] ?? ($this->pickup_schedule ?? '—');
+
+        if ($this->pickup_schedule) {
+            return self::$pickupLabels[$this->pickup_schedule] ?? $this->pickup_schedule;
+        }
+
+        // Fallback: kasir kadang menyimpan slot (istirahat_1 dll) langsung ke pickup_time
+        if ($this->pickup_time) {
+            return self::$pickupLabels[$this->pickup_time] ?? ('Jam ' . $this->pickup_time);
+        }
+
+        return '—';
     }
 
     // ─── Order Number Generator ───────────────────────────
 
-    public static function generateOrderNumber(): string
-    {
-        $latest = self::withTrashed()
-                      ->orderByDesc('id')
-                      ->value('order_number');
+   public static function generateOrderNumber(): string
+{
+    $latest = self::withTrashed()
+                ->where('order_number', 'like', 'SC-%')
+                ->lockForUpdate()
+                ->orderByRaw("CAST(SUBSTRING(order_number FROM 4) AS INTEGER) DESC")
+                ->value('order_number');
 
-        if (!$latest) {
-            return 'SC-001';
-        }
-
-        $number = (int) substr($latest, 3);
-        return 'SC-' . str_pad($number + 1, 3, '0', STR_PAD_LEFT);
+    if (!$latest) {
+        return 'SC-001';
     }
+
+    $number = (int) substr($latest, 3);
+    return 'SC-' . str_pad($number + 1, 3, '0', STR_PAD_LEFT);
+}
 
     // ─── Scopes ───────────────────────────────────────────
 

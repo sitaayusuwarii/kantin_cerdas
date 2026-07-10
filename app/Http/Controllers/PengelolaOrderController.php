@@ -26,40 +26,63 @@ class PengelolaOrderController extends Controller
         return Tenant::where('user_id', Auth::id())->firstOrFail();
     }
 
-    public function index()
-    {
-        $tenant = $this->getTenant();
+   public function index(Request $request)
+{
+    $tenant = $this->getTenant();
 
-        // Hanya order yang mengandung item milik tenant ini
-        $orders = Order::with([
-                        'user',
-                        'items' => fn($q) => $q->where('tenant_id', $tenant->id)
-                                              ->with('menu.category'),
-                    ])
-                    ->whereHas('items', fn($q) => $q->where('tenant_id', $tenant->id))
-                    ->whereIn('status', self::VISIBLE_STATUSES)
-                    ->today()
-                    ->latest()
-                    ->get();
+    $from = $request->filled('from')
+        ? \Carbon\Carbon::parse($request->query('from'))->startOfDay()
+        : today()->startOfDay();
 
-        $totalOrders     = $orders->count();
-        $newOrders       = $orders->whereIn('status', ['baru', 'pembayaran_terverifikasi'])->count();
-        $confirmedOrders = $orders->where('status', 'dikonfirmasi')->count();
-        $processedOrders = $orders->where('status', 'diproses')->count();
-        $readyOrders     = $orders->where('status', 'selesai_dimasak')->count();
-        $completedOrders = $orders->where('status', 'selesai')->count();
+    $to = $request->filled('to')
+        ? \Carbon\Carbon::parse($request->query('to'))->endOfDay()
+        : today()->endOfDay();
 
-        return view('pengelola.orders', compact(
-            'orders',
-            'tenant',
-            'totalOrders',
-            'newOrders',
-            'confirmedOrders',
-            'processedOrders',
-            'readyOrders',
-            'completedOrders'
-        ));
+    $status = $request->query('status', 'semua');
+
+    // Query dasar, dipakai ulang untuk counting & listing
+    $baseQuery = Order::whereHas('items', fn($q) => $q->where('tenant_id', $tenant->id))
+                ->whereIn('status', self::VISIBLE_STATUSES)
+                ->whereBetween('created_at', [$from, $to]);
+
+    // Hitung badge count via SQL aggregate — TIDAK load semua row ke PHP
+    $counts = (clone $baseQuery)
+        ->selectRaw('status, count(*) as total')
+        ->groupBy('status')
+        ->pluck('total', 'status');
+
+    $totalOrders     = $counts->sum();
+    $newOrders       = $counts->only(['baru', 'pembayaran_terverifikasi'])->sum();
+    $confirmedOrders = $counts->get('dikonfirmasi', 0);
+    $processedOrders = $counts->get('diproses', 0);
+    $readyOrders     = $counts->get('selesai_dimasak', 0);
+    $completedOrders = $counts->get('selesai', 0);
+
+    // Query listing: filter status di server + pagination
+    $listQuery = (clone $baseQuery)->with([
+        'user',
+        'items' => fn($q) => $q->where('tenant_id', $tenant->id)->with('menu.category'),
+    ]);
+
+    if ($status !== 'semua') {
+        $status === 'baru'
+            ? $listQuery->whereIn('status', ['baru', 'pembayaran_terverifikasi'])
+            : $listQuery->where('status', $status);
     }
+
+    $orders = $listQuery->latest()->paginate(20)->withQueryString();
+
+    return view('pengelola.orders', compact(
+        'orders', 'tenant',
+        'totalOrders', 'newOrders', 'confirmedOrders',
+        'processedOrders', 'readyOrders', 'completedOrders'
+    ) + [
+        'filterFrom'   => $from->format('Y-m-d'),
+        'filterTo'     => $to->format('Y-m-d'),
+        'activeStatus' => $status,
+    ]);
+}
+
 
     public function confirm(Order $order)
     {

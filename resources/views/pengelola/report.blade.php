@@ -6,29 +6,80 @@
 @section('content')
 
 {{-- ── CONTROLS ─────────────────────────────────────────── --}}
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <div class="flex gap-2 flex-wrap">
-        @foreach([
-            'hari'   => 'Hari Ini',
-            'minggu' => 'Minggu Ini',
-            'bulan'  => 'Bulan Ini',
-        ] as $key => $label)
-        <a href="{{ route('pengelola.report', ['period' => $key]) }}"
-           class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
-               {{ $period === $key
-                   ? 'bg-orange-500 text-cream-100 shadow-md'
-                   : 'bg-white border border-cream-300 text-forest-600 hover:border-forest-400' }}">
-            {{ $label }}
+<div class="flex flex-col gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex gap-2 flex-wrap">
+            @foreach([
+                'hari'   => 'Hari Ini',
+                'minggu' => 'Minggu Ini',
+                'bulan'  => 'Bulan Ini',
+            ] as $key => $label)
+            <a href="{{ route('pengelola.report', ['period' => $key]) }}"
+               class="px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                   {{ $period === $key
+                       ? 'bg-orange-500 text-cream-100 shadow-md'
+                       : 'bg-white border border-cream-300 text-forest-600 hover:border-forest-400' }}">
+                {{ $label }}
+            </a>
+            @endforeach
+
+            {{-- Toggle custom range --}}
+            <button type="button"
+                onclick="document.getElementById('customRangeForm').classList.toggle('hidden')"
+                class="px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2
+                    {{ $period === 'custom'
+                        ? 'bg-orange-500 text-cream-100 shadow-md'
+                        : 'bg-white border border-cream-300 text-forest-600 hover:border-forest-400' }}">
+                <i class="fa-regular fa-calendar-days text-xs"></i>Custom
+            </button>
+        </div>
+
+        {{-- Export Excel --}}
+<a href="{{ route('pengelola.report.export', array_merge(
+        ['period' => $period],
+        $period === 'custom' ? ['date_from' => $dateFrom ?? '', 'date_to' => $dateTo ?? ''] : []
+    )) }}"
+     class="btn-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl
+                  flex items-center gap-2 shadow-lg flex-shrink-0 no-underline">
+            <i class="fa-solid fa-file-excel text-xs"></i>Export Excel
         </a>
-        @endforeach
     </div>
 
-    {{-- Export Excel --}}
-    <a href="{{ route('pengelola.report.export', ['period' => $period]) }}"
-       class="btn-primary text-white font-semibold text-sm px-5 py-2.5 rounded-xl
-              flex items-center gap-2 shadow-lg flex-shrink-0 no-underline">
-        <i class="fa-solid fa-file-excel text-xs"></i>Export Excel
-    </a>
+    {{-- Form filter tanggal custom --}}
+    <form id="customRangeForm"
+          action="{{ route('pengelola.report') }}"
+          method="GET"
+          class="{{ $period === 'custom' ? '' : 'hidden' }} bg-white border border-cream-300 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-end gap-3">
+        <input type="hidden" name="period" value="custom">
+
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-forest-500">Dari Tanggal</label>
+            <input type="date" name="date_from"
+                   value="{{ $dateFrom ?? '' }}"
+                   max="{{ now()->format('Y-m-d') }}"
+                   class="px-3 py-2 rounded-lg border border-cream-300 text-sm text-forest-800 focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+
+        <div class="flex flex-col gap-1">
+            <label class="text-xs font-semibold text-forest-500">Sampai Tanggal</label>
+            <input type="date" name="date_to"
+                   value="{{ $dateTo ?? '' }}"
+                   max="{{ now()->format('Y-m-d') }}"
+                   class="px-3 py-2 rounded-lg border border-cream-300 text-sm text-forest-800 focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+
+        <button type="submit"
+            class="btn-primary text-white font-semibold text-sm px-5 py-2 rounded-xl shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-filter text-xs"></i>Terapkan
+        </button>
+
+        @if($period === 'custom')
+        <a href="{{ route('pengelola.report', ['period' => 'bulan']) }}"
+           class="text-sm text-forest-500 hover:text-forest-700 font-medium px-3 py-2">
+            Reset
+        </a>
+        @endif
+    </form>
 </div>
 
 {{-- ── Sub-label periode aktif ───────────────────────────── --}}

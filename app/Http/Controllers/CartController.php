@@ -127,9 +127,12 @@ class CartController extends Controller
     // CartController.php
     public function removeAjax($id)
     {
-        $item = CartItem::where('id', $id)
-                        ->where('user_id', auth()->id()) // pastikan milik user ini
-                        ->firstOrFail();
+        $item = CartItem::with('cart:id,user_id')->findOrFail($id);
+
+        if ($item->cart->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $item->delete();
 
         return response()->json(['success' => true]);

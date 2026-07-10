@@ -149,12 +149,28 @@ $cols = [
 
         <div class="space-y-3">
             @foreach($colItems as $d)
+            @php
+                $orderName = $d->order->user->full_name ?? $d->order->user->name ?? $d->order->user->username ?? 'Pelanggan';
+                if ($d->order->note && preg_match('/Nama pelanggan:\s*([^|]+)/i', $d->order->note, $matches)) {
+                    $orderName = trim($matches[1]);
+                }
+                $orderNote = trim(preg_replace('/Nama pelanggan:\s*[^|]+(\|\s*)?/i', '', $d->order->note ?? ''));
+            @endphp
             <div class="bg-white rounded-xl p-4 shadow-sm border border-cream-200 hover:shadow-md transition-shadow">
                 <div class="flex items-start justify-between gap-2 mb-2">
                     <div>
                         <p class="font-display font-bold text-xs text-forest-900">#{{ $d->order->order_number }}</p>
-                        <p class="text-xs font-medium text-forest-800 mt-0.5">{{ $d->order->user->full_name }}</p>
-                        <p class="text-[10px] text-forest-400">{{ $d->order->user->class }}</p>
+                        <p class="text-xs font-medium text-forest-800 mt-0.5">{{ $orderName }}</p>
+                        <p class="text-[10px] text-forest-400">
+                            @if($d->order->isFromKasir())
+                                <i class="fa-solid fa-cash-register"></i> Kasir
+                            @else
+                                {{ $d->order->user->class }}
+                            @endif
+                            @if($d->order->isDineIn() && $d->order->table_number)
+                                · <i class="fa-solid fa-chair"></i> Meja {{ $d->order->table_number }}
+                            @endif
+                        </p>
                     </div>
                     <div class="text-right flex-shrink-0">
                     @php $tenantTotal = $d->order->items->where('tenant_id', auth()->user()->tenant->id)->sum('subtotal'); @endphp
@@ -181,8 +197,8 @@ $cols = [
                         </span>
                     @endif
                 </div>
-                @if($d->order->note)
-                    <p class="text-[10px] text-gray-400 italic">📝 {{ $d->order->note }}</p>
+                @if($orderNote)
+                    <p class="text-[10px] text-gray-400 italic">📝 {{ $orderNote }}</p>
                 @endif
                    <p class="text-[10px] text-forest-400 mt-0.5">
                     <i class="fa-solid fa-clock text-forest-300"></i> {{ $d->order->pickup_display }}
@@ -248,6 +264,11 @@ $cols = [
     @foreach($deliveries as $d)
     @php
     $col = $cols[$d->status] ?? $cols['selesai'];
+    $orderName = $d->order->user->full_name ?? $d->order->user->name ?? $d->order->user->username ?? 'Pelanggan';
+    if ($d->order->note && preg_match('/Nama pelanggan:\s*([^|]+)/i', $d->order->note, $matches)) {
+        $orderName = trim($matches[1]);
+    }
+    $orderNote = trim(preg_replace('/Nama pelanggan:\s*[^|]+(\|\s*)?/i', '', $d->order->note ?? ''));
     $borderLeft = match($d->status) {
         'diproses'        => 'border-l-amber-500',
         'selesai_dimasak' => 'border-l-green-500',
@@ -267,9 +288,18 @@ $cols = [
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full {{ $col['dot'] }} flex-shrink-0 {{ $d->status!=='selesai'?'badge-new':'' }}"></div>
                     <div>
-                        <p class="font-display font-bold text-sm text-forest-900">#{{ $d->order->order_number }}</p>
-                        <p class="text-[10px] text-forest-400">{{ $d->order->user->full_name }} · {{ $d->order->user->class }}</p>
-                    </div>
+                    <p class="font-display font-bold text-sm text-forest-900">#{{ $d->order->order_number }} · {{ $orderName }}</p>
+                    <p class="text-[10px] text-forest-400">
+                        @if($d->order->isFromKasir())
+                            <i class="fa-solid fa-cash-register"></i> Kasir
+                        @else
+                            {{ $d->order->user->class }}
+                        @endif
+                        @if($d->order->isDineIn() && $d->order->table_number)
+                            · Meja {{ $d->order->table_number }}
+                        @endif
+                    </p>
+                </div>
                 </div>
                 <span class="{{ $stBg }} text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0">{{ $col['label'] }}</span>
             </div>
@@ -292,8 +322,8 @@ $cols = [
                         </span>
                     @endif
                 </div>
-                @if($d->order->note)
-                    <p class="text-[10px] text-gray-400 italic mb-0.5">📝 {{ $d->order->note }}</p>
+               @if($orderNote)
+                    <p class="text-[10px] text-gray-400 italic mb-0.5">📝 {{ $orderNote }}</p>
                 @endif
                 <p class="text-[10px] text-forest-400 mt-0.5">{{ $d->order->pickup_display }} · Rp {{ number_format($d->order->items->where('tenant_id', auth()->user()->tenant->id)->sum('subtotal'),0,',','.') }}</p>                </div>
                 @if($d->status === 'diproses')

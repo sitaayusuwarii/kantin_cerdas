@@ -20,33 +20,64 @@
     </span>
 </div>
 
+{{-- Filter Tanggal --}}
+<form method="GET" action="{{ route('pengelola.orders') }}"
+      class="flex flex-wrap items-end gap-3 bg-white border border-cream-200 rounded-2xl p-4 mb-5">
+    <div>
+        <label class="block text-[11px] font-semibold text-forest-500 uppercase tracking-wide mb-1">Dari Tanggal</label>
+        <input type="date" name="from" value="{{ $filterFrom }}"
+               class="border border-cream-300 rounded-xl px-3 py-2 text-sm text-forest-800 focus:outline-none focus:ring-2 focus:ring-orange-400">
+    </div>
+    <div>
+        <label class="block text-[11px] font-semibold text-forest-500 uppercase tracking-wide mb-1">Sampai Tanggal</label>
+        <input type="date" name="to" value="{{ $filterTo }}"
+               class="border border-cream-300 rounded-xl px-3 py-2 text-sm text-forest-800 focus:outline-none focus:ring-2 focus:ring-orange-400">
+    </div>
+
+    <button type="submit"
+            class="bg-orange-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow hover:bg-orange-600 transition">
+        <i class="fa-solid fa-filter mr-1.5"></i> Terapkan
+    </button>
+
+    @if($filterFrom !== today()->format('Y-m-d') || $filterTo !== today()->format('Y-m-d'))
+        <a href="{{ route('pengelola.orders') }}"
+           class="text-xs font-semibold text-forest-500 hover:text-red-500 px-2 py-2.5">
+            <i class="fa-solid fa-xmark"></i> Reset ke Hari Ini
+        </a>
+    @endif
+</form>
+
 {{-- Filter Tabs --}}
-{{-- ↓ data-status disesuaikan dengan status aktual dari controller --}}
 <div class="flex flex-wrap gap-2 mb-5">
-    <button data-status="semua"
-            class="filter-tab active-tab bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-semibold">
-        Semua ({{ $totalOrders }})
-    </button>
-    <button data-status="baru"
-            class="filter-tab bg-white border border-cream-300 px-4 py-2 rounded-xl text-sm font-semibold">
-        Baru ({{ $newOrders }})
-    </button>
-    <button data-status="dikonfirmasi"
-            class="filter-tab bg-white border border-cream-300 px-4 py-2 rounded-xl text-sm font-semibold">
-        Dikonfirmasi ({{ $confirmedOrders }})
-    </button>
-    <button data-status="diproses"
-            class="filter-tab bg-white border border-cream-300 px-4 py-2 rounded-xl text-sm font-semibold">
-        Diproses ({{ $processedOrders }})
-    </button>
-    <button data-status="selesai_dimasak"
-        class="filter-tab bg-white border border-cream-300 px-4 py-2 rounded-xl text-sm font-semibold">
-        Siap Diambil ({{ $readyOrders }})
-    </button>
-    <button data-status="selesai"
-            class="filter-tab bg-white border border-cream-300 px-4 py-2 rounded-xl text-sm font-semibold">
-        Selesai ({{ $completedOrders }})
-    </button>
+    @php
+        $tabs = [
+            'semua'           => 'Semua',
+            'baru'            => 'Baru',
+            'dikonfirmasi'    => 'Dikonfirmasi',
+            'diproses'        => 'Diproses',
+            'selesai_dimasak' => 'Siap Diambil',
+            'selesai'         => 'Selesai',
+        ];
+        $tabCounts = [
+            'semua'           => $totalOrders,
+            'baru'            => $newOrders,
+            'dikonfirmasi'    => $confirmedOrders,
+            'diproses'        => $processedOrders,
+            'selesai_dimasak' => $readyOrders,
+            'selesai'         => $completedOrders,
+        ];
+    @endphp
+
+    @foreach($tabs as $key => $label)
+        <a href="{{ route('pengelola.orders', array_filter([
+                'status' => $key,
+                'from'   => $filterFrom,
+                'to'     => $filterTo,
+            ])) }}"
+           class="filter-tab px-4 py-2 rounded-xl text-sm font-semibold {{ $activeStatus === $key ? 'bg-orange-500 text-white' : 'bg-white border border-cream-300' }}">
+            {{ $label }} ({{ $tabCounts[$key] }})
+        </a>
+    @endforeach
 </div>
 
 {{-- ── DESKTOP TABLE ────────────────────────────────────── --}}
@@ -78,16 +109,26 @@
             <tr class="order-row hover:bg-cream-100/50 transition-colors {{ $order->status === 'pembayaran_terverifikasi' ? 'bg-forest-50/40' : '' }}"
                  data-status="{{ $order->status }}">
                 <td class="px-6 py-4">
-                    <p class="font-display font-semibold text-sm text-forest-900">#{{ $order->order_number }}</p>
-                    <p class="text-[10px] text-forest-400 flex items-center gap-1 mt-0.5">
-                        <i class="fa-solid fa-clock text-forest-300"></i>{{ $order->created_at->format('H:i') }}
+                    <p class="font-display font-semibold text-sm text-forest-900 whitespace-nowrap">#{{ $order->order_number }}</p>
+                    <p class="text-[10px] text-forest-400 mt-0.5 whitespace-nowrap">
+                        {{ $order->created_at->format('d M Y') }}
+                    </p>
+                    <p class="text-[10px] text-forest-400 flex items-center gap-1 whitespace-nowrap">
+                        <i class="fa-solid fa-clock text-forest-300"></i>
+                        {{ $order->created_at->format('H:i') }}
                     </p>
                 </td>
                 <td class="px-4 py-4">
                     <p class="font-semibold text-xs text-forest-900">{{ $customerName }}</p>
-                    <p class="text-[10px] text-forest-400">
-                        {{ $order->user->class ?? $order->user->kelas ?? '-' }}
-                    </p>
+                    @if($order->isDineIn() && $order->table_number)
+                        <p class="text-[10px] text-teal-600 font-semibold">
+                            <i class="fa-solid fa-chair"></i> Meja {{ $order->table_number }}
+                        </p>
+                    @else
+                        <p class="text-[10px] text-forest-400">
+                            {{ $order->user->class ?? $order->user->kelas ?? '-' }}
+                        </p>
+                    @endif
                 </td>
                 <td class="px-4 py-4">
                     <span class="inline-flex items-center text-[10px] font-semibold px-2 py-1 rounded-full {{ $order->order_type_color }}">
@@ -105,7 +146,6 @@
                     @endif
                 </td>
                 <td class="px-4 py-4">
-               
                     <div class="space-y-0.5">
                         @foreach($order->items as $item)
                             <p class="text-xs text-forest-600">
@@ -164,31 +204,45 @@
         </tbody>
     </table>
 
-    {{-- ↓ Pesan kosong saat filter aktif tidak menemukan baris --}}
-    <div id="empty-order-msg" style="display:none" class="text-center py-16">
+    {{-- Pesan kosong (desktop) --}}
+    @if($orders->isEmpty())
+    <div class="text-center py-16">
         <div class="text-5xl mb-3">📋</div>
         <p class="text-forest-600 font-semibold text-sm">Tidak ada pesanan</p>
     </div>
+    @endif
+</div>
+
+<div class="mt-6">
+    {{ $orders->links() }}
 </div>
 
 {{-- ── MOBILE CARDS ─────────────────────────────────────── --}}
 <div class="md:hidden space-y-4" id="mobile-cards">
     @foreach($orders as $order)
         @php
+            $customerName = $order->user->full_name ?? $order->user->name ?? $order->user->username ?? 'Pelanggan';
+
+            if ($order->note && preg_match('/Nama pelanggan:\s*([^|]+)/i', $order->note, $matches)) {
+                $customerName = trim($matches[1]);
+            }
+
+            $displayNote = trim(preg_replace('/Nama pelanggan:\s*[^|]+(\|\s*)?/i', '', $order->note ?? ''));
+
             $borderColor = match($order->status) {
-            'pembayaran_terverifikasi' => 'border-l-green-500',
-            'dikonfirmasi' => 'border-l-amber-500',
-            'diproses'     => 'border-l-blue-500',
-            'selesai'      => 'border-l-emerald-500',
-            default        => 'border-l-gray-300',
-        };
+                'pembayaran_terverifikasi' => 'border-l-green-500',
+                'dikonfirmasi' => 'border-l-amber-500',
+                'diproses'     => 'border-l-blue-500',
+                'selesai'      => 'border-l-emerald-500',
+                default        => 'border-l-gray-300',
+            };
         @endphp
         <div class="order-row bg-cream-50 rounded-2xl shadow-sm border border-cream-200 overflow-hidden border-l-4 {{ $borderColor }}"
              data-status="{{ $order->status }}">
             <div class="flex items-center justify-between px-4 py-3 bg-cream-100/60 border-b border-cream-200">
                 <div class="flex items-center gap-2">
                     <p class="font-display font-bold text-sm text-forest-900">#{{ $order->order_number }}</p>
-                    <span class="text-[10px] text-forest-400">· {{ $order->created_at->format('H:i') }}</span>
+                    <span class="text-[10px] text-forest-400 whitespace-nowrap">· {{ $order->created_at->format('d M, H:i') }}</span>
                 </div>
                 <span class="inline-flex items-center gap-1 {{ $order->status_color }} text-[10px] font-bold px-2.5 py-1 rounded-full">
                     @if($order->status === 'pembayaran_terverifikasi')
@@ -201,7 +255,14 @@
                 <div class="flex items-start justify-between gap-3 mb-2.5">
                     <div>
                         <p class="font-semibold text-sm text-forest-900">{{ $customerName }}</p>
-                        <p class="text-xs text-forest-400">{{ $order->user->class }} · {{ $order->pickup_display }}</p>
+                        <p class="text-xs text-forest-400">
+                            @if($order->isDineIn() && $order->table_number)
+                                Meja {{ $order->table_number }} ·
+                            @else
+                                {{ $order->user->class }} ·
+                            @endif
+                            {{ $order->pickup_display }}
+                        </p>                    
                     </div>
                     <p class="font-display font-bold text-base text-forest-800 flex-shrink-0">
                         Rp {{ number_format($order->total_price, 0, ',', '.') }}
@@ -217,8 +278,8 @@
                         </span>
                     @endif
                 </div>
-                @if($order->note)
-                    <p class="text-[10px] text-gray-400 italic mb-2">📝 {{ $order->note }}</p>
+                @if($displayNote)
+                    <p class="text-[10px] text-gray-400 italic mb-2">📝 {{ $displayNote }}</p>
                 @endif
                 <div class="bg-cream-100 rounded-xl p-3 mb-3 space-y-1">
                     @foreach($order->items as $item)
@@ -229,7 +290,6 @@
                     @endforeach
                 </div>
 
-                {{-- ↓ Tombol aksi mobile — lengkap untuk semua status --}}
                 @if($order->status === 'pembayaran_terverifikasi')
                     <form action="{{ route('pengelola.orders.confirm', $order->order_number) }}" method="POST">
                         @csrf @method('PATCH')
@@ -247,7 +307,6 @@
                         </button>
                     </form>
                 @elseif($order->status === 'diproses')
-                    {{-- ↓ Sebelumnya tidak ada tombol untuk status ini di mobile --}}
                     <form action="{{ route('pengelola.orders.complete', $order->order_number) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit"
@@ -262,52 +321,13 @@
         </div>
     @endforeach
 
-    {{-- ↓ Satu elemen kosong untuk mobile, di luar loop --}}
-    <div id="empty-order-msg-mobile" style="display:none" class="text-center py-16">
+    {{-- Pesan kosong (mobile) --}}
+    @if($orders->isEmpty())
+    <div class="text-center py-16">
         <div class="text-5xl mb-3">📋</div>
         <p class="text-forest-600 font-semibold text-sm">Tidak ada pesanan</p>
     </div>
+    @endif
 </div>
 
-@push('scripts')
-<script>
-document.querySelectorAll('.filter-tab').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.querySelectorAll('.filter-tab').forEach(b => {
-            b.classList.remove('bg-orange-500', 'text-white', 'active-tab');
-            b.classList.add('bg-white', 'border', 'border-cream-300');
-        });
-        this.classList.remove('bg-white', 'border', 'border-cream-300');
-        this.classList.add('bg-orange-500', 'text-white', 'active-tab');
-
-        const status = this.dataset.status;
-        const rows   = document.querySelectorAll('.order-row');
-        let visible  = 0;
-
-        rows.forEach(row => {
-            const match = status === 'semua' || row.dataset.status === status;
-            row.style.display = match ? '' : 'none';
-            if (match) visible++;
-        });
-
-        // ↓ Handle pesan kosong untuk desktop dan mobile secara terpisah
-        const emptyDesktop = document.getElementById('empty-order-msg');
-        const emptyMobile  = document.getElementById('empty-order-msg-mobile');
-        if (emptyDesktop) emptyDesktop.style.display = visible === 0 ? 'block' : 'none';
-        if (emptyMobile)  emptyMobile.style.display  = visible === 0 ? 'block' : 'none';
-    });
-});
-
-// Cek saat halaman pertama load
-document.addEventListener('DOMContentLoaded', function () {
-    const rows = document.querySelectorAll('.order-row');
-    const emptyDesktop = document.getElementById('empty-order-msg');
-    const emptyMobile  = document.getElementById('empty-order-msg-mobile');
-    if (rows.length === 0) {
-        if (emptyDesktop) emptyDesktop.style.display = 'block';
-        if (emptyMobile)  emptyMobile.style.display  = 'block';
-    }
-});
-</script>
-@endpush
 @endsection

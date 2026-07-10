@@ -3,6 +3,10 @@
 
 @section('content')
 
+@if(session('error'))
+    <div class="bg-red-100 text-red-700 p-4 rounded mb-4">{{ session('error') }}</div>
+@endif
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-28">
 
     {{-- Header --}}
@@ -137,6 +141,35 @@
     </div>
 </div>
 
+{{-- Confirm Modal --}}
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+        <div id="confirm-modal-backdrop" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+
+        <div id="confirm-modal-box"
+             class="relative w-full max-w-sm rounded-[1.75rem] bg-white p-6 text-center shadow-2xl">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+                <i class="fa-solid fa-trash-can text-2xl"></i>
+            </div>
+
+            <h3 class="mt-5 font-heading text-lg font-extrabold text-gray-950">
+                Kosongkan Keranjang?
+            </h3>
+            <p class="mt-2 text-sm text-gray-500">
+                Semua item di keranjang akan dihapus dan tidak bisa dikembalikan.
+            </p>
+
+            <div class="mt-6 flex gap-3">
+                <button onclick="closeConfirmModal()"
+                        class="flex-1 rounded-2xl bg-gray-100 py-3 text-sm font-extrabold text-gray-600 transition hover:bg-gray-200">
+                    Batal
+                </button>
+                <button onclick="confirmClearCart()"
+                        class="flex-1 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 py-3 text-sm font-extrabold text-white shadow-lg shadow-red-100 transition hover:-translate-y-0.5">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('styles')
@@ -158,6 +191,21 @@
     .removing {
         animation: removeItem 0.22s ease forwards;
         pointer-events: none;
+    }
+
+    #confirm-modal.flex #confirm-modal-backdrop {
+        animation: fadeIn 0.18s ease both;
+    }
+    #confirm-modal.flex #confirm-modal-box {
+        animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes popIn {
+        from { opacity: 0; transform: scale(0.92) translateY(8px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
     }
 </style>
 @endpush
@@ -421,7 +469,19 @@ function removeItem(cartItemId) {
 }
 
 function clearCart() {
-    if (!confirm('Kosongkan semua keranjang?')) return;
+    const modal = document.getElementById('confirm-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirm-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function confirmClearCart() {
+    closeConfirmModal();
 
     cartItems = [];
     renderCart();
@@ -441,6 +501,13 @@ function clearCart() {
         })
         .catch(() => loadCart());
 }
+
+// Klik backdrop untuk menutup modal
+document.addEventListener('DOMContentLoaded', () => {
+    loadCart();
+    document.getElementById('confirm-modal-backdrop')
+        .addEventListener('click', closeConfirmModal);
+});
 
 function submitOrder() {
     window.location.href = '/order';
